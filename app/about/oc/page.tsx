@@ -3,7 +3,7 @@ import Image from "next/image";
 import { BgImgCenter } from "@/components/img";
 import { RoundedButton } from "@/components/buttons";
 import * as oc from "@/content/oc_content";
-import { ImgRibbonLeft, ImgRibbonRight } from "@/components/imgRibbons";
+import { ImgRibbonLeftOC, ImgRibbonRight } from "@/components/imgRibbons";
 import { OCText } from "@/components/text";
 import groupPic from "@/public/imgs/oc/oc.jpg";
 
@@ -36,7 +36,7 @@ export default function OC() {
         {oc.ocText.positions.map((item, index) => (
           <div key={index}>
             {index % 2 === 0 ? (
-              <ImgRibbonLeft
+              <ImgRibbonLeftOC
                 img={oc.ocText.positions[index].img}
                 hoverImg={oc.ocText.positions[index].img2}
                 alt={oc.ocText.positions[index].alt}
@@ -46,7 +46,7 @@ export default function OC() {
                   title={oc.ocText.positions[index].title}
                   subtext={oc.ocText.positions[index].names}
                 />
-              </ImgRibbonLeft>
+              </ImgRibbonLeftOC>
             ) : (
               <ImgRibbonRight
                 img={oc.ocText.positions[index].img}
