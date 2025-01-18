@@ -19,7 +19,7 @@ export default function CaptureIT() {
       </div>
       <section className="md:flex md:flex-col lg:grid lg:grid-cols-2">
         <div className="pb-[10vh]">
-          <CaptureITBanner></CaptureITBanner>
+          <CaptureITBanner />
           {CaptureITCardText.content.map((item, index) => (
             <div key={index}>
               <CaptureITCard
