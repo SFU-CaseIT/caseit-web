@@ -63,9 +63,8 @@ export default function Home() {
           <Image
             src="/svgs/globe.svg"
             alt="Background Globe"
-            layout="fill"
-            objectFit="cover"
-            className="w-[150vw] h-auto hidden md:block"
+            fill={true}
+            className="w-[150vw] object-cover h-auto hidden md:block"
           />
         </div>
         {/* number scrolling */}
