@@ -12,7 +12,7 @@ export const contactText = {
         "CaseIT team applications open in September, so keep a look out to see how you can be a part of the CaseIT Organizing Committee.",
     },
     {
-      question: "I am a student, how can I compete in CaseIT 2024?",
+      question: "I am a student, how can I compete in CaseIT 2025?",
       answer:
         "If you are a student interested in competing at CaseIT, please have a faculty representative contact us to express your school’s interest and complete the application.",
     },

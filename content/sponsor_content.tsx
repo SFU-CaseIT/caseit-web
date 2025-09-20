@@ -281,7 +281,7 @@ export const sponsorOpportunitiesContent = {
       text: "In-kind sponsors will have their name and hyperlink displayed on our website, a feature in our event program, and countless uses of their in-kind product throughout the competition week.",
       alt: "Various icons with subheadders",
       subtext:
-        "CaseIT 2024 warmly welcomes in-kind contributions offered by esteemed corporate partners to enrich our competition. These items include, but are not limited to:",
+        "CaseIT 2025 warmly welcomes in-kind contributions offered by esteemed corporate partners to enrich our competition. These items include, but are not limited to:",
     },
   ],
 };
