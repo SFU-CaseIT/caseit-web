@@ -142,17 +142,17 @@ export const inkindSponsorTileContent = {
 
 // FOR SPONSOR OVERVIEW PAGE
 export const sponsorOverviewText = {
-  header2: ["Sponsoring CaseIT 2025", "What can I sponsor?"],
+  header2: ["Sponsoring CaseIT 2026", "What can I sponsor?"],
   subtext: "Overview",
-  plug: "Explore the CaseIt 2024 Financial, Technological, and In-Kind oportunities by checking out the link below!",
-  desc: "Through the generosity, support, and involvement of our corporate partners, CaseIT is proud to foster meaningful connections within the business and technology industry. Are you looking to become involved as a sponsor? Learn more about our sponsorship opportunities for our 22nd iteration.",
+  plug: "Explore the CaseIt 2026 Financial, Technological, and In-Kind oportunities by checking out the link below!",
+  desc: "Through the generosity, support, and involvement of our corporate partners, CaseIT is proud to foster meaningful connections within the business and technology industry. Are you looking to become involved as a sponsor? Learn more about our sponsorship opportunities for our 23nd iteration.",
   sectionTitle: [{ title: "Why Sponsor CaseIT?" }],
   ribbons: [
     {
       img: "/imgs/sponsorOverview/SponsOverview1.png",
       alt: "group candid",
       title: "Top Talent Recruitment",
-      desc: "Engage with motivated and driven participants at CaseIT and our local competition PIVOT, who are passionate about leveraging technology to create impactful change in our community. \nConnect with the CaseIT 2025 Organizing Committee comprised of 50 dedicated SFU students actively pursuing opportunities in various fields of business. \nBuild your brand as a valued partner of CaseIT and the Beedie School of Business - a network of over 3,800 undergraduate Bachelor of Business Administration students.",
+      desc: "Engage with motivated and driven participants at CaseIT and our local competition PIVOT, who are passionate about leveraging technology to create impactful change in our community. \nConnect with the CaseIT 2026 Organizing Committee comprised of 50 dedicated SFU students actively pursuing opportunities in various fields of business. \nBuild your brand as a valued partner of CaseIT and the Beedie School of Business - a network of over 3,800 undergraduate Bachelor of Business Administration students.",
     },
     {
       img: "/imgs/sponsorOverview/SponsOverview2.png",
@@ -254,7 +254,7 @@ export const sponsorTileContent = {
 export const sponsorOppsText = {
   header2: "Sponsoring Opportunities",
   subtext: "Sponsorship Opportunities",
-  desc: "CaseIT 2025 invites our corporate partners to contribute to years of academic excellence. In collaboration, we aim to foster meaningful connections, provide industry expertise, and enable professional growth amongst our rising leaders in business and technology.",
+  desc: "CaseIT 2026 invites our corporate partners to contribute to years of academic excellence. In collaboration, we aim to foster meaningful connections, provide industry expertise, and enable professional growth amongst our rising leaders in business and technology.",
 };
 
 export const sponsorOpportunitiesContent = {
@@ -281,7 +281,7 @@ export const sponsorOpportunitiesContent = {
       text: "In-kind sponsors will have their name and hyperlink displayed on our website, a feature in our event program, and countless uses of their in-kind product throughout the competition week.",
       alt: "Various icons with subheadders",
       subtext:
-        "CaseIT 2025 warmly welcomes in-kind contributions offered by esteemed corporate partners to enrich our competition. These items include, but are not limited to:",
+        "CaseIT 2026 warmly welcomes in-kind contributions offered by esteemed corporate partners to enrich our competition. These items include, but are not limited to:",
     },
   ],
 };

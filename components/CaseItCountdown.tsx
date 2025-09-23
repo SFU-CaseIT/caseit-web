@@ -1,9 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 
-type CaseItCountdownProps = {};
+type CaseItCountdownProps = {
+  year: number,
+  targetDate: Date
+};
 
-export const CaseItCountdown = () => {
+export const CaseItCountdown = ( {year, targetDate}: CaseItCountdownProps) => {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -12,12 +15,11 @@ export const CaseItCountdown = () => {
   });
 
   useEffect(() => {
-    // Target date set whatever you want
-    const targetDate = new Date("2025-02-16T00:00:00").getTime();
 
     const updateCountdown = () => {
       const now = new Date().getTime();
-      const difference = targetDate - now;
+      const target = targetDate.getTime();
+      const difference = target - now;
 
       if (difference > 0) {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
@@ -50,7 +52,7 @@ export const CaseItCountdown = () => {
   return (
     <fieldset className="border-redDark border-4 rounded-xl lg:rounded-[30px] px-16 py-2 md:py-4 font-acid font-bold ">
       <legend className="uppercase text-redDark text-[1.5rem]">
-        CaseIT 2025
+        CaseIT {year}
       </legend>
 
       <div className="text-[2.5rem] text-redDark justify-center grid grid-cols-1 md:grid-cols-7 ">

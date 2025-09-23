@@ -14,7 +14,7 @@ type imgItems = {
 
 export const BgImgCenter = ({ img, children }: imgItems) => {
   return (
-    <section className="relative mb-[10vh] h-screen w-full">
+    <section className="relative h-screen w-full">
       <Image
         src={img || "/imgs/banners/Downtown-Vancouver.png"}
         alt="Downtown Vancouver"

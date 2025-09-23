@@ -34,13 +34,13 @@ export const Footer = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 text-[0.75rem] md:text-[1rem]  mt-24 border-t pt-4 border-t-white text-white/60">
-          <span>CaseIT © 2020-2025 </span>
+          <span>CaseIT © 2020-2026 </span>
           <span className="hidden sm:flex">| </span>
           <Link
             className="hover:text-white duration-200"
             href={"https://www.sfu.ca/contact/terms-conditions/privacy.html"}
           >
-            Privacy Policy{" "}
+            Privacy Policy
           </Link>
           <span className="hidden sm:flex">| </span>
           <Link
@@ -50,7 +50,7 @@ export const Footer = () => {
             }
           >
             Traditional Territories Acknowledgement
-          </Link>{" "}
+          </Link>
         </div>
       </nav>
     </div>

@@ -20,6 +20,13 @@ export const NavLinks = [
     ],
   },
   {
+    ref: "/2026",
+    name: "CaseIT 2026",
+    sublinks: [
+      { name: "Overview", ref: "/2026"}
+    ]
+  },
+  {
     ref: "/2025",
     name: "CaseIT 2025",
     sublinks: [

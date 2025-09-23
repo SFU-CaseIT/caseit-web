@@ -12,7 +12,7 @@ export const contactText = {
         "CaseIT team applications open in September, so keep a look out to see how you can be a part of the CaseIT Organizing Committee.",
     },
     {
-      question: "I am a student, how can I compete in CaseIT 2025?",
+      question: "I am a student, how can I compete in CaseIT 2026?",
       answer:
         "If you are a student interested in competing at CaseIT, please have a faculty representative contact us to express your school’s interest and complete the application.",
     },
@@ -24,7 +24,7 @@ export const contactText = {
     {
       question: "How long is the CaseIT competition week?",
       answer:
-        "CaseIT 2024 will be a 6 day competition week from February 16, 2025 to February 21, 2025!",
+        "CaseIT 2026 will be a 6 day competition week from February 15, 2025 to February 20, 2026!",
     },
   ],
 };

@@ -5,7 +5,7 @@ import discover from "@/public/imgs/2025_discover.png";
 import { BgImgCenter } from "@/components/img";
 import * as content from "@/content/2025_content";
 import { Stats } from "../../components/2025components/Stats";
-import { CaseItCountdown } from "../../components/2025components/CaseItCountdown";
+import { CaseItCountdown } from "../../components/CaseItCountdown";
 import { ArrowButton } from "@/components/buttons";
 import banner from "@/public/imgs/banners/2025_banner.png";
 import { ImgButton2025 } from "@/components/2025components/ImgButton2025";
@@ -22,13 +22,13 @@ export default function CaseIt2025() {
   return (
     <div>
       {/* ---MAIN BANNER--- */}
-      <section id="2025" className="">
+      <section id="2025" className="mb-[10vh]">
         <BgImgCenter img={banner}>
           <div className="text-header1 pb-8 leading-none">
             {content.caseit2025Text.header1}
           </div>
           <div className="w-full sm:w-[60vw] md:w-[80vw] lg:w-[90vw] xl:w-[80%]">
-            <CaseItCountdown />
+            <CaseItCountdown year={2025} targetDate={new Date("2025-02-16")} />
           </div>
         </BgImgCenter>
       </section>
