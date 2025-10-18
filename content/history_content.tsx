@@ -122,13 +122,13 @@ export const competitionData: CompetitionData[] = [
 
 export const imgButtons = [
   {
-    img: "/imgs/2024_OC.PNG",
+    img: "/imgs/oc/2024_OC.PNG",
     alt: "2024 OC team pic",
     text: "2024 RECAP",
     link: "/history/recap/",
   },
   {
-    img: "/imgs/CaseIT_On3.PNG",
+    img: "/imgs/about/CaseIT_On3.PNG",
     alt: "2024 OC team pic",
     text: "2024 MEDIA GALLERY",
     link: "/history/media/",
