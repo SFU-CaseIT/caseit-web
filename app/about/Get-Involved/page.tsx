@@ -10,14 +10,16 @@ export const metadata: Metadata = {
   description: "Learn more about our company and team.",
 };
 
+const isHiring: boolean = false;
+
 export default function GetInvolved() {
   return (
     <div>
       {/* ---MAIN BANNER---  */}
       <section>
         <BgImgCenter img={banner}>
-          <div className="flex flex-col items-center">
-            <div className="text-redDark text-center text-header4">
+          <div className="flex flex-col  items-center">
+            <div className="text-redDark text-center text-header2">
               {involved.involvedText.red}
             </div>
             {/* Title */}
@@ -25,19 +27,22 @@ export default function GetInvolved() {
               {involved.involvedText.header1}
             </div>
             {/* Buttons */}
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-              <RoundedButton
-                text="Apply now"
-                link="/history" // link to application form
-                variant="black"
-                state="disabled" //remove this to enable
-              />
-              <RoundedButton
-                text="View 2025 Recruitment Package"
-                link="https://drive.google.com/file/d/1HCsRQMqF7GNQhONxv8tj46uEhxcn__Mt/view"
-                variant="black"
-              />
-            </div>
+            {
+              isHiring &&
+                <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+                  <RoundedButton
+                    text="Apply now"
+                    link="/history" // link to application form
+                    variant="black"
+                    state={isHiring ? "default" : "disabled"}
+                  />
+                  <RoundedButton
+                    text="View 2025 Recruitment Package"
+                    link="https://drive.google.com/file/d/1HCsRQMqF7GNQhONxv8tj46uEhxcn__Mt/view"
+                    variant="black"
+                  />
+                </div>
+            }
           </div>
         </BgImgCenter>
       </section>

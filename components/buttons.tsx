@@ -14,6 +14,7 @@ type buttonItems = {
   link: string;
   text?: string;
   subtext?: string;
+  
 };
 type ButtonProps = buttonItems & {
   state?: "default" | "hover" | "focus" | "disabled";

@@ -7,10 +7,7 @@ import { CompetitionCard } from "@/components/HistoryCard";
 import { competitionData } from "@/content/history_content";
 import mypic from "@/public/imgs/2024_OC.png";
 
-export const metadata: Metadata = {
-  title: "History",
-  description: "Learn more about our company and team.",
-};
+
 
 export default function History() {
   return (

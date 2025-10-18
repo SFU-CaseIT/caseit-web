@@ -23,13 +23,19 @@ export const heroContent = {
 };
 
 export type CompetitionData = {
+  img: StaticImageData;
   title: string;
   description: string;
   winner: string;
-  img: StaticImageData;
 };
 
 export const competitionData: CompetitionData[] = [
+  {
+    img: _2024,
+    title: "CaseIT 2025",
+    description: "fuck everyone",
+    winner: "Some school",
+  },
   {
     img: _2024,
     title: "CaseIT 2024",
