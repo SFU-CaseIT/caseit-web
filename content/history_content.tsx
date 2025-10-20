@@ -2,6 +2,7 @@ import { StaticImageData } from "next/image";
 // import images here, also makes it easier for the next Image component
 
 import ph from "@/public/imgs/history/2018.png";
+import _2025 from "@/public/imgs/mediaGallery/Gallery2025.png"
 import _2024 from "@/public/imgs/history/2024.png";
 import _2023 from "@/public/imgs/history/2023.png";
 import _2020 from "@/public/imgs/history/2020.png";
@@ -31,10 +32,10 @@ export type CompetitionData = {
 
 export const competitionData: CompetitionData[] = [
   {
-    img: _2024,
+    img: _2025,
     title: "CaseIT 2025",
-    description: "fuck everyone",
-    winner: "Some school",
+    description: "CaseIT celebrates its 22th Year Anniversary.",
+    winner: "The University of Manchester",
   },
   {
     img: _2024,

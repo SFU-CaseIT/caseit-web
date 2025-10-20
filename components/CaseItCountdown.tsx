@@ -1,12 +1,17 @@
 "use client";
 import { useState, useEffect } from "react";
+import { fromZonedTime } from "date-fns-tz";
+import { label } from "framer-motion/client";
 
 type CaseItCountdownProps = {
   year: number,
-  targetDate: Date
+  localDate: string;
+  /** Time zone of the event, e.g. "America/Vancouver" */
+  timeZone?: string;
+  label: string;
 };
 
-export const CaseItCountdown = ( {year, targetDate}: CaseItCountdownProps) => {
+export const CaseItCountdown = ( {year, localDate, timeZone = "America/Vancouver", label}: CaseItCountdownProps) => {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -18,9 +23,10 @@ export const CaseItCountdown = ( {year, targetDate}: CaseItCountdownProps) => {
 
     const updateCountdown = () => {
       const now = new Date().getTime();
-      const target = targetDate.getTime();
+      const target = fromZonedTime(localDate, timeZone).getTime()
+      
       const difference = target - now;
-
+      
       if (difference > 0) {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
         const hours = Math.floor(
@@ -40,7 +46,7 @@ export const CaseItCountdown = ( {year, targetDate}: CaseItCountdownProps) => {
     const interval = setInterval(updateCountdown, 1000);
 
     return () => clearInterval(interval); // Cleanup on component unmount
-  }, []);
+  }, [localDate]);
 
   const timeUnits = [
     { label: "Days", colon: ":", value: timeLeft.days },
@@ -50,9 +56,9 @@ export const CaseItCountdown = ( {year, targetDate}: CaseItCountdownProps) => {
   ];
 
   return (
-    <fieldset className="border-redDark border-4 rounded-xl lg:rounded-[30px] px-16 py-2 md:py-4 font-acid font-bold ">
-      <legend className="uppercase text-redDark text-[1.5rem]">
-        CaseIT {year}
+    <fieldset className="border-redDark border-4 rounded-xl lg:rounded-[30px] px-16 py-2 md:py-4 font-acid font-bold">
+      <legend className="uppercase text-redDark text-[1.5rem] px-2">
+         CaseIT {year} 
       </legend>
 
       <div className="text-[2.5rem] text-redDark justify-center grid grid-cols-1 md:grid-cols-7 ">
@@ -77,6 +83,10 @@ export const CaseItCountdown = ( {year, targetDate}: CaseItCountdownProps) => {
             )}
           </>
         ))}
+      </div>
+
+      <div className="text-redDark">
+        {label}
       </div>
     </fieldset>
   );

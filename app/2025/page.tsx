@@ -28,7 +28,7 @@ export default function CaseIt2025() {
             {content.caseit2025Text.header1}
           </div>
           <div className="w-full sm:w-[60vw] md:w-[80vw] lg:w-[90vw] xl:w-[80%]">
-            <CaseItCountdown year={2025} targetDate={new Date("2025-02-16")} />
+            <CaseItCountdown year={2025} localDate={"2025-02-16"} label="CaseIT Feb 16-21, 2025"/>
           </div>
         </BgImgCenter>
       </section>
