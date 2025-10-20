@@ -12,7 +12,7 @@ export default function Tour() {
   return (
     <div className="py-[20vh] px-7 md:px-16 xl:px-[15vw]">
       <div className="pb-8">
-        <DiscoverITBanner></DiscoverITBanner>
+        <DiscoverITBanner/>
       </div>
       <section className="flex flex-col space-y-8">
         <TourBento
@@ -20,8 +20,10 @@ export default function Tour() {
           subtext={tourText.subtext[0]}
           img={tourText.img[0]}
           text={tourText.paragraph[0]}
-          children={tourText.p2}
-        />{" "}
+        >
+          {tourText.p2}
+        </TourBento>
+
         <TourBento
           title={tourText.header2[1]}
           subtext={tourText.subtext[1]}

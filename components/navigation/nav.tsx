@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import CaseitLogoBlack from "@/public/svgs/caseit/CaseitLogoBlack";
 import { usePathname } from "next/navigation";
 import { NavListMobile } from "./NavListMobile";
+import Link from 'next/link'
 
 export const NavBar = () => {
   const pathname = usePathname();
@@ -87,9 +88,9 @@ export const NavBar = () => {
     ${lastScrollTop === 0 ? "bg-white/0" : "bg-white"}
     transition-all flex justify-between  w-full py-4 md:py-5 top-0 z-[50] fixed px-[5vw] `}
       >
-        <a href="/" className=" block w-24 lg:w-32">
+        <Link href="/" className=" block w-24 lg:w-32">
           <CaseitLogoBlack />
-        </a>
+        </Link>
 
         <button
           onClick={() => setIsOpen(!isOpen)}

@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { fromZonedTime } from "date-fns-tz";
-import { label } from "framer-motion/client";
 
 type CaseItCountdownProps = {
   year: number,

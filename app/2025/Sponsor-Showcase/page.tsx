@@ -59,6 +59,7 @@ export default function SponsorShowcase() {
       <section className=" px-7 mx-auto flex flex-col md:flex-row md:gap-[8rem] max-w-[90vw] space-y-12 md:space-y-0 py-[10vh] justify-center">
         {sponsor.diamondSponsorContent.map((item, index) => (
           <DiamondSponsor
+            key={index}
             text="Diamond Sponsor"
             img={sponsor.diamondSponsorContent[index].img}
             alt={sponsor.diamondSponsorContent[index].alt}
@@ -81,6 +82,7 @@ export default function SponsorShowcase() {
       <section className=" px-7 mx-auto flex flex-col md:flex-row md:gap-[8rem] max-w-[90vw] space-y-12 md:space-y-0 py-[10vh]">
         {sponsor.caseSponsorContent.map((item, index) => (
           <SilverSponsor
+            key={index}
             title={sponsor.caseSponsorContent[index].header1}
             subtext={sponsor.caseSponsorContent[index].subtext}
             text={sponsor.caseSponsorContent[index].text}
