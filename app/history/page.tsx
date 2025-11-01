@@ -5,9 +5,8 @@ import { ImgButton } from "@/components/buttons";
 import * as history from "@/content/history_content";
 import { CompetitionCard } from "@/components/HistoryCard";
 import { competitionData } from "@/content/history_content";
+import Carousel from "@/components/Carousel";
 import mypic from "@/public/imgs/2024_OC.png";
-
-
 
 export default function History() {
   return (
@@ -24,19 +23,18 @@ export default function History() {
         </div>
 
         {/* Moving carousel */}
-        {/* alter the speed in config file  */}
-        <div className=" mt-8 mx-4 flex flex-col gap-4  md:px-0 md:flex-row md:gap-4 md:pl-4 md:flex-nowrap md:w-fit  md:py-6  md:hover:pause md:animate-marquee md:animation-delay ">
-          {[...Array(2)].map((_, repeatIndex) =>
-            competitionData.map((competition, index) => (
+        <div className="mt-8">
+          <Carousel>
+            {competitionData.map((competition, index) => (
               <CompetitionCard
-                key={`${repeatIndex}-${index}`}
+                key={index}
                 image={competition.img}
                 title={competition.title}
                 description={competition.description}
                 winner={competition.winner}
               />
-            ))
-          )}
+            ))}
+          </Carousel>
         </div>
       </section>
       {/* ---IMAGE BUTTON CARDS---  */}

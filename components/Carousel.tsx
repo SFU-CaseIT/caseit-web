@@ -13,6 +13,7 @@ export default function Carousel({ className, children }: CarouselProps) {
   const controls = useAnimationControls();
   const x = useMotionValue(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const cardWidthRef = useRef(0);
   
   // Convert children to array and duplicate for seamless infinite scroll
@@ -21,6 +22,7 @@ export default function Carousel({ className, children }: CarouselProps) {
   const singleSetLength = childrenArray.length;
 
   useEffect(() => {
+    setIsMounted(true);
     if (carousel.current) {
       const firstCard = carousel.current.querySelector('.cursor-grab > *');
       if (firstCard) {
@@ -49,7 +51,7 @@ export default function Carousel({ className, children }: CarouselProps) {
   }, [x, singleSetLength]);
 
   useEffect(() => {
-    if (isDragging) return;
+    if (!isMounted || isDragging) return;
 
     const autoSlide = () => {
       const currentPosition = x.get();
@@ -60,7 +62,7 @@ export default function Carousel({ className, children }: CarouselProps) {
     const intervalId = setInterval(autoSlide, 16); // ~60fps for smooth animation
 
     return () => clearInterval(intervalId);
-  }, [controls, isDragging, x]);
+  }, [controls, isDragging, x, isMounted]);
   return (
     <div ref={carousel} className="relative flex overflow-hidden">
       {/* progressive blue for styling purposes */}
@@ -79,7 +81,7 @@ export default function Carousel({ className, children }: CarouselProps) {
         onDragEnd={() => {
           setIsDragging(false);
         }}
-        className="cursor-grab pl-8 lg:pl-32 flex flex-row gap-8 p-3 "
+        className="cursor-grab pl-8 lg:pl-32 flex flex-row gap-5 p-3 "
       >
         {duplicatedChildren.map((child, index) => (
           <React.Fragment key={`carousel-item-${index}`}>
