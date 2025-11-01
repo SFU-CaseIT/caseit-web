@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import { BgImgCenter } from "@/components/img";
-import { RoundedButton } from "@/components/buttons";
 import * as oc from "@/content/oc_content";
 import { ImgRibbonLeft, ImgRibbonRight } from "@/components/imgRibbons";
 import { OCText } from "@/components/text";

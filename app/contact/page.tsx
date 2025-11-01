@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { DesktopFAQ, MobileFAQ } from "@/components/faq";
 import { contactText } from "@/content/contact_content";

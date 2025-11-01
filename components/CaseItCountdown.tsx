@@ -45,7 +45,7 @@ export const CaseItCountdown = ( {year, localDate, timeZone = "America/Vancouver
     const interval = setInterval(updateCountdown, 1000);
 
     return () => clearInterval(interval); // Cleanup on component unmount
-  }, [localDate]);
+  }, [localDate, timeZone]);
 
   const timeUnits = [
     { label: "Days", colon: ":", value: timeLeft.days },

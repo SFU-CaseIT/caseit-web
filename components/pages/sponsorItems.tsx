@@ -160,7 +160,6 @@ export const SponsorBanner = ({
   text,
   children,
 }: sponsorItems) => {
-  const pathname = usePathname();
   return (
     <div className="w-full flex items-center justify-center md:justify-start">
       <div className="flex flex-col space-y-[2vh] max-w-[85vw] md:max-w-[50vw] xl:max-w-[40vw] mx-auto md:mx-[5vw] xl:mx-[10vw] text-left">

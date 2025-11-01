@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { RoundedButton, ArrowButton } from "@/components/buttons";
+import { RoundedButton } from "@/components/buttons";
 import { BgImgCenter } from "@/components/img";
 import banner from "@/public/imgs/banners/2025_banner.png";
 import * as involved from "@/content/involved_content";

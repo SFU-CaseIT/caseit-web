@@ -1,8 +1,5 @@
 "use client";
-import { RoundedButton } from "@/components/buttons";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { BoldedText } from "../text";
 
 type recapItems = {
   text?: string;

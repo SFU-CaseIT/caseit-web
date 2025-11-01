@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Image from "next/image";
-import { ImgLeft, IconImg } from "@/components/img";
+import { IconImg } from "@/components/img";
 import * as text from "@/components/text";
 import { ImgButton, RoundedButton, PivotButton } from "@/components/buttons";
 import { ImgRibbonLeft } from "@/components/imgRibbons";

@@ -24,7 +24,6 @@ export default function SubpageBanner({
 }
 
 export const DiscoverITBanner = () => {
-  const pathname = usePathname();
   return (
     <div className="space-x-[3rem] flex text-redDark text-[13px] font-semibold mb-[3vh] md:mb-[1vh]">
       <SubpageBanner link="/2025/DiscoverIT/overview" title="OVERVIEW" />

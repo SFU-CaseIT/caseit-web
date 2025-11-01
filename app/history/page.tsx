@@ -1,12 +1,14 @@
 import { Metadata } from "next";
-import Image from "next/image";
-import * as text from "@/components/text";
 import { ImgButton } from "@/components/buttons";
 import * as history from "@/content/history_content";
 import { CompetitionCard } from "@/components/HistoryCard";
 import { competitionData } from "@/content/history_content";
 import Carousel from "@/components/Carousel";
-import mypic from "@/public/imgs/2024_OC.png";
+
+export const metadata: Metadata = {
+  title: "History",
+  description: "Explore CaseIT's rich history and past competitions featuring top business schools from around the world.",
+};
 
 export default function History() {
   return (
