@@ -6,7 +6,7 @@ export const mediaText = {
 
 export const buttonText = [
   {
-    text: "Check the 2024 Recap",
+    text: "Check the 2025 Recap",
     link: "/history/recap",
   },
   {
@@ -18,9 +18,9 @@ export const buttonText = [
 export const galleryText = [
   {
     title: "CaseIT 2025",
-    subtext: "February 16-21, 2024",
+    subtext: "February 16-21, 2025",
     img: "/imgs/mediaGallery/Gallery2025.png",
-    link: "https://drive.google.com/drive/folders/1YBMOiPQKSlQJ_oMKAzQEBMLCwVegd6zL",
+    link: "https://drive.google.com/drive/folders/1YBMOiPQKSlQJ_oMKAzQEBMLCwVegd6zL?usp=share_link",
   },
   {
     title: "CaseIT 2024",

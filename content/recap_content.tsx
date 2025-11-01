@@ -1,13 +1,13 @@
 export const recapText = {
-  header1: "What happened at CaseIT 2024?",
-  header3: "CaseIT 2024 Placements",
+  header1: "What happened at CaseIT 2025?",
+  header3: "CaseIT 2025 Placements",
   header4: "Awards",
 
   positions: [
     {
       day: "Day One",
       title: "ReadyForIT",
-      desc: "ReadyForIT kicked off CaseIT 2024 with exciting games and challenges that provided competitors an opportunity to mingle with students from all around the world before the week got busy.",
+      desc: "ReadyForIT kicked off CaseIT 2025 with exciting games and challenges that provided competitors an opportunity to mingle with students from all around the world before the week got busy.",
       title2: "ExchangeIT",
       desc2:
         "ExchangeIT, a component of ReadyForIt, gave competitors from all around the world the chance to show off all their unique items from their home country and swap swag with all the competitors and organizing committee!",
@@ -27,7 +27,7 @@ export const recapText = {
     {
       day: "Day Three",
       title: "Case I Presentations",
-      desc: "Case I of CaseIT’s set the stage for innovation as teams tackled real-world challenges and suggested creative solutions within a 5-hour deliberation period. Competitors presented their solutions to a panel of industry professionals for 15 minutes, followed by a 5 minute Q&A.",
+      desc: "Case I of CaseIT's set the stage for innovation as teams tackled real-world challenges and suggested creative solutions within a 5-hour deliberation period. Competitors presented their solutions to a panel of industry professionals for 15 minutes, followed by a 5 minute Q&A.",
       img: "/imgs/recap/2024/day3.png",
       alt: "group candid",
     },
@@ -54,7 +54,7 @@ export const recapText = {
       desc: "Case II brought the thrill for competitors to present their findings to a panel of industry professionals after an intense 24-hour deliberation period. A Wildcard round occurred, where the chosen teams were given the opportunity to get a spot in the Finals round. First runners of the Preliminary round and the Wildcard round winner advanced to the Final round and competed for podium placements in the renowned CaseIT international undergraduate case competition!",
       title2: "Award Banquet",
       desc2:
-        "The Awards Banquet wrapped up our intensive competition week of CaseIT 2024. Competitors gathered in formal attire to celebrate their achievements. The evening featured speeches from faculty members and the CaseIT team, highlighting the event's significance and the hard work of all participants. Finally, the winners of CaseIT 2024 were announced along with other existing awards.",
+        "The Awards Banquet wrapped up our intensive competition week of CaseIT 2025. Competitors gathered in formal attire to celebrate their achievements. The evening featured speeches from faculty members and the CaseIT team, highlighting the event's significance and the hard work of all participants. Finally, the winners of CaseIT 2024 were announced along with other existing awards.",
       img: "/imgs/recap/2024/day6.png",
       alt: "group candid",
     },

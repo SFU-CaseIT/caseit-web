@@ -6,12 +6,16 @@ import { BgImgCenter } from "@/components/img";
 import { RecapText } from "@/components/text";
 import { RoundedButton, ArrowButton } from "@/components/buttons";
 import banner from "@/public/imgs/banners/recap_banner.png";
+
+const year = 2025;
+
 export const metadata: Metadata = {
-  title: "2024 Recap",
+  title: `${year} Recap`,
   description: "Learn more about our company and team.",
 };
 
-export default function Recap2024() {
+export default function RecapPage() {
+
   return (
     <div>
       {/* ---MAIN BANNER--- */}
@@ -23,14 +27,14 @@ export default function Recap2024() {
           <div className="flex flex-col-reverse md:flex-row justify-center items-center md:space-x-[20px] ">
             <div>
               <RoundedButton
-                text="2024 Media Gallery"
-                link="https://drive.google.com/drive/u/4/folders/1mkOBqwmWtPPuD7FvBlQuO974As3zuGAS"
+                text={`${year} Media Gallery`}
+                link="https://drive.google.com/drive/folders/1YBMOiPQKSlQJ_oMKAzQEBMLCwVegd6zL?usp=share_link"
                 variant="red"
               />
             </div>
             <div className="mb-4 md:mb-0">
               <RoundedButton
-                text="View CaseIT 2024 Recap Video"
+                text={`View CaseIT ${year} Recap Video`}
                 link="/history/media"
                 variant="black"
               />

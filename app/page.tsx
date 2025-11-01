@@ -124,7 +124,7 @@ export default function Home() {
           />
           <SquareButton
             variant="white"
-            text="Our 2024 Recap"
+            text="Our 2025 Recap"
             subtext="Relive some of our best moments"
             link="/history/recap"
           />
