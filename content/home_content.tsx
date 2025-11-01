@@ -9,7 +9,7 @@ export const HomeText = {
   large: [" See you in Vancouver."],
   paragraph: [
     "\bCaseIT 2026 \bwill take place in the beautiful city of Vancouver, BC from\b February 15 to 20, 2026.",
-    "To commemorate our 23nd year, we pledge to shape the next two decades by organizing a case competition that will continue \bfostering industry expertise, cultural diversity, and international communities.",
+    "To commemorate our 23rd year, we pledge to shape the next two decades by organizing a case competition that will continue \bfostering industry expertise, cultural diversity, and international communities.",
     "CaseIT is the world’s premier international undergraduate Management Information Systems (MIS) case competition. The brightest business students from across the globe converge in Vancouver, BC, to put their skills to the test in this week-long event. With opportunities to network, explore, and learn, we promise that your CaseIT experience is one that you will never forget.",
   ],
 };

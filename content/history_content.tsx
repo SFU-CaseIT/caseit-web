@@ -34,7 +34,7 @@ export const competitionData: CompetitionData[] = [
   {
     img: _2025,
     title: "CaseIT 2025",
-    description: "CaseIT celebrates its 22th Year Anniversary.",
+    description: "CaseIT celebrates its 23rd Year Anniversary.",
     winner: "The University of Manchester",
   },
   {
