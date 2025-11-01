@@ -3,6 +3,9 @@ import { RoundedButton, ArrowButton } from "@/components/buttons";
 import { BgImgCenter } from "@/components/img";
 import banner from "@/public/imgs/banners/2025_banner.png";
 import * as involved from "@/content/involved_content";
+import { memberData } from "@/content/GetInvolved_content";
+import { GetInvolvedCard } from "@/components/GetInvolvedCard";
+
 import Carousel from "@/components/Carousel";
 
 export const metadata: Metadata = {
@@ -51,7 +54,17 @@ export default function GetInvolved() {
         <h2 className=" text-header2 ml-8 lg:ml-32 mb-12 max-w-[24ch] tracking-tight leading-tight">
           {involved.involvedText.header2[0]}
         </h2>
-        <Carousel />
+        <Carousel>
+            {memberData.map((member, index) => (
+              <GetInvolvedCard
+                key={index}
+                image={member.img}
+                name={member.name}
+                quote={member.quote}
+                position={member.position}
+              />
+            ))}
+        </Carousel>
       </section>
       {/* ---PLUG--- */}
       <section className="flex flex-col justify-center items-center gap-6 py-28 px-4">
