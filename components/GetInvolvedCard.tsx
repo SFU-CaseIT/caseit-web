@@ -24,7 +24,7 @@ export const GetInvolvedCard = ({
         src={image}
         alt={""}
       ></Image>
-      <p className="text-gray-700 text-[0.875rem] md:text-base mb-8">{quote}</p>
+      <p className="text-gray-700 text-[0.875rem] md:text-base mb-8 whitespace-pre-line">{quote}</p>
       <div className="flex flex-col text-gray-500 mt-auto">
         <strong>{name}</strong>
         <span>{position}</span>
