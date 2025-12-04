@@ -23,17 +23,9 @@ export const NavLinks = [
     ref: "/2026",
     name: "CaseIT 2026",
     sublinks: [
-      { name: "Overview", ref: "/2026"}
+      { name: "Overview", ref: "/2026"},
+      { name: "Chair's Welcome", ref: "/2026/chair"},
     ]
-  },
-  {
-    ref: "/2025",
-    name: "CaseIT 2025",
-    sublinks: [
-      { name: "Overview", ref: "/2025" },
-      { name: "Chair's Welcome", ref: "/2025/chair" },
-      { name: "2025 Sponsors", ref: "/2025/Sponsor-Showcase" },
-    ],
   },
   {
     ref: "/history",
