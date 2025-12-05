@@ -14,11 +14,21 @@ export const metadata: Metadata = {
 export default function Chair() {
   return (
     <main className="p-7 md:px-16 pt-36 mx-auto md:max-w-[80vw] overflow-hidden">
-      <h2 className="font-semibold text-4xl lg:text-[4rem] tracking-tight leading-none mb-16">
+      <h2 className="font-semibold text-4xl lg:text-[4rem] tracking-tight leading-none mb-10">
         {chairs.chairText.header}
       </h2>
 
-      <div className="flex flex-col-reverse lg:space-x-[5vw] lg:flex-row gap-8">
+      <div className="flex flex-col gap-8 justify-center items-center">
+        {/* Image */}
+          <Image
+            src={chair}
+            width={500}
+            height={500}
+            className=" rounded-2xl object-contain md:w-screen lg:w-[50vw] "
+            quality={100}
+            alt="portrait of CaseIT 2026 Chair"
+          />
+
         {/* Text Content */}
         <div className="text-pretty ">
           <div>{chairs.chairContent.paragraph}</div>
@@ -26,15 +36,6 @@ export default function Chair() {
             <Image className="w-48" src={signature} alt="chair signature" />
             {chairs.chairContent.signature}
           </div>
-        </div>
-
-        {/* Image */}
-        <div className="lg:max-w-[33vw]">
-          <Image
-            className=" rounded-[1rem]"
-            src={chair}
-            alt="portrait of CaseIT 2026 Chair"
-          />
         </div>
       </div>
 
