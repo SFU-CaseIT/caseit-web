@@ -18,25 +18,25 @@ export default function Chair() {
         {chairs.chairText.header}
       </h2>
 
-      <div className="flex flex-col gap-8 justify-center items-center">
+      <div className="flex flex-col gap-8 justify-center items-center xl:flex-row-reverse">
         {/* Image */}
           <Image
             src={chair}
             width={500}
             height={500}
-            className=" rounded-2xl object-contain md:w-screen lg:w-[50vw] "
+            className=" rounded-2xl object-contain md:w-screen lg:w-[50vw]"
             quality={100}
             alt="portrait of CaseIT 2026 Chair"
           />
 
         {/* Text Content */}
         <div className="text-pretty ">
-          <div>{chairs.chairContent.paragraph}</div>
-          <div mb-4>
-            <Image className="w-48" src={signature} alt="chair signature" />
-            {chairs.chairContent.signature}
-          </div>
+          <div className="max-w-[60vw]">{chairs.chairContent.paragraph}</div>
         </div>
+      </div>
+      <div mb-4>
+        <Image className="w-48" src={signature} alt="chair signature" />
+        {chairs.chairContent.signature}
       </div>
 
       <div className="w-full flex justify-center items-center py-[10vh]">
