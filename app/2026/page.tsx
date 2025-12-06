@@ -11,8 +11,6 @@ import banner from "@/public/imgs/banners/2025_banner.png";
 import { ImgButton2025 } from "@/components/2025components/ImgButton2025";
 import { Results } from "@/components/2025components/results";
 import Image from "next/image";
-import { ImgRibbonLeft, ImgRibbonRight } from "@/components/imgRibbons";
-import { WinnersText } from "@/components/text";
 export const metadata: Metadata = {
   title: "CaseIT 2026",
   description: "Learn more about our company and team.",

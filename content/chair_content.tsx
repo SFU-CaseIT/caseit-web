@@ -1,7 +1,7 @@
 export const chairContent = {
   paragraph: (
     <p>
-      On behalf of the 2026 Organizing Committee, it is our honour to welcome you to CaseIT 2026.
+      On behalf of the 2026 Organizing Committee, it is my honour to welcome you to CaseIT 2026.
       <br />
       <br />
       With great excitement, we are embarking on another remarkable year of CaseIT where we bring together a talented group of individuals to challenge conventional thinking and bridge the gap between business and technology. Since its inception in 2004, with the support of our sponsors, CaseIT has grown from a local competition to the premier undergraduate MIS case competition in the world. We have welcomed over 1,000 undergraduate competitors from 51 universities and 20 countries to participate in our week-long competition in the beautiful city of Vancouver, British Columbia.
@@ -16,7 +16,7 @@ export const chairContent = {
       To learn more about our upcoming opportunities for the year, please contact us at caseit@sfu.ca or visit our website https://www.caseit.org/.
       <br />
       <br />
-      Sincerly,
+      Sincerely
     </p>
   ),
   signature: (
