@@ -4,7 +4,7 @@ export const NavLinks = [
     name: "About",
     sublinks: [
       { name: "About CaseIT", ref: "/about" },
-      { name: "2025 Organizing Committee", ref: "/about/oc" },
+      { name: "2026 Organizing Committee", ref: "/about/oc" },
       { name: "Get Involved", ref: "/about/Get-Involved" },
     ],
   },
@@ -19,12 +19,24 @@ export const NavLinks = [
       },
     ],
   },
+  // {
+  //   ref:"/2025",
+  //   name:"CaseIT 2025",
+  //   sublinks: [
+  //     { name: "Overview", ref: "/2025"},
+  //     { name: "Chair's Welcome", ref: "/2025/chair"},
+  //     { name: "Sponsor Showcase", ref: "/2025/Sponsor-Showcase"},
+  //     { name: "DiscoverIT", ref: "/2025/DiscoverIT/overview"}
+  //   ]
+
+  // },
   {
     ref: "/2026",
     name: "CaseIT 2026",
     sublinks: [
       { name: "Overview", ref: "/2026"},
       { name: "Chair's Welcome", ref: "/2026/chair"},
+      { name: "DiscoverIT", ref: "/2026/DiscoverIT/overview"}
     ]
   },
   {

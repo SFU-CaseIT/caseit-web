@@ -4,7 +4,7 @@ import { BgImgCenter } from "@/components/img";
 import * as oc from "@/content/oc_content";
 import { ImgRibbonLeft, ImgRibbonRight } from "@/components/imgRibbons";
 import { OCText } from "@/components/text";
-import groupPic from "@/public/imgs/oc/2025/oc.jpg";
+import groupPic from "@/public/imgs/oc/2026/everyone.jpg";
 
 export const metadata: Metadata = {
   title: "OC Team",
@@ -26,13 +26,11 @@ export default function OC() {
       {/* ---ENTIRE OC---  */}
       <section>
         <div className="py-[10vh] justify-center items-center flex flex-col space-y-6 w-full">
-          <div className="w-[90vw] xl:w-[60vw] text-header2">{oc.ocText.header2}</div>
+          <div className="w-[80vw] xl:w-[60vw] text-header2">{oc.ocText.header2}</div>
           <Image
             src={groupPic}
             alt="CaseIT OC Group Pic"
-            width={1002}
-            height={503}
-            className="w-[90vw] xl:w-[60vw] h-auto xl:rounded-2xl rounded-xl"
+            className="w-[90vw] xl:w-[50vw] h-auto xl:rounded-2xl rounded-xl"
           />
         </div>
       </section>
