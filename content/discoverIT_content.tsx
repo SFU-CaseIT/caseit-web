@@ -8,21 +8,21 @@ export const overviewText = {
     "It's a thrilling opportunity to showcase your school pride and demonstrate your enthusiasm for CaseIT 2025! The team with the most SpirIT points will receive the SpirIT prize at our Awards Banquet. Good luck!",
   ],
 };
-
+ 
 export const tourText = {
   subtext: ["Tour 1", "Tour 2"],
   header2: ["Granville Island + Flyover Canada", "Capilano Suspension Bridge"],
   paragraph: [
-    "Blending art, beauty, and culinary delights, Granville Island’s Public Market is at the very heart of Vancouver, British Columbia. Whether you're interested in shopping for unique products, enjoying live performances, or savouring delicious food, the Granville Island Public Market is a must go-to location for exploring the uniqueness of local Vancouver culture. ",
-    "The Capilano Suspension Bridge Park is a tourist-favourite attraction in North Vancouver. Known for its breathtaking natural beauty and iconic suspension bridge spanning the Capilano River. Explore a variety of attractions and activities to experience Vancouver’s thriving coastal rainforest and unique ecosystems. Brave the seven suspension bridges and towering platforms of Treetop Adventures to see Capilano from a squirrel’s eye view. A lucky sight to see, Capilano’s seasonal Love Lights will be on display, illuminating the bridges to transform the winter wilderness.",
+    "Blending art, beauty, and culinary delights, Granville Island’s Public Market is at the very heart of Vancouver, British Columbia. Whether you're interested in shopping for unique products, enjoying live performances, or savouring delicious food, the Granville Island Public Market is a must go-to location for exploring the uniqueness of local Vancouver culture. ",
+    "The Capilano Suspension Bridge Park is a tourist-favourite attraction in North Vancouver. Known for its breathtaking natural beauty and iconic suspension bridge spanning the Capilano River. Explore a variety of attractions and activities to experience Vancouver’s thriving coastal rainforest and unique ecosystems. Brave the seven suspension bridges and towering platforms of Treetop Adventures to see Capilano from a squirrel's eye view. A lucky sight to see, Capilano’s seasonal Love Lights will be on display, illuminating the bridges to transform the winter wilderness.",
   ],
   p2: (
     <>
       <p className="pt-4">
-        Immerse yourself on a grand journey through Canada’s scenic mountains,
+        Immerse yourself on a grand journey through Canada's scenic mountains,
         vast prairies, and historic cities with FlyOver Canada on the second
         half of this tour. Combining state-of-the-art technology with an
-        unparalleled unique sensory experience, you’ll have  experienced the
+        unparalleled unique sensory experience, you'll have experienced the
         best of Canada by the end of your ride.
       </p>
     </>

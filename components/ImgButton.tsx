@@ -11,7 +11,7 @@ type buttonItems = {
 };
 
 
-export const ImgButton2025 = ({ img, alt, text, link }: buttonItems) => {
+export const ImgButton = ({ img, alt, text, link }: buttonItems) => {
   return (
     <div className="relative h-full">
       {/* Top line */}
@@ -23,7 +23,8 @@ export const ImgButton2025 = ({ img, alt, text, link }: buttonItems) => {
         <Image
           src={img || "/svgs/CaseIT_Black.svg"}
           alt={alt || "image description"}
-          className="h-full w-full brightness-75 object-[0rem_30%] object-cover group-hover:brightness-100 duration-300 xl:rounded-2xl rounded-xl group-hover:outline group-hover:outline-[4px] group-hover:outline-red"
+
+          className="h-full w-full brightness-75 object-cover object-center group-hover:brightness-100 duration-300 xl:rounded-2xl rounded-xl group-hover:outline group-hover:outline-[4px] group-hover:outline-red"
         />
 
         <div className="absolute inset-0 flex items-end pl-5 pb-5 z-10 max-w-[95%]">

@@ -8,7 +8,7 @@ import { Stats } from "../../components/2025components/Stats";
 import { CaseItCountdown } from "../../components/CaseItCountdown";
 import { ArrowButton } from "@/components/buttons";
 import banner from "@/public/imgs/banners/2025_banner.png";
-import { ImgButton2025 } from "@/components/2025components/ImgButton2025";
+import { ImgButton } from "@/components/ImgButton";
 import { Results } from "@/components/2025components/results";
 import Image from "next/image";
 import { ImgRibbonLeft, ImgRibbonRight } from "@/components/imgRibbons";
@@ -53,7 +53,7 @@ export default function CaseIt2025() {
         {/* ---3 BUTTON GRID---  */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-5 md:grid-rows-2 gap-6 sm:max-w-[80vw] lg:max-w-[60vw]">
           <div className="group relative md:row-span-2 md:col-span-2 aspect-video md:aspect-[0] ">
-            <ImgButton2025
+            <ImgButton
               img={caseitChair}
               alt={"case it chair"}
               text={"Chair's Welcome"}
@@ -61,7 +61,7 @@ export default function CaseIt2025() {
             />
           </div>
           <div className="relative group md:col-start-3 md:col-span-3 md:aspect-[2]">
-            <ImgButton2025
+            <ImgButton
               img={sponsor}
               alt={"2025 Sponsors"}
               text={"2025 Sponsors"}
@@ -69,7 +69,7 @@ export default function CaseIt2025() {
             />
           </div>
           <div className=" group relative md:col-start-3 md:col-span-3 md:aspect-[2]">
-            <ImgButton2025
+            <ImgButton
               img={discover}
               alt={"DiscoverIT"}
               text={"DiscoverIT"}
