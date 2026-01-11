@@ -6,7 +6,7 @@ import { ReactNode } from "react";
 type textItems = {
   title?: string;
   text?: string;
-  subtext?: string;
+  subtext: { available?: string; missing?: string };
   dotText?: ReactNode;
   stylingClasses?: string;
 };
@@ -31,9 +31,22 @@ export const OCText = ({ title, text, subtext }: textItems) => {
       <div className="md:max-w-[50vw] pb-[2vh] pr-[3vw]">
         <div className="text-paragraph">{text}</div>
       </div>
-      <p>
-        <strong>{subtext}</strong>
-      </p>
+      {subtext && typeof subtext === 'object' ? (
+        <div>
+          <p className="font-bold">
+            Left to right: {subtext.available}
+          </p>
+          {subtext.missing && (
+            <p className="text-sm font-bold mt-1">
+              Missing: {subtext.missing}
+            </p>
+          )}
+        </div>
+      ) : (
+        <p>
+          <strong>{subtext}</strong>
+        </p>
+      )}
     </div>
   );
 };
@@ -41,7 +54,8 @@ export const OCText = ({ title, text, subtext }: textItems) => {
 export const RecapText = ({ title, text, subtext }: textItems) => {
   return (
     <div className="md:pl-10 flex flex-col space-y-3">
-      <div className="text-red text-header2">{subtext}</div>
+      {/*This might be everyone instead of just available */}
+      <div className="text-red text-header2">{subtext.available}</div>
       <div className="text-header4">{title}</div>
       <div className="md:max-w-[50vw] pb-[2vh] ">
         <div className="text-paragraph">{text}</div>
@@ -53,7 +67,8 @@ export const RecapText = ({ title, text, subtext }: textItems) => {
 export const WinnersText = ({ title, subtext }: textItems) => {
   return (
     <div className="md:pl-10 flex flex-col space-y-3 leading-none">
-      <div className="text-red text-paragraph font-bold">{subtext}</div>
+      {/*This might be everyone instead of just available */}
+      <div className="text-red text-paragraph font-bold">{subtext.available}</div>
       <div className="md:max-w-[50vw] pb-[2vh] ">
         <div className="text-header2">{title}</div>
       </div>
