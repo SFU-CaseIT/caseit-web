@@ -8,7 +8,8 @@ type ribbonItems = {
   img: string;
   alt: string;
   children: React.ReactNode;
-  hoverImg?: string;
+  hoverImg: string;
+  hoverAlt: string;
 };
 
 // Image on the left while the text or children elements are on the right
@@ -16,6 +17,7 @@ export const ImgRibbonLeft = ({
   hoverImg,
   img,
   alt,
+  hoverAlt,
   children,
 }: ribbonItems) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -34,9 +36,9 @@ export const ImgRibbonLeft = ({
     <div className="md:flex md:space-x-[5vw] md:items-center">
       <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         <ImgLeft
-          img={isHovered ? hoverImg : img}
+          img={(isHovered && hoverImg) ? hoverImg : img}
           stylingClasses="w-[90vw] md:w-[70vw] h-auto xl:rounded-2xl rounded-xl"
-          alt={alt || "img description"}
+          alt={(isHovered && hoverAlt) ? hoverAlt : alt}
         />{" "}
       </div>
       <div className=" px-7 md:px-[5vw] pr-[5vw] md:w-[70vw] flex flex-col items-start justify-center">
@@ -51,6 +53,7 @@ export const ImgRibbonRight = ({
   hoverImg,
   img,
   alt,
+  hoverAlt,
   children,
 }: ribbonItems) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -73,9 +76,9 @@ export const ImgRibbonRight = ({
       </div>
       <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         <ImgRight
-          img={isHovered ? hoverImg : img}
+          img={isHovered && hoverImg ? hoverImg : img}
           stylingClasses="w-[90vw] md:w-[70vw] h-auto xl:rounded-2xl rounded-xl"
-          alt={alt || "img description"}
+          alt={isHovered && hoverAlt ? hoverAlt : alt}
         />{" "}
       </div>
     </div>

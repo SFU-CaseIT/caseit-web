@@ -44,6 +44,7 @@ export default function OC() {
                 img={oc.ocText.positions[index].img}
                 hoverImg={oc.ocText.positions[index].img2}
                 alt={oc.ocText.positions[index].alt}
+                hoverAlt={oc.ocText.positions[index].hoverAlt}
               >
                 <OCText
                   text={oc.ocText.positions[index].desc}
@@ -56,6 +57,7 @@ export default function OC() {
                 img={oc.ocText.positions[index].img}
                 hoverImg={oc.ocText.positions[index].img2}
                 alt={oc.ocText.positions[index].alt}
+                hoverAlt={oc.ocText.positions[index].hoverAlt}
               >
                 <OCText
                   text={oc.ocText.positions[index].desc}
