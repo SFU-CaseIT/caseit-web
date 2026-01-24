@@ -8,8 +8,8 @@ type ribbonItems = {
   img: string;
   alt: string;
   children: React.ReactNode;
-  hoverImg: string;
-  hoverAlt: string;
+  hoverImg?: string;
+  hoverAlt?: string;
 };
 
 // Image on the left while the text or children elements are on the right

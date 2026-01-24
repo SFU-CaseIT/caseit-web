@@ -49,7 +49,7 @@ export default function OC() {
                 <OCText
                   text={oc.ocText.positions[index].desc}
                   title={oc.ocText.positions[index].title}
-                  subtext={oc.ocText.positions[index].names}
+                  members={oc.ocText.positions[index].names}
                 />
               </ImgRibbonLeft>
             ) : (
@@ -62,7 +62,7 @@ export default function OC() {
                 <OCText
                   text={oc.ocText.positions[index].desc}
                   title={oc.ocText.positions[index].title}
-                  subtext={oc.ocText.positions[index].names}
+                  members={oc.ocText.positions[index].names}
                 />
               </ImgRibbonRight>
             )}
