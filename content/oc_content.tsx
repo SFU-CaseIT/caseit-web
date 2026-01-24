@@ -34,7 +34,7 @@ export const ocText = {
       desc: "The Competition Executive team is the driving force behind a seamless execution of CaseIT. With their commitment to excellence, they ensure every event runs smoothly and efficiently.",
       names: {
         // Names are ordered left to right as they appear in the photo
-        available: "Jessie Lin, Tyler Tan, Keyan Viloria, Lynn Kim Ananya Singh, Shriya Narayan.",
+        available: "Jessie Lin, Tyler Tan, Keyan Viloria, Lynn Kim, Ananya Singh, Shriya Narayan.",
         missing: "",
       },
       img: "/imgs/oc/2026/compEx.jpg",
@@ -48,7 +48,7 @@ export const ocText = {
       names: {
         // Names are ordered left to right as they appear in the photo
         available: "Kelly Hy, Nathan Huynh, Kelly Liao, Rachel Tu, Inarah Usmani, Sherene Liu.",
-        missing: "",
+        missing: "Nayoon Kim",
       },
       img: "/imgs/oc/2026/marketing.jpg",
       img2: "/imgs/oc/2026/marketing_funny.jpg",

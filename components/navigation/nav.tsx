@@ -95,6 +95,7 @@ export const NavBar = () => {
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="lg:hidden relative w-8 h-6 z-50"
+          title="Navigation Hamburger"
         >
           <div
             className={`bg-[#8b8b8b] w-8 h-[2.5px] rounded-md absolute top-0

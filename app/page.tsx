@@ -9,6 +9,7 @@ import { useCountUp } from "@/hooks/useCountUp";
 import Image from "next/image";
 import StatCard from "@/components/stats";
 import { BoldedText } from "@/components/text";
+import Banner2026 from "@/public/imgs/2026.png"
 import TawkTo from "@/components/liveChat";
 
 export default function Home() {
@@ -86,21 +87,21 @@ export default function Home() {
         {/* Vancouver card  */}
         <div className="  mt-12 grid grid-cols-1 md:grid-cols-2 border-redDark border-2 rounded-2xl gap-12 p-6 md:p-12 xl:p-20 w-[90%] max-w-[25rem] md:max-w-[1200px] mx-auto drop-shadow-[0_0_15px_rgba(197,52,52,0.25)] bg-white">
           <div className="w-full">
-            <Icon2025 width="100%" height="100%" />
+            <Image src={Banner2026} alt="2026" className="w-[100%] h-[100%]"/>
           </div>
 
-          <div className=" text-[1rem] lg:text-[1rem] ">
-            <h2 className="font-bold text-redDark md:text-[1.5rem]">
-              {home.HomeText.header2[0]}
-            </h2>
-            <h3 className="font-bold text-[1.125rem] md:text-[1.75rem] lg:text-[2.5rem]">
-              {home.HomeText.large[0]}
-            </h3>
-            <div className="mt-4 max-w-[40ch] lg:max-w-[45ch]">
-              <BoldedText text={home.HomeText.paragraph[0]} />
-            </div>
-            <div className="mt-4 max-w-[60ch] lg:max-w-[45ch]">
-              <BoldedText text={home.HomeText.paragraph[1]} />
+          <div className=" text-[1rem] lg:text-[1rem] flex flex-col justify-center">
+              <h2 className="font-bold text-redDark md:text-[1.5rem]">
+                {home.HomeText.header2[0]}
+              </h2>
+              <h3 className="font-bold text-[1.125rem] md:text-[1.75rem] lg:text-[2.5rem]">
+                {home.HomeText.large[0]}
+              </h3>
+              <div className="mt-4 max-w-[40ch] lg:max-w-[45ch]">
+                <BoldedText text={home.HomeText.paragraph[0]} />
+              </div>
+              <div className="mt-4 max-w-[60ch] lg:max-w-[45ch]">
+                <BoldedText text={home.HomeText.paragraph[1]} />
             </div>
           </div>
         </div>
