@@ -20,14 +20,14 @@ export const icons = [
 
 export const imgButtons = [
   {
-    img: "/imgs/oc/2024_OC.PNG",
-    alt: "2024 OC team pic",
-    text: "2025 ORGANIZING COMMITTEE",
+    img: "/imgs/oc/2026/everyone.jpg",
+    alt: "2026 OC team pic",
+    text: "2026 ORGANIZING COMMITTEE",
     link: "/about/oc/",
   },
   {
     img: "/imgs/about/CaseIT_On3.PNG",
-    alt: "2024 OC team pic",
+    alt: "2026 OC team pic",
     text: "GET INVOLVED",
     link: "/about/Get-Involved",
   },

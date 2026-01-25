@@ -120,7 +120,7 @@ export default function About() {
         <div className="text-header2 py-[5vh]">
           {about.aboutText.header2[0]}{" "}
         </div>
-        <div className="flex flex-col  space-y-[4vw] md:space-y-[0] md:flex-row md:space-x-[2vw] md:pt-[2vh]">
+        <div className="flex flex-col space-y-[4vw] md:space-y-[0] md:flex-row md:items-stretch md:space-x-[2vw] md:pt-[2vh]">
           {about.imgButtons.map((item, index) => (
             <ImgButton
               key={index}
@@ -131,7 +131,7 @@ export default function About() {
             />
           ))}
         </div>
-      </section>
+      </section>        
     </div>
   );
 }

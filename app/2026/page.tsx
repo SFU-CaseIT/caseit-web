@@ -63,8 +63,8 @@ export default function CaseIt2026() {
           <div className="relative group md:col-start-3 md:col-span-3 md:aspect-[2]">
             <ImgButton
               img={sponsor}
-              alt={"2025 Sponsors"}
-              text={"2025 Sponsors"}
+              alt={"2026 Sponsors"}
+              text={"2026 Sponsors"}
               link={"/sponsor/Sponsor-Overview"}
             />
           </div>
