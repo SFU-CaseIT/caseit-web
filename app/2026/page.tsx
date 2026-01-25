@@ -81,7 +81,7 @@ export default function CaseIt2026() {
       
       {/* <section className="md:hidden flex justify-center mx-auto scroll-smooth py-[7vh]">
         <ArrowButton link="#2026" />
-      </section> */}
+      </section> */} 
     </div>
   );
 }

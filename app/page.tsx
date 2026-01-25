@@ -140,9 +140,9 @@ export default function Home() {
       </section>
       {/* LIVECHAT CODE */}
       {/* Uncomment and set "Overview > Status" and "Channels > Chat Widget > Widget Status" to Active on TawkTo */}
-      {/* <section>
+      <section>
         <TawkTo />
-      </section> */}
+      </section>
     </main>
   );
 }
