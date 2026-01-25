@@ -84,11 +84,12 @@ export default function Home() {
             />
           ))}
         </div>
+        {/*When you are here, to add back the icon, modified the padding */}
         {/* Vancouver card  */}
-        <div className="  mt-12 grid grid-cols-1 md:grid-cols-2 border-redDark border-2 rounded-2xl gap-12 p-6 md:p-12 xl:p-20 w-[90%] max-w-[25rem] md:max-w-[1200px] mx-auto drop-shadow-[0_0_15px_rgba(197,52,52,0.25)] bg-white">
-          <div className="w-full">
+        <div className="  mt-12 flex flex-col  border-redDark border-2 rounded-2xl gap-12 p-4 md:p-6 xl:p-10 w-[90%] max-w-[25rem] md:max-w-[1200px] mx-auto drop-shadow-[0_0_15px_rgba(197,52,52,0.25)] bg-white text-center">
+          {/* <div className="w-full">
             <Image src={Banner2026} alt="2026" className="w-[100%] h-[100%]"/>
-          </div>
+          </div> */}
 
           <div className=" text-[1rem] lg:text-[1rem] flex flex-col justify-center">
               <h2 className="font-bold text-redDark md:text-[1.5rem]">
@@ -97,12 +98,12 @@ export default function Home() {
               <h3 className="font-bold text-[1.125rem] md:text-[1.75rem] lg:text-[2.5rem]">
                 {home.HomeText.large[0]}
               </h3>
-              <div className="mt-4 max-w-[40ch] lg:max-w-[45ch]">
                 <BoldedText text={home.HomeText.paragraph[0]} />
-              </div>
-              <div className="mt-4 max-w-[60ch] lg:max-w-[45ch]">
                 <BoldedText text={home.HomeText.paragraph[1]} />
-            </div>
+              {/* <div className="mt-4 max-w-[40ch] lg:max-w-[45ch] text-center">
+              </div>
+              <div className="mt-4 max-w-[60ch] lg:max-w-[45ch] text-center">
+            </div> */}
           </div>
         </div>
       </section>
