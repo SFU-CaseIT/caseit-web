@@ -10,7 +10,7 @@ import Image from "next/image";
 import StatCard from "@/components/stats";
 import { BoldedText } from "@/components/text";
 import Banner2026 from "@/public/imgs/2026.png"
-import TawkTo from "@/components/liveChat";
+import TawkTo from "@/components/TawkTo";
 
 export default function Home() {
   const { ref: sectionRef, inView } = useInView({
@@ -140,9 +140,9 @@ export default function Home() {
       </section>
       {/* LIVECHAT CODE */}
       {/* Uncomment and set "Overview > Status" and "Channels > Chat Widget > Widget Status" to Active on TawkTo */}
-      <section>
+      {/* <section>
         <TawkTo />
-      </section>
+      </section> */}
     </main>
   );
 }
