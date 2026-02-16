@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 
 const config: Config = {
   content: [
@@ -59,9 +60,23 @@ const config: Config = {
         sans: ["Switzer", "sans-serif"],
         acid: ["acid", "sans-serif"],
       },
+      fontSize: {
+        "3xs": "8px",
+        "2xs": "12px",
+        xs: "14px",
+        sm: "16px",
+        base: "18px",
+        lg: "20px",
+        xl: "24px",
+        "2xl": "32px",
+        "3xl": "40px",
+        "4xl": "48px",
+        "5xl": "104px",
+      },
     },
     // Colours used based on Figma Library
     colors: {
+      ...colors, // Include all default Tailwind colors
       white: "#FFFFFF", //default white
 
       black: "#000000", //default black
@@ -91,19 +106,6 @@ const config: Config = {
       Discord: "#7289DA",
       Instagram: "#DD2A7B",
       LinkedIn: "#0077B5",
-    },
-    fontSize: {
-      "3xs": "8px",
-      "2xs": "12px",
-      xs: "14px",
-      sm: "16px",
-      base: "18px",
-      lg: "20px",
-      xl: "24px",
-      "2xl": "32px",
-      "3xl": "40px",
-      "4xl": "48px",
-      "5xl": "104px",
     },
   },
   plugins: [],
