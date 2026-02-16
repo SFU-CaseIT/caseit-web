@@ -85,18 +85,17 @@ export default function CaseIt2026() {
         <div className="font-semibold text-[2rem] text-center md:text-[2.5rem] pb-8">
           {contents.caseit2026Text.header2[1]}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 px-4 w-full max-w-7xl mx-auto">
+        {contents.compWeek.caseOne}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-12 2xl:gap-x-1 w-full max-w-full mx-auto">
           {contents.caseOneDivisionDraw.map((division) => (
-            /* Removed flex justify-center to allow stretching */
             <div key={division.title}>
               <DivisionTable title={division.title} data={division.data} />
             </div>
           ))}
         </div>
 
-        {content.compWeek.caseOne}
 
-        <div className="grid md:grid-cols-2 gap-4">
+        {/* <div className="grid md:grid-cols-2 gap-4">
           {content.caseOneImgs.map((item, index) => (
             <div key={index}>
               <Image
@@ -122,7 +121,7 @@ export default function CaseIt2026() {
           img1="/imgs/compWeek/2025/C2_mobile.png"
           alt="case 2 winner"
           title={content.compWeek.caseTwoWinner}
-        />
+        /> */}
       </section>
       <section className="md:hidden flex justify-center mx-auto scroll-smooth py-[7vh]">
         <ArrowButton link="#2026" />
