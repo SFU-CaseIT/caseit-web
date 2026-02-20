@@ -89,10 +89,15 @@ export default function CaseIt2026() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-x-12 2xl:gap-x-1 w-full max-w-full mx-auto">
           {contents.caseOneDivisionDraw.map((division) => (
             <div key={division.title}>
-              <DivisionTable title={division.title} data={division.data} />
+              <DivisionTable title={division.title} variant="divisionDraw" data={division.data} />
             </div>
           ))}
         </div>
+
+        <div className="mt-8">
+          {contents.compWeek.caseOneWinner}
+        </div>
+        <DivisionTable title={contents.caseOneDivisionWinners.title} variant="divisionWinner" data={contents.caseOneDivisionWinners.data}/>
 
 
         {/* <div className="grid md:grid-cols-2 gap-4">

@@ -71,6 +71,16 @@ export const caseOneDivisionDraw = [
   },
 ];
 
+export const caseOneDivisionWinners = {
+  title: "Division Winners",
+  data:  ["Peak Consulting", "Alliance 360", "BMCC", "Visionary Consulting"].map((uni, idx) => {
+      return {
+        label: `Division ${idx + 1}`,
+        teamName: uni
+      }
+  })
+}
+
 export const compWeek = {
   caseOne: (
     <h2 className="font-semibold text-header3 sm:text-header2">

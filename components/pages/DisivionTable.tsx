@@ -1,21 +1,30 @@
 import React from 'react';
+import { twJoin } from 'tailwind-merge';
 
-type DivisionCardProp = {
-    title: string, 
+const labelVariant = {
+  divisionDraw: "text-2xl sm:text-3xl md:text-4xl font-extrabold",
+  divisionWinner: "text-lg md:text-xl font-semibold"
+}
+
+type LabelVariant = keyof typeof labelVariant;
+
+type DivisionCardProps = {
+    title: string,
+    variant: LabelVariant,
     data: {
         label: string, 
         teamName: string, 
-    }[]
+    }[],
 }
 
-const DivisionTable = ({ title, data }: DivisionCardProp) => {
+const DivisionTable = ({ title, variant, data }: DivisionCardProps) => {
   return (
     /* Changed max-w-md to max-w-2xl and added mx-auto to keep it clean on ultra-wide screens */
     <div className="w-full max-w-2xl mx-auto overflow-hidden bg-slate-50 border border-gray-200 rounded-3xl shadow-lg">
       
       {/* Header */}
       <div className="py-8 text-center border-b border-gray-200">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-red tracking-tight">{title}</h2>
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-red tracking-tight">{title}</h2>
       </div>
 
       {/* Rows */}
@@ -25,9 +34,9 @@ const DivisionTable = ({ title, data }: DivisionCardProp) => {
             key={index} 
             className={`flex items-stretch ${index !== data.length - 1 ? 'border-b border-gray-200' : ''}`}
           >
-            {/* Label Column (A, B, C) */}
+
             <div className="flex items-center justify-center w-32 sm:w-40 py-10 border-r border-gray-200 bg-white/50">
-              <span className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-800">{item.label}</span>
+              <span className={twJoin(labelVariant[variant], "text-gray-800")}>{item.label}</span>
             </div>
             
             {/* Content Column (Team Name) */}
