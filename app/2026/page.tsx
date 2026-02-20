@@ -99,7 +99,7 @@ export default function CaseIt2026() {
         <DivisionTable title={contents.caseOneDivisionWinners.title} variant="divisionWinner" data={contents.caseOneDivisionWinners.data}/>
 
         <div className="mt-8">
-          {contents.compWeek.caseTwoPreliminaryWinner}
+          {contents.compWeek.caseTwoWinner}
         </div>
         <DivisionTable title={contents.caseOneDivisionWinners.title} variant="divisionWinner" data={contents.caseTwoDivisionWinners.data}/>
 
