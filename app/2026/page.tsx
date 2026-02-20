@@ -93,40 +93,16 @@ export default function CaseIt2026() {
             </div>
           ))}
         </div>
-
         <div className="mt-8">
           {contents.compWeek.caseOneWinner}
         </div>
         <DivisionTable title={contents.caseOneDivisionWinners.title} variant="divisionWinner" data={contents.caseOneDivisionWinners.data}/>
 
-
-        {/* <div className="grid md:grid-cols-2 gap-4">
-          {content.caseOneImgs.map((item, index) => (
-            <div key={index}>
-              <Image
-                className="w-full"
-                src={item.src}
-                alt={item.src}
-                width={500}
-                height={450}
-              />
-            </div>
-          ))}
+        <div className="mt-8">
+          {contents.compWeek.caseTwoPreliminaryWinner}
         </div>
+        <DivisionTable title={contents.caseOneDivisionWinners.title} variant="divisionWinner" data={contents.caseTwoDivisionWinners.data}/>
 
-        <Results
-          img2="/imgs/compWeek/2025/C1_win.png"
-          img1="/imgs/compWeek/2025/C1_mobile.png"
-          alt="case 1 winner"
-          title={content.compWeek.caseOneWinner}
-        />
-
-        <Results
-          img2="/imgs/compWeek/2025/C2_win.png"
-          img1="/imgs/compWeek/2025/C2_mobile.png"
-          alt="case 2 winner"
-          title={content.compWeek.caseTwoWinner}
-        /> */}
       </section>
       <section className="md:hidden flex justify-center mx-auto scroll-smooth py-[7vh]">
         <ArrowButton link="#2026" />

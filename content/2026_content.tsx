@@ -73,6 +73,16 @@ export const caseOneDivisionDraw = [
 
 export const caseOneDivisionWinners = {
   title: "Division Winners",
+  data:  ["Apex Consulting", "Skeleton Crew", "Beyond Consulting", "Evergreen Consulting"].map((uni, idx) => {
+      return {
+        label: `Division ${idx + 1}`,
+        teamName: uni
+      }
+  })
+}
+
+export const caseTwoDivisionWinners = {
+  title: "Division Winners",
   data:  ["Peak Consulting", "Alliance 360", "BMCC", "Visionary Consulting"].map((uni, idx) => {
       return {
         label: `Division ${idx + 1}`,
@@ -92,9 +102,9 @@ export const compWeek = {
       <span className="text-redDark">Case I</span> Division Winners
     </h2>
   ),
-  caseTwoWinner: (
+  caseTwoPreliminaryWinner: (
     <h2 className="font-semibold text-header3 sm:text-header2">
-      <span className="text-redDark">Case II</span> Division Winners
+      <span className="text-redDark">Case II Preliminary</span> Division Winners
     </h2>
   ),
 };
