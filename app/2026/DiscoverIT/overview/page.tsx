@@ -46,7 +46,7 @@ export default function Overview() {
           <div className="mt-8 md:mt-auto">
             <RoundedButton
               text="Explore"
-              link="/2025/DiscoverIT/CaptureIT"
+              link="/2026/DiscoverIT/CaptureIT"
               variant="red"
             />
           </div>

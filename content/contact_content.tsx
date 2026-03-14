@@ -24,7 +24,7 @@ export const contactText = {
     {
       question: "How long is the CaseIT competition week?",
       answer:
-        "CaseIT 2026 will be a 6 day competition week from February 15, 2025 to February 20, 2026!",
+        "CaseIT 2026 will be a 6 day competition week from February 15, 2026 to February 20, 2026!",
     },
   ],
 };

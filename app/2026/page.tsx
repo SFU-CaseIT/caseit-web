@@ -33,19 +33,6 @@ export default function CaseIt2026() {
           </div>
         </BgImgCenter>
       </section>
-      <section>
-        {/* <div className="flex gap-2 flex-col md:items-center p-8">
-          <h2 className="text-redDark font-semibold text-header3 md:text-header2">
-            {content.caseit2025Text.header2[2]}
-          </h2>
-          <div className="flex flex-col md:flex-row md:justify-center md:gap-16 lg:gap-24">
-            {content.stats.map((stat, index) => (
-              <Stats key={index} title={stat} />
-            ))}
-          </div>
-          {content.boldText.section_2_Pargraph}
-        </div> */}
-      </section>
       {/* ---COMPETITION INFORMATION--- */}
       <section className="flex flex-col justify-center items-center px-4 md:px-8 xl:px-20 md:mx-auto max-w-[1920px] my-10">
         <h2 className="mx-auto w-fit font-semibold text-[2rem]  md:text-[2.5rem]">

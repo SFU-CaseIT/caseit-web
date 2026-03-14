@@ -40,7 +40,7 @@ export default function GetInvolved() {
                     state={isHiring ? "default" : "disabled"}
                   />
                   <RoundedButton
-                    text="View 2025 Recruitment Package"
+                    text="View 2026 Recruitment Package"
                     link="https://drive.google.com/file/d/1HCsRQMqF7GNQhONxv8tj46uEhxcn__Mt/view"
                     variant="black"
                   />

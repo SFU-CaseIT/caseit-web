@@ -37,7 +37,7 @@ export const aboutText = {
   header2: ["Meet the Team", "About CaseIT", "Our Local rendition"],
   paragraph: [
     "CaseIT brings together top undergraduate students, distinguished faculty members, experienced industry professionals, and a dedicated student body to challenge conventional thinking and offer professional connections to benefit your business career.",
-    "PIVOT shares a similar structure to its international rendition, CaseIT, and is designed for passionate undergraduate students in British Columbia. Designed to challenge your way of thinking and collaborating, teams will need to leverage their technology and business acumen to tackle real world problems. PIVOT 2025 is integrated into the CaseIT international competition week! Get ready to #experienceIT.",
+    "PIVOT shares a similar structure to its international rendition, CaseIT, and is designed for passionate undergraduate students in British Columbia. Designed to challenge your way of thinking and collaborating, teams will need to leverage their technology and business acumen to tackle real world problems. PIVOT 2026 is integrated into the CaseIT international competition week! Get ready to #experienceIT.",
   ],
   disclaimer:
     " the world map displays all the post-secondary institutions that have participated in CaseIT since it inauguration",

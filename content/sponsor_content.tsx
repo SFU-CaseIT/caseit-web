@@ -1,8 +1,8 @@
 // FOR 20XX SPONSOR SHOWCASE PAGE
 export const sponsorShowcaseBannerText = {
-  header1: "2025 Sponsors",
+  header1: "2026 Sponsors",
   subtext:
-    "Through the generosity, support, and involvement of our corporate partners, CaseIT 2025 is proud to foster meaningful connections within the business and technology industry. Browse through our digital showcase to learn more about CaseIT 2025’s incredible sponsors and the potential opportunities for our student competitors.",
+    "Through the generosity, support, and involvement of our corporate partners, CaseIT 2026 is proud to foster meaningful connections within the business and technology industry. Browse through our digital showcase to learn more about CaseIT 2025’s incredible sponsors and the potential opportunities for our student competitors.",
 };
 
 export const titleSponsorContent = [
