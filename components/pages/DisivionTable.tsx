@@ -12,7 +12,7 @@ type DivisionCardProps = {
     title: string,
     variant: LabelVariant,
     data: {
-        label: string, 
+        label?: string, 
         teamName: string, 
     }[],
 }
@@ -35,9 +35,11 @@ const DivisionTable = ({ title, variant, data }: DivisionCardProps) => {
             className={`flex items-stretch ${index !== data.length - 1 ? 'border-b border-gray-200' : ''}`}
           >
 
-            <div className="flex items-center justify-center w-32 sm:w-40 py-10 border-r border-gray-200 bg-white/50">
-              <span className={twJoin(labelVariant[variant], "text-gray-800")}>{item.label}</span>
-            </div>
+            {item.label && 
+              <div className="flex items-center justify-center w-32 sm:w-40 py-10 border-r border-gray-200 bg-white/50">
+                <span className={twJoin(labelVariant[variant], "text-gray-800")}>{item.label}</span>
+              </div>
+            }
             
             {/* Content Column (Team Name) */}
             <div className="flex items-center justify-center flex-1 px-8 py-10 text-center">

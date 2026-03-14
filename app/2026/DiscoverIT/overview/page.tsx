@@ -26,7 +26,7 @@ export default function Overview() {
       <section className="pb-6">
         <Bento>
           {" "}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <BentoText
               title={overviewText.title[0]}
               text={overviewText.paragraph[0]}
