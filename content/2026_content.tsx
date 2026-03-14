@@ -12,6 +12,21 @@ export const caseit2026Text = {
     "Note: An official detailed schedule for CaseIT 2026 will be updated soon.",
 };
 
+export const boldText = {
+  section_2_Pargraph: (
+    <p className="max-w-[65ch] md:text-center md:text-lg mt-4 md:mt-8">
+      CaseIT is back and better, stronger, and faster than ever. With our 22nd
+      iteration, the Organizing Committee promises a competition full of fun,
+      challenges, leaving you with double the memories! We are excited to
+      welcome top business technology undergraduates and their faculty advisors
+      from around the world to the beautiful city of Vancouver from{" "}
+      <strong>February 16 to 21, 2025</strong>.
+    </p>
+  ),
+
+  section_3_Title: "Competition Information",
+};
+
 const Division1 = [
   "Peak Consulting",
   "Apex Consulting",
@@ -108,3 +123,37 @@ export const compWeek = {
     </h2>
   ),
 };
+
+
+export const winners = [
+  {
+    img: "/imgs/winners/2026/first_place_emory_university.JPG",
+    alt: "Emory University First Place Winner",
+    title: "Emory University",
+    place: "First Place",
+  },
+  {
+    img: "/imgs/winners/2026/second_place_chinese_university_hk.JPG",
+    alt: "Chinese University of Hong Kong Second Place Winner",
+    title: "Chinese University of Hong Kong",
+    place: "Second Place",
+  },
+  {
+    img: "/imgs/winners/2026/third_place_panamericana.JPG",
+    alt: "Universidad Panamericana Third Place Winner",
+    title: "Universidad Panamericana",
+    place: "Third Place",
+  },
+  {
+    img: "/imgs/winners/2026/spirit_award_idiana_university.JPG",
+    alt: "Indiana University Spirit Award",
+    title: "Indiana University",
+    place: "Spirit Award",
+  },
+  {
+    img: "/imgs/winners/2026/best_speaker.JPG",
+    alt: "Speaker winner",
+    title: "Jenny Jiang",
+    place: "Best Speaker",
+  },
+];
