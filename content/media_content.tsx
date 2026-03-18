@@ -17,6 +17,12 @@ export const buttonText = [
 
 export const galleryText = [
   {
+    title: "CaseIT 2026",
+    subtext: "February 15-20, 2026",
+    img: "/imgs/mediaGallery/Gallery2026.JPG",
+    link: "https://1sfu-my.sharepoint.com/:f:/g/personal/caseit_sfu_ca/IgB_53eTNPc6RbvXhPQTTDocAbWtvMrMuAo22Ip5tANl0Ik?e=Bh07dJ ",
+  },
+  {
     title: "CaseIT 2025",
     subtext: "February 16-21, 2025",
     img: "/imgs/mediaGallery/Gallery2025.png",

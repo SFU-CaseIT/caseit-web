@@ -26,7 +26,7 @@ export const GalleryCards = ({
             alt="Gallery photo"
             width={472}
             height={267}
-            className="mx-auto w-full rounded-xl border"
+            className="mx-auto w-full rounded-xl border aspect-[472/267] object-cover"
           />
         </div>
         <div className="text-center py-4">

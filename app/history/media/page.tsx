@@ -41,11 +41,11 @@ export default function Media() {
             // Populates the cards based on content
             <div key={index}>
               <GalleryCards
-                title={media.galleryText[index].title}
-                subtext={media.galleryText[index].subtext}
-                img={media.galleryText[index].img}
-                link={media.galleryText[index].link}
-                state={media.galleryText[index].state}
+                title={item.title}
+                subtext={item.subtext}
+                img={item.img}
+                link={item.link}
+                state={item.state}
               />
             </div>
           ))}
