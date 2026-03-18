@@ -7,7 +7,7 @@ import { RecapText } from "@/components/text";
 import { RoundedButton, ArrowButton } from "@/components/buttons";
 import banner from "@/public/imgs/banners/recap_banner.png";
 
-const year = 2025;
+const year = 2026;
 
 export const metadata: Metadata = {
   title: `${year} Recap`,
@@ -28,7 +28,7 @@ export default function RecapPage() {
             <div>
               <RoundedButton
                 text={`${year} Media Gallery`}
-                link="https://drive.google.com/drive/folders/1YBMOiPQKSlQJ_oMKAzQEBMLCwVegd6zL?usp=share_link"
+                link="https://1sfu-my.sharepoint.com/:f:/g/personal/caseit_sfu_ca/IgB_53eTNPc6RbvXhPQTTDocAbWtvMrMuAo22Ip5tANl0Ik?e=Bh07dJ"
                 variant="red"
               />
             </div>
@@ -48,35 +48,35 @@ export default function RecapPage() {
           <div key={index}>
             {index % 2 === 0 ? (
               <ImgRibbonRight
-                img={re.recapText.positions[index].img}
-                alt={re.recapText.positions[index].alt}
+                img={item.img}
+                alt={item.alt}
               >
                 <RecapText
-                  subtext={re.recapText.positions[index].day}
-                  text={re.recapText.positions[index].desc}
-                  title={re.recapText.positions[index].title}
+                  subtext={item.day}
+                  text={item.desc}
+                  title={item.title}
                 />
-                {re.recapText.positions[index].title2 && (
+                {item.title2 && (
                   <RecapText
-                    text={re.recapText.positions[index].desc2}
-                    title={re.recapText.positions[index].title2}
+                    text={item.desc2}
+                    title={item.title2}
                   />
                 )}
               </ImgRibbonRight>
             ) : (
               <ImgRibbonLeft
-                img={re.recapText.positions[index].img}
-                alt={re.recapText.positions[index].alt}
+                img={item.img}
+                alt={item.alt}
               >
                 <RecapText
-                  subtext={re.recapText.positions[index].day}
-                  text={re.recapText.positions[index].desc}
-                  title={re.recapText.positions[index].title}
+                  subtext={item.day}
+                  text={item.desc}
+                  title={item.title}
                 />
-                {re.recapText.positions[index].title2 && (
+                {item.title2 && (
                   <RecapText
-                    text={re.recapText.positions[index].desc2}
-                    title={re.recapText.positions[index].title2}
+                    text={item.desc2}
+                    title={item.title2}
                   />
                 )}
               </ImgRibbonLeft>

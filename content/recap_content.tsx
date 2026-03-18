@@ -1,13 +1,13 @@
 export const recapText = {
-  header1: "What happened at CaseIT 2025?",
-  header3: "CaseIT 2025 Placements",
+  header1: "What happened at CaseIT 2026?",
+  header3: "CaseIT 2026 Placements",
   header4: "Awards",
 
   positions: [
     {
       day: "Day One",
       title: "ReadyForIT",
-      desc: "ReadyForIT kicked off CaseIT 2025 with exciting games and challenges that provided competitors an opportunity to mingle with students from all around the world before the week got busy.",
+      desc: "ReadyForIT kicked off CaseIT 2026 with exciting games and challenges that provided competitors an opportunity to mingle with students from all around the world before the week got busy.",
       title2: "ExchangeIT",
       desc2:
         "ExchangeIT, a component of ReadyForIt, gave competitors from all around the world the chance to show off all their unique items from their home country and swap swag with all the competitors and organizing committee!",
@@ -54,7 +54,7 @@ export const recapText = {
       desc: "Case II brought the thrill for competitors to present their findings to a panel of industry professionals after an intense 24-hour deliberation period. A Wildcard round occurred, where the chosen teams were given the opportunity to get a spot in the Finals round. First runners of the Preliminary round and the Wildcard round winner advanced to the Final round and competed for podium placements in the renowned CaseIT international undergraduate case competition!",
       title2: "Award Banquet",
       desc2:
-        "The Awards Banquet wrapped up our intensive competition week of CaseIT 2025. Competitors gathered in formal attire to celebrate their achievements. The evening featured speeches from faculty members and the CaseIT team, highlighting the event's significance and the hard work of all participants. Finally, the winners of CaseIT 2024 were announced along with other existing awards.",
+        "The Awards Banquet wrapped up our intensive competition week of CaseIT 2026. Competitors gathered in formal attire to celebrate their achievements. The evening featured speeches from faculty members and the CaseIT team, highlighting the event's significance and the hard work of all participants. Finally, the winners of CaseIT 2024 were announced along with other existing awards.",
       img: "/imgs/recap/2024/day6.png",
       alt: "group candid",
     },
@@ -64,28 +64,28 @@ export const recapText = {
 export const recapCardText = [
   {
     title: "1st Place",
-    subtext: "The University of Manchester",
-    img: "/imgs/winners/2025/Place1.png",
+    subtext: "Emory University",
+    img: "/imgs/winners/2026/first_place_emory_university.JPG",
   },
   {
     title: "2nd Place",
-    subtext: "Wilfred Laurier University",
-    img: "/imgs/winners/2025/Place2.png",
+    subtext: "The Chinese University of Hong Kong",
+    img: "/imgs/winners/2026/second_place_chinese_university_hk.JPG",
   },
   {
     title: "3rd Place",
-    subtext: "Cornivus University of Budapest",
-    img: "/imgs/winners/2025/Place3.png",
+    subtext: "Universidad Panamericana",
+    img: "/imgs/winners/2026/third_place_panamericana.JPG",
   },
 
   {
     title: "Best Speaker",
-    subtext: "Jasmine Peart",
-    img: "/imgs/winners/2025/Speaker.png",
+    subtext: "Jenny Jiang",
+    img: "/imgs/winners/2026/best_speaker.JPG",
   },
   {
     title: "Spirit Award",
-    subtext: "HEC Montréal University",
-    img: "/imgs/winners/2025/Spirit.png",
+    subtext: "Indiana University",
+    img: "/imgs/winners/2026/spirit_award_idiana_university.JPG",
   },
 ];

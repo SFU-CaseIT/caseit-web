@@ -6,7 +6,7 @@ export const mediaText = {
 
 export const buttonText = [
   {
-    text: "Check the 2025 Recap",
+    text: "Check the 2026 Recap",
     link: "/history/recap",
   },
   {

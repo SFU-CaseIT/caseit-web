@@ -19,7 +19,7 @@ export const RecapCards = ({ title, subtext, img, alt }: recapItems) => {
             alt={alt || "Award winners"}
             width={513}
             height={370}
-            className="mx-auto w-full rounded-2xl"
+            className="mx-auto w-full h-[250px] object-cover rounded-2xl"
           />
         </div>
         <div className="text-center py-4">
