@@ -117,7 +117,7 @@ export default function Home() {
           {home.HomeText.paragraph[2]}
         </p>
 
-        <div className="flex flex-col md:flex-row  gap-4  ">
+        <div className="flex flex-col md:flex-row gap-4">
           <SquareButton
             variant="white"
             text="CASEIT History"
@@ -126,7 +126,7 @@ export default function Home() {
           />
           <SquareButton
             variant="white"
-            text="Our 2025 Recap"
+            text="Our 2026 Recap"
             subtext="Relive some of our best moments"
             link="/history/recap"
           />
@@ -140,11 +140,11 @@ export default function Home() {
       </section>
       {/* LIVECHAT CODE */}
       {/* Uncomment and set "Overview > Status" and "Channels > Chat Widget > Widget Status" to Active on TawkTo */}
-      {
+      {/* {
         <section>
           <TawkTo />
         </section>
-      }
+      } */}
     </main>
   );
 }
