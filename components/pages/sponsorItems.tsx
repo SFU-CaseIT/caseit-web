@@ -6,7 +6,7 @@ import { BoldedText, NewLineText, NewLineText2 } from "../text";
 import SubpageBanner from "../subpageBanner";
 
 type sponsorItems = {
-  text: string;
+  text?: string;
   link?: string;
   title?: string;
   subtext?: string;
@@ -19,17 +19,18 @@ type sponsorItems = {
 // SMALL SPONSOR TILES USED ON 2 Pages
 export const SponsorTiles = ({ img, text, alt }: sponsorItems) => {
   return (
-    <div className="flex flex-col items-center p-[1vh]">
+    <div className="flex flex-col p-[1vh]">
       <Image
         src={img || "/imgs/sponsorTile.png"}
         alt={alt || "White circle containing a sponsor logo"}
-        width={315}
-        height={317}
-        className="drop-shadow-[0_0_33px_rgba(0,0,0,0.1)] hover:drop-shadow-[0_0_15px_rgba(210,121,128,0.8)] transition-all size-[10vw],[15.5rem] md:w-[20vw] xl:w-[20vw]"
+        width={500}
+        height={500}
+        className="size-[10vw],[15.5rem]"
       />
+      {text &&
       <text className="text-paragraph font-bold pt-[0.463rem] md:text-1 text-center">
         {text}
-      </text>
+      </text>}
     </div>
   );
 };

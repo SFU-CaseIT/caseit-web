@@ -43,9 +43,9 @@ export default function SponsorOverview() {
             // Populated by the content
             <div key={index}>
               <SponsorTiles
-                img={sponsor.sponsorTileContent.sponsors[index].img}
-                text={sponsor.sponsorTileContent.sponsors[index].text}
-                alt={sponsor.sponsorTileContent.sponsors[index].alt}
+                img={item.img}
+                text={item.text}
+                alt={item.alt}
               />
             </div>
           ))}

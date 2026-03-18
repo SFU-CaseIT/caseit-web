@@ -2,7 +2,7 @@
 export const sponsorShowcaseBannerText = {
   header1: "2026 Sponsors",
   subtext:
-    "Through the generosity, support, and involvement of our corporate partners, CaseIT 2026 is proud to foster meaningful connections within the business and technology industry. Browse through our digital showcase to learn more about CaseIT 2025’s incredible sponsors and the potential opportunities for our student competitors.",
+    "Through the generosity, support, and involvement of our corporate partners, CaseIT 2026 is proud to foster meaningful connections within the business and technology industry. Browse through our digital showcase to learn more about CaseIT 2026's incredible sponsors and the potential opportunities for our student competitors.",
 };
 
 export const titleSponsorContent = [
@@ -14,22 +14,14 @@ export const titleSponsorContent = [
     title: "Title Sponsor",
     desc: "Home to over 4,000 students across 3 different campuses, SFU's Beedie School of Business has been fostering innovation and creativity in the community since 1965. In 2022, SFU Beedie was ranked as the top university in the world for entrepreneurial spirit, as well as the top Canadian university for innovation. Beedie is proud to offer students a global perspective and countless experiential learning initiatives that are building our business leaders of tomorrow. Learn more about SFU Beedie's programs, faculty, and students at beedie.sfu.ca",
   },
-  {
-    img: "/imgs/sponsorShowcase/cio.png",
-    alt: "group candid",
-    logoImg: "/imgs/sponsorShowcase/cioLogo.png",
-    logoAlt: "SFU Beedie Logo",
-    title: "Title Sponsor",
-    desc: "CIOCAN is the Association of Canada, representing ClOs, CISOs and IT Executives. CIOCAN is a community for leaders in technology who want to engage in meaningful conversations about collective challenges, opportunities, and strategies. They provide their members with opportunities to increase knowledge and skill in order to support innovation and leadership in organizations throughout Canada. We are honoured to have CIOCAN's continuous support over the many years of CaselT.",
-  },
 ];
 
 export const sponsorThankContent = {
-  header1: "Thank you 2025 Sponsors",
-  text: "The 2025 CaseIT Organizing Committee thanks all of our sponsors for their contribution to the execution of our 2025 competition. Your support is tremendous to the development of the next generation of business technology leaders in Vancouver and beyond.",
+  header1: "Thank you 2026 Sponsors",
+  text: "The 2026 CaseIT Organizing Committee thanks all of our sponsors for their contribution to the execution of our 2026 competition. Your support is tremendous to the development of the next generation of business technology leaders in Vancouver and beyond.",
   bold: (
     <p>
-      Interested in partnering with CaseIT 2026? Visit our{" "}
+      Interested in partnering with CaseIT 2027? Visit our{" "}
       <span className="text-red"> Sponsorship </span> page to learn more.
     </p>
   ),
@@ -46,31 +38,30 @@ export const techSponsorContent = {
 
 export const caseSponsorContent = [
   {
-    header1: "5-HR Case Sponsor",
-    img: "/imgs/sponsorShowcase/ednius.png",
-    alt: "ednius logo",
-    text: "Scoring a Future: AI-Enhanced Short-Answer Assessments",
+    header1: "Case I Sponsor",
+    img: "/imgs/sponsorShowcase/pragilis.svg",
+    alt: "Pragilis logo",
+    text: "Helping leaders welcome change, so their organization can succeed at change.",
     subtext:
-      "Ednius is an AI-powered grading tool that evaluates quizzes, exams, and assignments. It handles diverse question types, from open-ended to subjective, offering detailed, personalized feedback for student learning in addition to grades. Ednius can deliver results and insights within minutes, facilitating live learning opportunities by significantly reducing feedback time, enhancing the educational experience by combining speed, accuracy, and personalized learning support.",
+      "Pragilis will help you determine what to change for your business, then show you how. So your people will adopt and become successful at managing change. Pragilis is a change management and strategy company that helps organizations focus on the people side of change. We help you identify why change efforts may be stalling and co-create a custom strategy to navigate and sustain change effectively.",
   },
   {
-    header1: "24-HR Case Sponsor",
-    img: "/imgs/sponsorShowcase/translink.png",
-    alt: "translink logo",
-    text: "Navigating the Future: Innovating Public Transit for a Growing Metro Vancouver",
+    header1: "Case II Sponsor",
+    img: "/imgs/sponsorShowcase/vgh-logo__foundation-black.svg",
+    alt: "VGH & UBC Hospital Foundation logo",
+    text: "VGH & UBC Hospital Foundation is the leading charity investing in health care innovation in BC",
     subtext:
-      "TransLink, the South Coast British Columbia Transportation Authority, is a leader in public transit innovation. TransLink has constantly evolved since its formation in 1999 to meet the region's needs. It manages Metro Vancouver’s comprehensive system, including buses, SkyTrains, and ferries, as well as key bridges and roads, reflecting Metro Vancouver’s diverse geographical and commuter needs.",
-  },
-];
-
+      "VGH & UBC Hospital Foundation is Vancouver Coastal Health's primary philanthropic partner, raising funds for specialized adult health services and research for all British Columbians. The Foundation partners with donors to drive innovation and sustainable health care at VGH & UBC Hospital, GF Strong Rehab Centre, Vancouver Coastal Health Research Institute and Vancouver Community Health Services.",
+  }
+]
 export const diamondSponsorContent = [
   {
     img: "/imgs/sponsorShowcase/beedie.png",
-    alt: "microsoft team pic",
+    alt: "Beedie School of Business",
   },
   {
-    img: "/imgs/sponsorShowcase/gpi.png",
-    alt: "microsoft team pic",
+    img: "/imgs/sponsorShowcase/cioLogo.png",
+    alt: "CIO Association of Canada",
   },
 ];
 
@@ -78,64 +69,52 @@ export const inkindSponsorTileContent = {
   title: "In-kind Sponsor",
   sponsors: [
     {
-      img: "/imgs/sponsorShowcase/tiles/c9.png",
-      alt: "White circle with sponsor logo",
+      img: "/imgs/sponsorShowcase/in-kind/rumble-studio.png",
+      alt: "White circle with Rumble Studio logo",
     },
     {
-      img: "/imgs/sponsorShowcase/tiles/mov.png",
-      alt: "White circle with sponsor logo",
+      img: "/imgs/sponsorShowcase/in-kind/BAK_DLogo.webp",
+      alt: "White circle with BAK'D Cookies Cafe logo",
     },
     {
-      img: "/imgs/sponsorShowcase/tiles/redbull.png",
-      alt: "White circle with sponsor logo",
+      img: "/imgs/sponsorShowcase/in-kind/barryslogo.png",
+      alt: "White circle with Barry's logo",
     },
     {
-      img: "/imgs/sponsorShowcase/tiles/bakd.png",
-      alt: "White circle with sponsor logo",
+      img: "/imgs/sponsorShowcase/in-kind/MOVLogo.png",
+      alt: "White circle with MOV logo",
     },
     {
-      img: "/imgs/sponsorShowcase/tiles/bise.png",
-      alt: "White circle with sponsor logo",
+      img: "/imgs/sponsorShowcase/in-kind/BonMacaronColor.png",
+      alt: "White circle with Bon Macaron logo",
     },
     {
-      img: "/imgs/sponsorShowcase/tiles/book.png",
-      alt: "White circle with sponsor logo",
+      img: "/imgs/sponsorShowcase/in-kind/HR_Macmillan_SpaceCentre.png",
+      alt: "White circle with HR Macmillan Space Centre logo",
     },
     {
-      img: "/imgs/sponsorShowcase/tiles/crafts.png",
-      alt: "White circle with sponsor logo",
+      img: "/imgs/sponsorShowcase/in-kind/promosapien.jpg",
+      alt: "White circle with PromoSapien logo",
     },
     {
-      img: "/imgs/sponsorShowcase/tiles/discover.png",
-      alt: "White circle with sponsor logo",
+      img: "/imgs/sponsorShowcase/in-kind/SFUBookstore.png",
+      alt: "White circle with SFU Bookstore logo",
     },
     {
-      img: "/imgs/sponsorShowcase/tiles/indomie.png",
-      alt: "White circle with sponsor logo",
+      img: "/imgs/sponsorShowcase/in-kind/SW_logo_black_RGB.png",
+      alt: "White circle with Science World logo",
     },
     {
-      img: "/imgs/sponsorShowcase/tiles/macaron.png",
-      alt: "White circle with sponsor logo",
+      img: "/imgs/sponsorShowcase/in-kind/PhotoCrumbLogo2.webp",
+      alt: "White circle with Photo Crumb logo",
     },
     {
-      img: "/imgs/sponsorShowcase/tiles/promo.png",
-      alt: "White circle with sponsor logo",
+      img: "/imgs/sponsorShowcase/in-kind/VancouverArtgallery.png",
+      alt: "White circle with Vancouver Art Gallery logo",
     },
     {
-      img: "/imgs/sponsorShowcase/tiles/promosapien.png",
-      alt: "White circle with sponsor logo",
-    },
-    {
-      img: "/imgs/sponsorShowcase/tiles/rain.png",
-      alt: "White circle with sponsor logo",
-    },
-    {
-      img: "/imgs/sponsorShowcase/tiles/scienceworld.png",
-      alt: "White circle with sponsor logo",
-    },
-    {
-      img: "/imgs/sponsorShowcase/tiles/steves.png",
-      alt: "White circle with sponsor logo",
+      img: "/imgs/sponsorShowcase/in-kind/TransLink_logo.png",
+      alt: "White circle with TransLink logo",
     },
   ],
 };
