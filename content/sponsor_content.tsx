@@ -121,9 +121,9 @@ export const inkindSponsorTileContent = {
 
 // FOR SPONSOR OVERVIEW PAGE
 export const sponsorOverviewText = {
-  header2: ["Sponsoring CaseIT 2026", "What can I sponsor?"],
+  header2: ["Sponsoring CaseIT 2027", "What can I sponsor?"],
   subtext: "Overview",
-  plug: "Explore the CaseIt 2026 Financial, Technological, and In-Kind oportunities by checking out the link below!",
+  plug: "Explore the CaseIt 2027 Financial, Technological, and In-Kind oportunities by checking out the link below!",
   desc: "Through the generosity, support, and involvement of our corporate partners, CaseIT is proud to foster meaningful connections within the business and technology industry. Are you looking to become involved as a sponsor? Learn more about our sponsorship opportunities for our 23nd iteration.",
   sectionTitle: [{ title: "Why Sponsor CaseIT?" }],
   ribbons: [
@@ -233,7 +233,7 @@ export const sponsorTileContent = {
 export const sponsorOppsText = {
   header2: "Sponsoring Opportunities",
   subtext: "Sponsorship Opportunities",
-  desc: "CaseIT 2026 invites our corporate partners to contribute to years of academic excellence. In collaboration, we aim to foster meaningful connections, provide industry expertise, and enable professional growth amongst our rising leaders in business and technology.",
+  desc: "CaseIT 2027 invites our corporate partners to contribute to years of academic excellence. In collaboration, we aim to foster meaningful connections, provide industry expertise, and enable professional growth amongst our rising leaders in business and technology.",
 };
 
 export const sponsorOpportunitiesContent = {
@@ -260,7 +260,7 @@ export const sponsorOpportunitiesContent = {
       text: "In-kind sponsors will have their name and hyperlink displayed on our website, a feature in our event program, and countless uses of their in-kind product throughout the competition week.",
       alt: "Various icons with subheadders",
       subtext:
-        "CaseIT 2026 warmly welcomes in-kind contributions offered by esteemed corporate partners to enrich our competition. These items include, but are not limited to:",
+        "CaseIT 2027 warmly welcomes in-kind contributions offered by esteemed corporate partners to enrich our competition. These items include, but are not limited to:",
     },
   ],
 };

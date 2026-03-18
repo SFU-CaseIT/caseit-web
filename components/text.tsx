@@ -114,18 +114,3 @@ export const NewLineText = ({ text }: TextItems) => {
   );
 };
 
-interface NewLineTextProps {
-  children: string;
-}
-
-export const NewLineText2: React.FC<NewLineTextProps> = ({ children }) => {
-  return (
-    <div>
-      {(children || "").split("\n").map((paragraph, index) => (
-        <p key={index} className="pb-[2vh]">
-          {paragraph}
-        </p>
-      ))}
-    </div>
-  );
-};

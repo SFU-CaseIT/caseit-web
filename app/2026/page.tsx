@@ -56,7 +56,7 @@ export default function CaseIt2026() {
               img={sponsor}
               alt={"2026 Sponsors"}
               text={"2026 Sponsors"}
-              link={"/sponsor/Sponsor-Overview"}
+              link={"/2026/Sponsor-Showcase"}
             />
           </div>
           <div className=" group relative md:col-start-3 md:col-span-3 md:aspect-[2]">

@@ -2,7 +2,7 @@
 import { RoundedButton } from "@/components/buttons";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { BoldedText, NewLineText, NewLineText2 } from "../text";
+import { BoldedText, NewLineText} from "../text";
 import SubpageBanner from "../subpageBanner";
 
 type sponsorItems = {
@@ -195,7 +195,7 @@ export const SponsorOverviewRibbonText = ({ title, text }: sponsorItems) => {
       </div>
       <div className="md:max-w-[50vw] pb-[2vh] pr-[3vw]">
         <div className="text-paragraph pt-[2vh]">
-          <NewLineText2>{text}</NewLineText2>
+          <NewLineText text={text}></NewLineText>
         </div>
       </div>
     </div>
