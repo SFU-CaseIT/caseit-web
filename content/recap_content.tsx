@@ -20,7 +20,7 @@ export const recapText = {
       desc: "DiscoverIT gave competitors the opportunity to explore Vancouver alongside their Team Hosts. Competitors captured memories at 3 of Vancouver’s iconic landmarks: Vancouver Aquarium, Capilano Suspension Bridge, and Flyover Canada!",
       title2: "Welcome Ceremony ",
       desc2:
-        "The Welcome Ceremony celebrated, brought together, and connected competing teams, coaches, industry professionals, and the CaseIT Organizing Committee for the very first time, jumpstarting the official start to CaseIT 2024.",
+        "The Welcome Ceremony celebrated, brought together, and connected competing teams, coaches, industry professionals, and the CaseIT Organizing Committee for the very first time, jumpstarting the official start to CaseIT 2026.",
       img: "/imgs/recap/2024/day2.png",
       alt: "group candid",
     },
@@ -54,7 +54,7 @@ export const recapText = {
       desc: "Case II brought the thrill for competitors to present their findings to a panel of industry professionals after an intense 24-hour deliberation period. A Wildcard round occurred, where the chosen teams were given the opportunity to get a spot in the Finals round. First runners of the Preliminary round and the Wildcard round winner advanced to the Final round and competed for podium placements in the renowned CaseIT international undergraduate case competition!",
       title2: "Award Banquet",
       desc2:
-        "The Awards Banquet wrapped up our intensive competition week of CaseIT 2026. Competitors gathered in formal attire to celebrate their achievements. The evening featured speeches from faculty members and the CaseIT team, highlighting the event's significance and the hard work of all participants. Finally, the winners of CaseIT 2024 were announced along with other existing awards.",
+        "The Awards Banquet wrapped up our intensive competition week of CaseIT 2026. Competitors gathered in formal attire to celebrate their achievements. The evening featured speeches from faculty members and the CaseIT team, highlighting the event's significance and the hard work of all participants. Finally, the winners of CaseIT 2026 were announced along with other existing awards.",
       img: "/imgs/recap/2024/day6.png",
       alt: "group candid",
     },
