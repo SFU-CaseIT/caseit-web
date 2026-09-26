@@ -1,7 +1,7 @@
 export const ocText = {
   header1: "Organizing Committee",
-  header2: "CaseIT 2026 Organizing Committee",
-  paragraph: "Meet the dedicated teams behind CaseIT 2026.",
+  header2: "CaseIT 2027 Organizing Committee",
+  paragraph: "Meet the dedicated teams behind CaseIT 2027.",
   positions: [
     // {
     //   title: "Faculty Advisors",

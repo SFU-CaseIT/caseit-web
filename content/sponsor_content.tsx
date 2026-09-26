@@ -131,7 +131,7 @@ export const sponsorOverviewText = {
       img: "/imgs/sponsorOverview/SponsOverview1.png",
       alt: "group candid",
       title: "Top Talent Recruitment",
-      desc: "Engage with motivated and driven participants at CaseIT and our local competition PIVOT, who are passionate about leveraging technology to create impactful change in our community. \nConnect with the CaseIT 2026 Organizing Committee comprised of 50 dedicated SFU students actively pursuing opportunities in various fields of business. \nBuild your brand as a valued partner of CaseIT and the Beedie School of Business - a network of over 3,800 undergraduate Bachelor of Business Administration students.",
+      desc: "Engage with motivated and driven participants at CaseIT and our local competition PIVOT, who are passionate about leveraging technology to create impactful change in our community. \nConnect with the CaseIT 2027 Organizing Committee comprised of 50 dedicated SFU students actively pursuing opportunities in various fields of business. \nBuild your brand as a valued partner of CaseIT and the Beedie School of Business - a network of over 3,800 undergraduate Bachelor of Business Administration students.",
     },
     {
       img: "/imgs/sponsorOverview/SponsOverview2.png",

@@ -16,7 +16,7 @@ import { ImgButton } from "@/components/ImgButton";
 import { Results } from "@/components/2025components/results";
 import Image from "next/image";
 export const metadata: Metadata = {
-  title: "CaseIT 2026",
+  title: "CaseIT 2027",
   description: "Learn more about our company and team.",
 };
 
@@ -31,7 +31,7 @@ export default function CaseIt2026() {
           </div>
           <div className="w-full sm:w-[60vw] md:w-[80vw] lg:w-[90vw] xl:w-[80%]">
             {/* The time format is yyyy-mm-dd, please make sure it's in this format*/}
-            <CaseItCountdown year={2026} localDate="2026-02-15" timeZone="America/Vancouver" label="CaseIT Feb 15-20, 2026"/> 
+            <CaseItCountdown year={2027} localDate="2027-02-14" timeZone="America/Vancouver" label="CaseIT Feb 14-19, 2027"/> 
           </div>
         </BgImgCenter>
       </section>

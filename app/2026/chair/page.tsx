@@ -41,7 +41,7 @@ export default function Chair() {
 
       <div className="w-full flex justify-center items-center py-[10vh]">
         <RoundedButton
-          text="Return to CaseIT 2026 Page"
+          text="Return to CaseIT 2027 Page"
           link="/2026"
           variant="red"
         />
