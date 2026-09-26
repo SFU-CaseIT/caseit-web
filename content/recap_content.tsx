@@ -27,7 +27,7 @@ export const recapText = {
     {
       day: "Day Three",
       title: "Case I Presentations",
-      desc: "Case I of CaseIT's set the stage for innovation as teams tackled real-world challenges and suggested creative solutions within a 5-hour deliberation period. Competitors presented their solutions to a panel of industry professionals for 15 minutes, followed by a 5 minute Q&A.",
+      desc: "Case I of CaseIT's set the stage for innovation as teams tackled real-world challenges and suggested creative solutions within a 6-hour deliberation period. Competitors presented their solutions to a panel of industry professionals for 15 minutes, followed by a 5 minute Q&A.",
       img: "/imgs/recap/2024/day3.png",
       alt: "group candid",
     },
