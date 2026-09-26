@@ -2,7 +2,7 @@ import { svgIcons } from "@/public/svgs/icons";
 
 const competitionLinks = [
   { name: "About CaseIT", ref: "/about" },
-  { name: "CaseIT 2026", ref: "/2026" },
+  { name: "CaseIT 2027", ref: "/2026" },
 ];
 
 const sponsorshipLinks = [

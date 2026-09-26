@@ -1,7 +1,7 @@
 export const chairContent = {
   paragraph: (
     <p>
-      On behalf of the 2026 Organizing Committee, it is my honour to welcome you to CaseIT 2026.
+      On behalf of the 2027 Organizing Committee, it is my honour to welcome you to CaseIT 2027.
       <br />
       <br />
       With great excitement, we are embarking on another remarkable year of CaseIT where we bring together a talented group of individuals to challenge conventional thinking and bridge the gap between business and technology. Since its inception in 2004, with the support of our sponsors, CaseIT has grown from a local competition to the premier undergraduate MIS case competition in the world. We have welcomed over 1,000 undergraduate competitors from 51 universities and 20 countries to participate in our week-long competition in the beautiful city of Vancouver, British Columbia.
@@ -23,7 +23,7 @@ export const chairContent = {
     <p>
       <b>Alexis Yew</b>
       <br />
-      Chair, CaseIT 2026
+      Chair, CaseIT 2027
     </p>
   ),
 };

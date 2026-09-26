@@ -9,6 +9,8 @@
     "lint": "next lint --fix"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.5",
+    "@supabase/supabase-js": "^2.115.0",
     "@svgr/webpack": "^8.1.0",
     "clsx": "^2.1.1",
     "date-fns-tz": "^3.2.0",
