@@ -13,7 +13,7 @@ export async function signIn(formData: FormData) {
     redirect("/admin/login?error=Enter+your+email+address+and+password.");
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
