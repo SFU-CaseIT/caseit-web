@@ -8,6 +8,8 @@ The official website for CaseIT, a Simon Fraser University Beedie School of Busi
 - Next.js with the App Router
 - React and TypeScript
 - Tailwind CSS
+- `react-data-grid` for editable spreadsheet views
+- `xlsx` for workbook and CSV import/export
 - Supabase for authentication and admin functionality
 - Microsoft Clarity for analytics
 - Vercel-compatible deployment
@@ -24,8 +26,11 @@ app/
 		history/         History, media, and recap pages
 		sponsor/         Sponsor information and opportunities
 	admin/             Admin login and protected admin pages
+		(protected)/     Authenticated admin dashboard and workbook editor
 components/          Reusable UI components and navigation
+	admin/             Workbook editor and admin controls
 content/              Text and page data used throughout the site
+lib/admin/           Workbook data service and sync integration hooks
 lib/supabase/         Supabase browser, server, and middleware helpers
 public/               Images, fonts, logos, and other static assets
 styles/               Global CSS and Tailwind styles
