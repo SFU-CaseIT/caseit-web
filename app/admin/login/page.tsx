@@ -3,10 +3,12 @@ import { signIn } from "./actions";
 // LOGIN PAGE
 
 type AdminLoginPageProps = {
-  searchParams?: { error?: string };
+  searchParams?: Promise<{ error?: string }>;
 };
 
-export default function AdminLoginPage({ searchParams }: AdminLoginPageProps) {
+export default async function AdminLoginPage({ searchParams }: AdminLoginPageProps) {
+  const params = await searchParams;
+
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-xl translate-y-[30px] items-center px-6 py-20 md:translate-y-[35px] lg:translate-y-[40px]">
       <form
@@ -16,9 +18,9 @@ export default function AdminLoginPage({ searchParams }: AdminLoginPageProps) {
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-red">CaseIT</p>
         <h1 className="mt-3 text-header1">Admin sign in</h1>
 
-        {searchParams?.error && (
+        {params?.error && (
           <p className="mt-5 rounded-md bg-red px-4 py-3 text-sm text-white" role="alert">
-            {searchParams.error}
+            {params.error}
           </p>
         )}
 
