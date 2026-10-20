@@ -153,8 +153,7 @@ export default function AdminWorkbookEditor() {
     if (!file) return;
 
     try {
-      const workbook = XLSX.read(await file.arrayBuffer(), { type: "array", cellDates: true });
-      const importedData = normalizeSheetNames(workbookToData(workbook));
+      const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
       setWorkbookData(importedData);
       setActiveSheetIndex(0);
       setStatus(`Imported ${importedData.sheets.length} sheet${importedData.sheets.length === 1 ? "" : "s"}`);
