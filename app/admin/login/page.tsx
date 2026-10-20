@@ -1,4 +1,6 @@
 import { signIn } from "./actions";
+import { TextBox } from "@/components/TextBox";
+import { SignInSubmitButton } from "@/components/admin/SignInSubmitButton";
 
 // LOGIN PAGE
 
@@ -15,8 +17,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
         action={signIn}
         className="w-full rounded-2xl bg-greyDark p-8 text-Black shadow-xl"
       >
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-red">CaseIT</p>
-        <h1 className="mt-3 text-header1">Admin sign in</h1>
+        <h1 className="mt-3 text-header1">Exec Sign In</h1>
 
         {params?.error && (
           <p className="mt-5 rounded-md bg-red px-4 py-3 text-sm text-white" role="alert">
@@ -24,33 +25,29 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
           </p>
         )}
 
-        <label className="mt-7 block text-sm font-semibold" htmlFor="email">
-          Email address
-        </label>
-        <input
-          className="mt-2 w-full rounded-md px-3 py-2 text-black"
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-        />
+        <div className="mt-7">
+          <TextBox
+            autoComplete="email"
+            id="email"
+            label="Email address"
+            name="email"
+            type="email"
+            required
+          />
+        </div>
 
-        <label className="mt-5 block text-sm font-semibold" htmlFor="password">
-          Password
-        </label>
-        <input
-          className="mt-2 w-full rounded-md px-3 py-2 text-black"
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-        />
+        <div className="mt-5">
+          <TextBox
+            autoComplete="current-password"
+            id="password"
+            label="Password"
+            name="password"
+            type="password"
+            required
+          />
+        </div>
 
-        <button className="mt-8 w-full rounded-md bg-pivotBlue px-5 py-3 font-semibold" type="submit">
-          Sign in
-        </button>
+        <SignInSubmitButton />
       </form>
     </main>
   );

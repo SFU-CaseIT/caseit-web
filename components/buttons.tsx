@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
 import { ArrowIcon } from "@/public/svgs/arrows/arrow";
+import type { ComponentProps } from "react";
 
 // CLSX library was used here to create different variations of imgButtons
 // Make sure you npm install!
@@ -26,6 +27,23 @@ type RoundedButtonProps = ButtonProps & {
 type SquareButtonProps = ButtonProps & {
   variant?: "white" | "black";
 };
+
+export function ActionButton({
+  className,
+  type = "button",
+  ...props
+}: ComponentProps<"button">) {
+  return (
+    <button
+      {...props}
+      className={clsx(
+        "inline-flex min-h-11 items-center justify-center rounded-md bg-pivotBlue px-5 py-3 font-semibold text-white transition-colors hover:bg-pivotBlueDark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pivotBlue disabled:cursor-not-allowed disabled:opacity-60",
+        className,
+      )}
+      type={type}
+    />
+  );
+}
 
 export const ImgButton = ({ img, alt, text, link }: buttonItems) => {
   return (
