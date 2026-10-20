@@ -58,7 +58,14 @@ function workbookToData(workbook: XLSX.WorkBook): AdminWorkbookData {
         defval: "",
         raw: true,
       });
-      return rowsToSheetData(name, values);
+      const valuesWithFormulas = values.map((row, rowIndex) =>
+        row.map((value, columnIndex) => {
+          const formula =
+            worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })]?.f;
+          return formula ? `=${formula}` : value;
+        }),
+      );
+      return rowsToSheetData(name, valuesWithFormulas);
     }),
   };
 }
@@ -69,6 +76,14 @@ function dataToWorkbook(data: AdminWorkbookData): XLSX.WorkBook {
   data.sheets.forEach((sheet) => {
     const values = sheet.rows.map((row) => sheet.columns.map((column) => row[column] ?? ""));
     const worksheet = XLSX.utils.aoa_to_sheet(values);
+    values.forEach((row, rowIndex) =>
+      row.forEach((value, columnIndex) => {
+        if (typeof value === "string" && value.startsWith("=") && value.length > 1) {
+          const address = XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex });
+          worksheet[address] = { t: "n", f: value.slice(1), v: 0 };
+        }
+      }),
+    );
     XLSX.utils.book_append_sheet(workbook, worksheet, sheet.name.slice(0, 31) || "Sheet1");
   });
 
@@ -154,6 +169,7 @@ export default function AdminWorkbookEditor() {
 
     try {
       const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
+      const importedData = normalizeSheetNames(workbookToData(workbook));
       setWorkbookData(importedData);
       setActiveSheetIndex(0);
       setStatus(`Imported ${importedData.sheets.length} sheet${importedData.sheets.length === 1 ? "" : "s"}`);
