@@ -222,7 +222,9 @@ export default function AdminWorkbookEditor() {
         {workbookData.sheets.map((sheet, index) => (
           <button
             aria-selected={index === activeSheetIndex}
+            aria-controls={`workbook-sheet-panel-${index}`}
             className={`min-h-11 shrink-0 border-b-2 px-4 py-2 text-sm font-semibold ${index === activeSheetIndex ? "border-red text-red" : "border-transparent text-black/60 hover:border-black"}`}
+            id={`workbook-sheet-tab-${index}`}
             key={`${sheet.name}-${index}`}
             onClick={() => setActiveSheetIndex(index)}
             role="tab"
@@ -234,18 +236,30 @@ export default function AdminWorkbookEditor() {
       </div>
 
       <div className="max-w-full overflow-hidden border border-black/20 bg-white">
-        {activeSheet ? (
-          <div className="min-w-0 overflow-x-auto">
-            <DataGrid
-              columns={columns}
-              className="rdg-light min-h-[420px]"
-              onCellClick={({ setActivePosition }) => setActivePosition(true)}
-              onCellDoubleClick={({ setActivePosition }) => setActivePosition(true)}
-              onRowsChange={handleRowsChange}
-              rowKeyGetter={(row) => row.id}
-              rows={activeSheet.rows}
-            />
-          </div>
+        {workbookData.sheets.length ? (
+          workbookData.sheets.map((sheet, index) => (
+            <div
+              aria-labelledby={`workbook-sheet-tab-${index}`}
+              hidden={index !== activeSheetIndex}
+              id={`workbook-sheet-panel-${index}`}
+              key={`${sheet.name}-${index}`}
+              role="tabpanel"
+            >
+              {index === activeSheetIndex && (
+                <div className="min-w-0 overflow-x-auto">
+                  <DataGrid
+                    columns={columns}
+                    className="rdg-light min-h-[420px]"
+                    onCellClick={({ setActivePosition }) => setActivePosition(true)}
+                    onCellDoubleClick={({ setActivePosition }) => setActivePosition(true)}
+                    onRowsChange={handleRowsChange}
+                    rowKeyGetter={(row) => row.id}
+                    rows={sheet.rows}
+                  />
+                </div>
+              )}
+            </div>
+          ))
         ) : (
           <div className="p-8 text-center text-sm text-black/60">Import a workbook to begin editing.</div>
         )}
