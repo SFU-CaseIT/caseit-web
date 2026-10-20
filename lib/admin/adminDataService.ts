@@ -12,20 +12,7 @@ export type AdminWorkbookData = {
 
 export type DataChangeCallback = (data: AdminWorkbookData) => void;
 
-const mockData: AdminWorkbookData = {
-  sheets: [
-    {
-      name: "Sheet1",
-      columns: ["A", "B", "C"],
-      rows: [
-        { id: 0, A: "CaseIT 2027", B: "Status", C: "Draft" },
-        { id: 1, A: "Add workbook data", B: "Owner", C: "Exec team" },
-      ],
-    },
-  ],
-};
-
-let currentData = cloneWorkbook(mockData);
+let currentData: AdminWorkbookData = { sheets: [] };
 const listeners = new Set<DataChangeCallback>();
 
 function cloneWorkbook(data: AdminWorkbookData): AdminWorkbookData {
