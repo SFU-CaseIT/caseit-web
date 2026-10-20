@@ -40,7 +40,7 @@ The public site is grouped under `app/(public)`. Parentheses indicate a Next.js 
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 20.9 or newer
 - npm
 - Supabase credentials for features that use the admin area or Supabase-backed data
 
