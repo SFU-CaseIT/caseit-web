@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint --fix"
+    "lint": "eslint . --fix"
   },
   "dependencies": {
     "@microsoft/clarity": "^1.0.2",
@@ -17,22 +17,24 @@
     "date-fns-tz": "^3.2.0",
     "framer-motion": "^11.15.0",
     "install": "^0.13.0",
-    "next": "^14.2.12",
-    "npm": "^11.6.4",
-    "react": "^18",
-    "react-dom": "^18",
+    "next": "^16.4.1",
+    "react": "^19.3.1",
+    "react-data-grid": "^7.0.0-beta.61",
+    "react-dom": "^19.3.1",
     "react-intersection-observer": "^9.13.1",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.5",
+    "xlsx": "^0.18.5",
     "tailwind-merge": "^2.5.2"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "eslint": "8.57.1",
-    "eslint-config-next": "15.5.6",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.1",
+    "postcss": "^8.5.30",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5"
   }
 }

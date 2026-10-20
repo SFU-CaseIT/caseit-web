@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 //CHECKS ROLE BEFORE VISITING ANY /ADMIN PAGES
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
   const userId = claimsData?.claims?.sub;
 
