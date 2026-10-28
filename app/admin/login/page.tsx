@@ -17,7 +17,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
         action={signIn}
         className="w-full rounded-2xl bg-greyDark p-8 text-Black shadow-xl"
       >
-        <h1 className="mt-3 text-header1">Exec Sign In</h1>
+        <h1 className="mt-3 text-header1">Sign in</h1>
 
         {params?.error && (
           <p className="mt-5 rounded-md bg-red px-4 py-3 text-sm text-white" role="alert">

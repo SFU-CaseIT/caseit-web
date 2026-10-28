@@ -16,8 +16,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .from("admins")
     .select("user_id")
     .eq("user_id", userId)
+    .maybeSingle();
 
-  if (adminError || !admin) {
+  if (adminError || !admin?.user_id) {
     redirect("/admin/login?error=You+do+not+have+admin+access.");
   }
 

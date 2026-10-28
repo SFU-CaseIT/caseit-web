@@ -10,34 +10,37 @@ export type AdminWorkbookData = {
   sheets: AdminSheetData[];
 };
 
-export type DataChangeCallback = (data: AdminWorkbookData) => void;
+export function isAdminWorkbookData(value: unknown): value is AdminWorkbookData {
+  if (typeof value !== "object" || value === null || !("sheets" in value)) {
+    return false;
+  }
 
-let currentData: AdminWorkbookData = { sheets: [] };
-const listeners = new Set<DataChangeCallback>();
+  const sheets = value.sheets;
+  return (
+    Array.isArray(sheets) &&
+    sheets.every((sheet: unknown) => {
+      if (typeof sheet !== "object" || sheet === null) return false;
+      if (!("name" in sheet) || !("columns" in sheet) || !("rows" in sheet)) return false;
 
-function cloneWorkbook(data: AdminWorkbookData): AdminWorkbookData {
-  return {
-    sheets: data.sheets.map((sheet) => ({
-      ...sheet,
-      columns: [...sheet.columns],
-      rows: sheet.rows.map((row) => ({ ...row })),
-    })),
-  };
-}
-
-export async function loadSheetData(): Promise<AdminWorkbookData> {
-  // Replace this in-memory read with the database query when persistence is ready.
-  return cloneWorkbook(currentData);
-}
-
-export async function saveSheetData(data: AdminWorkbookData): Promise<void> {
-  // Replace this in-memory write with the database mutation when persistence is ready.
-  currentData = cloneWorkbook(data);
-  const snapshot = cloneWorkbook(currentData);
-  listeners.forEach((listener) => listener(snapshot));
-}
-
-export function onDataChange(callback: DataChangeCallback): () => void {
-  listeners.add(callback);
-  return () => listeners.delete(callback);
+      return (
+        typeof sheet.name === "string" &&
+        Array.isArray(sheet.columns) &&
+        sheet.columns.every((column: unknown) => typeof column === "string") &&
+        Array.isArray(sheet.rows) &&
+        sheet.rows.every((row: unknown) => {
+          if (typeof row !== "object" || row === null || !("id" in row)) return false;
+          return (
+            typeof row.id === "number" &&
+            Object.values(row).every(
+              (cell) =>
+                cell === null ||
+                typeof cell === "string" ||
+                typeof cell === "number" ||
+                typeof cell === "boolean",
+            )
+          );
+        })
+      );
+    })
+  );
 }

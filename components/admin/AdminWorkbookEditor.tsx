@@ -4,10 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { DataGrid, renderTextEditor, type Column } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 import * as XLSX from "xlsx";
+import { loadAdminWorkbook } from "@/app/admin/(protected)/actions";
 import {
-  loadSheetData,
-  onDataChange,
-  saveSheetData,
+  isAdminWorkbookData,
   type AdminSheetData,
   type AdminWorkbookData,
   type CellValue,
@@ -15,6 +14,59 @@ import {
 import { syncWithOneDrive } from "@/lib/admin/oneDriveSync";
 
 type GridRow = Record<string, CellValue> & { id: number };
+
+const WORKBOOK_CACHE_KEY = "caseit-admin-workbook-caseit-2027";
+const WORKBOOK_CACHE_TTL_MS = 30_000;
+
+type CachedWorkbook = {
+  expiresAt: number;
+  data: AdminWorkbookData;
+};
+
+function readCachedWorkbook(): AdminWorkbookData | null {
+  try {
+    const cachedValue = sessionStorage.getItem(WORKBOOK_CACHE_KEY);
+    if (!cachedValue) return null;
+
+    const parsed: unknown = JSON.parse(cachedValue);
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      !("expiresAt" in parsed) ||
+      !("data" in parsed)
+    ) {
+      sessionStorage.removeItem(WORKBOOK_CACHE_KEY);
+      return null;
+    }
+
+    const cached = parsed as CachedWorkbook;
+    if (
+      typeof cached.expiresAt !== "number" ||
+      cached.expiresAt <= Date.now() ||
+      !isAdminWorkbookData(cached.data)
+    ) {
+      sessionStorage.removeItem(WORKBOOK_CACHE_KEY);
+      return null;
+    }
+
+    return cached.data;
+  } catch (error) {
+    console.warn("Could not read the cached admin workbook.", error);
+    return null;
+  }
+}
+
+function cacheWorkbook(data: AdminWorkbookData) {
+  try {
+    const cached: CachedWorkbook = {
+      expiresAt: Date.now() + WORKBOOK_CACHE_TTL_MS,
+      data,
+    };
+    sessionStorage.setItem(WORKBOOK_CACHE_KEY, JSON.stringify(cached));
+  } catch (error) {
+    console.warn("Could not cache the admin workbook in this browser session.", error);
+  }
+}
 
 function columnName(index: number): string {
   let name = "";
@@ -111,6 +163,10 @@ export default function AdminWorkbookEditor() {
   const [workbookData, setWorkbookData] = useState<AdminWorkbookData>({ sheets: [] });
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
   const [status, setStatus] = useState("Loading workbook...");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hasLoadError, setHasLoadError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const activeSheet = workbookData.sheets[activeSheetIndex];
@@ -118,20 +174,44 @@ export default function AdminWorkbookEditor() {
   useEffect(() => {
     let mounted = true;
 
-    void loadSheetData().then((data) => {
-      if (mounted) {
-        setWorkbookData(data);
-        setStatus("Ready");
+    async function loadWorkbook() {
+      const cachedData = readCachedWorkbook();
+      if (cachedData) {
+        if (mounted) {
+          setWorkbookData(cachedData);
+          setStatus("Loaded recent workbook data");
+          setHasLoadError(false);
+          setIsLoading(false);
+        }
+        return;
       }
-    });
 
-    const unsubscribe = onDataChange((data) => {
-      if (mounted) setWorkbookData(data);
-    });
+      try {
+        const result = await loadAdminWorkbook();
+        if (!result.success) {
+          throw new Error(result.error);
+        }
 
+        if (mounted) {
+          setWorkbookData(result.data);
+          setStatus("Ready");
+          setHasLoadError(false);
+          cacheWorkbook(result.data);
+        }
+      } catch (error) {
+        console.error("Could not load the admin workbook.", error);
+        if (mounted) {
+          setStatus(error instanceof Error ? error.message : "Could not load the workbook.");
+          setHasLoadError(true);
+        }
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    }
+
+    void loadWorkbook();
     return () => {
       mounted = false;
-      unsubscribe();
     };
   }, []);
 
@@ -140,18 +220,18 @@ export default function AdminWorkbookEditor() {
       activeSheet?.columns.map((column) => ({
         key: column,
         name: column,
-        editable: true,
         renderEditCell: renderTextEditor,
         resizable: true,
         width: 160,
+        editable: !isSaving && !isLoading,
       })) ?? [],
-    [activeSheet],
+    [activeSheet, isLoading, isSaving],
   );
 
   function updateWorkbook(nextData: AdminWorkbookData, message = "Unsaved changes") {
     setWorkbookData(nextData);
+    setHasUnsavedChanges(true);
     setStatus(message);
-    void saveSheetData(nextData);
   }
 
   function handleRowsChange(rows: GridRow[]) {
@@ -172,10 +252,56 @@ export default function AdminWorkbookEditor() {
       const importedData = normalizeSheetNames(workbookToData(workbook));
       setWorkbookData(importedData);
       setActiveSheetIndex(0);
+      setHasUnsavedChanges(true);
       setStatus(`Imported ${importedData.sheets.length} sheet${importedData.sheets.length === 1 ? "" : "s"}`);
-      await saveSheetData(importedData);
     } catch {
       setStatus("Could not read that workbook.");
+    }
+  }
+
+  async function handleSave() {
+    setIsSaving(true);
+    setStatus("Saving workbook...");
+
+    try {
+      const workbookJson = JSON.stringify(workbookData);
+      let requestBody: BodyInit = workbookJson;
+      const headers = new Headers({ "Content-Type": "application/json" });
+
+      if (typeof CompressionStream !== "undefined") {
+        const uncompressedBody = new Blob([workbookJson]);
+        const compressedBody = await new Response(
+          uncompressedBody.stream().pipeThrough(new CompressionStream("gzip")),
+        ).blob();
+
+        if (compressedBody.size < uncompressedBody.size) {
+          requestBody = compressedBody;
+          headers.set("Content-Type", "application/gzip");
+        }
+      }
+
+      const response = await fetch("/admin/api/workbook", {
+        method: "PUT",
+        headers,
+        body: requestBody,
+      });
+      const result = (await response.json()) as
+        | { success: true }
+        | { error: string };
+
+      if (!response.ok || "error" in result) {
+        setStatus("error" in result ? result.error : "Could not save the workbook. Please try again.");
+        return;
+      }
+
+      setHasUnsavedChanges(false);
+      setStatus("Workbook saved");
+      cacheWorkbook(workbookData);
+    } catch (error) {
+      console.error("Could not save the admin workbook.", error);
+      setStatus("Could not save the workbook. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -195,18 +321,20 @@ export default function AdminWorkbookEditor() {
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-red">CaseIT 2027</p>
           <h2 className="mt-2 text-2xl font-bold md:text-3xl">Executive workbook</h2>
-          <p className="mt-2 text-sm text-black/65">Import workbook using Import, and export workbook using Export. Sync currently WIP.</p>
+          <p className="mt-2 text-sm text-black/65">Import a workbook or edit its contents, then save your changes to share them with the executive team.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <input
             ref={fileInputRef}
             accept=".xlsx,.xls,.csv"
             className="sr-only"
+            disabled={isLoading || isSaving || hasLoadError}
             onChange={handleImport}
             type="file"
           />
           <button
             className="min-h-11 border-2 border-black bg-white px-4 py-2 text-sm font-bold hover:bg-black hover:text-white"
+            disabled={isLoading || isSaving || hasLoadError}
             onClick={() => fileInputRef.current?.click()}
             type="button"
           >
@@ -214,18 +342,27 @@ export default function AdminWorkbookEditor() {
           </button>
           <button
             className="min-h-11 border-2 border-red bg-red px-4 py-2 text-sm font-bold text-white hover:bg-redDark"
-            disabled={!workbookData.sheets.length}
+            disabled={isLoading || hasLoadError || !workbookData.sheets.length}
             onClick={handleExport}
             type="button"
           >
             Export .xlsx
           </button>
           <button
+            className="min-h-11 border-2 border-black bg-black px-4 py-2 text-sm font-bold text-white hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isLoading || isSaving || hasLoadError || !hasUnsavedChanges || !workbookData.sheets.length}
+            onClick={handleSave}
+            type="button"
+          >
+            {isSaving ? "Saving..." : "Save changes"}
+          </button>
+          <button
             className="min-h-11 border-2 border-pivotBlue bg-pivotBlue px-4 py-2 text-sm font-bold text-white hover:bg-pivotBlueDark"
+            disabled={isLoading || isSaving || hasLoadError}
             onClick={handleSync}
             type="button"
           >
-            Sync
+            OneDrive sync (WIP)
           </button>
         </div>
       </div>
@@ -234,25 +371,29 @@ export default function AdminWorkbookEditor() {
         {status}
       </p>
 
-      <div className="flex max-w-full gap-1 overflow-x-auto border-b border-black/15" role="tablist" aria-label="Workbook sheets">
-        {workbookData.sheets.map((sheet, index) => (
-          <button
-            aria-selected={index === activeSheetIndex}
-            aria-controls={`workbook-sheet-panel-${index}`}
-            className={`min-h-11 shrink-0 border-b-2 px-4 py-2 text-sm font-semibold ${index === activeSheetIndex ? "border-red text-red" : "border-transparent text-black/60 hover:border-black"}`}
-            id={`workbook-sheet-tab-${index}`}
-            key={`${sheet.name}-${index}`}
-            onClick={() => setActiveSheetIndex(index)}
-            role="tab"
-            type="button"
-          >
-            {sheet.name}
-          </button>
-        ))}
-      </div>
+      {!isLoading && workbookData.sheets.length > 0 && (
+        <div className="flex max-w-full gap-1 overflow-x-auto border-b border-black/15" role="tablist" aria-label="Workbook sheets">
+          {workbookData.sheets.map((sheet, index) => (
+            <button
+              aria-selected={index === activeSheetIndex}
+              aria-controls={`workbook-sheet-panel-${index}`}
+              className={`min-h-11 shrink-0 border-b-2 px-4 py-2 text-sm font-semibold ${index === activeSheetIndex ? "border-red text-red" : "border-transparent text-black/60 hover:border-black"}`}
+              id={`workbook-sheet-tab-${index}`}
+              key={`${sheet.name}-${index}`}
+              onClick={() => setActiveSheetIndex(index)}
+              role="tab"
+              type="button"
+            >
+              {sheet.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="max-w-full overflow-hidden border border-black/20 bg-white">
-        {workbookData.sheets.length ? (
+        {isLoading ? (
+          <div className="p-8 text-center text-sm text-black/60">Loading workbook...</div>
+        ) : workbookData.sheets.length ? (
           workbookData.sheets.map((sheet, index) => (
             <div
               aria-labelledby={`workbook-sheet-tab-${index}`}
@@ -277,7 +418,9 @@ export default function AdminWorkbookEditor() {
             </div>
           ))
         ) : (
-          <div className="p-8 text-center text-sm text-black/60">Import a workbook to begin editing.</div>
+          <div className="p-8 text-center text-sm text-black/60">
+            {hasLoadError ? status : "Import a workbook to begin editing."}
+          </div>
         )}
       </div>
     </section>
