@@ -17,38 +17,70 @@ type GridRow = Record<string, CellValue> & { id: number };
 
 const WORKBOOK_CACHE_KEY = "caseit-admin-workbook-caseit-2027";
 const WORKBOOK_CACHE_TTL_MS = 30_000;
+const WORKBOOK_CACHE_DB_NAME = "caseit-admin-cache";
+const WORKBOOK_CACHE_STORE_NAME = "workbooks";
 
 type CachedWorkbook = {
+  key: string;
   expiresAt: number;
   data: AdminWorkbookData;
 };
 
-function readCachedWorkbook(): AdminWorkbookData | null {
+let memoryCachedWorkbook: CachedWorkbook | null = null;
+
+function openWorkbookCache(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(WORKBOOK_CACHE_DB_NAME, 1);
+    request.onupgradeneeded = () => {
+      if (!request.result.objectStoreNames.contains(WORKBOOK_CACHE_STORE_NAME)) {
+        request.result.createObjectStore(WORKBOOK_CACHE_STORE_NAME, { keyPath: "key" });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error ?? new Error("Could not open workbook cache."));
+    request.onblocked = () => reject(new Error("Workbook cache is blocked by another tab."));
+  });
+}
+
+function isValidCachedWorkbook(value: unknown): value is CachedWorkbook {
+  if (typeof value !== "object" || value === null) return false;
+  if (!("key" in value) || !("expiresAt" in value) || !("data" in value)) return false;
+
+  return (
+    value.key === WORKBOOK_CACHE_KEY &&
+    typeof value.expiresAt === "number" &&
+    value.expiresAt > Date.now() &&
+    isAdminWorkbookData(value.data)
+  );
+}
+
+async function readCachedWorkbook(): Promise<AdminWorkbookData | null> {
+  if (memoryCachedWorkbook && isValidCachedWorkbook(memoryCachedWorkbook)) {
+    return memoryCachedWorkbook.data;
+  }
+
+  if (typeof indexedDB === "undefined") return null;
+
   try {
-    const cachedValue = sessionStorage.getItem(WORKBOOK_CACHE_KEY);
-    if (!cachedValue) return null;
+    const database = await openWorkbookCache();
+    const cached = await new Promise<unknown>((resolve, reject) => {
+      const transaction = database.transaction(WORKBOOK_CACHE_STORE_NAME, "readonly");
+      const request = transaction.objectStore(WORKBOOK_CACHE_STORE_NAME).get(WORKBOOK_CACHE_KEY);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error ?? new Error("Could not read workbook cache."));
+      transaction.oncomplete = () => database.close();
+      transaction.onerror = () => {
+        database.close();
+        reject(transaction.error ?? new Error("Could not read workbook cache."));
+      };
+      transaction.onabort = () => {
+        database.close();
+        reject(transaction.error ?? new Error("Workbook cache read was aborted."));
+      };
+    });
 
-    const parsed: unknown = JSON.parse(cachedValue);
-    if (
-      typeof parsed !== "object" ||
-      parsed === null ||
-      !("expiresAt" in parsed) ||
-      !("data" in parsed)
-    ) {
-      sessionStorage.removeItem(WORKBOOK_CACHE_KEY);
-      return null;
-    }
-
-    const cached = parsed as CachedWorkbook;
-    if (
-      typeof cached.expiresAt !== "number" ||
-      cached.expiresAt <= Date.now() ||
-      !isAdminWorkbookData(cached.data)
-    ) {
-      sessionStorage.removeItem(WORKBOOK_CACHE_KEY);
-      return null;
-    }
-
+    if (!isValidCachedWorkbook(cached)) return null;
+    memoryCachedWorkbook = cached;
     return cached.data;
   } catch (error) {
     console.warn("Could not read the cached admin workbook.", error);
@@ -56,15 +88,36 @@ function readCachedWorkbook(): AdminWorkbookData | null {
   }
 }
 
-function cacheWorkbook(data: AdminWorkbookData) {
+async function cacheWorkbook(data: AdminWorkbookData): Promise<void> {
+  const cached: CachedWorkbook = {
+    key: WORKBOOK_CACHE_KEY,
+    expiresAt: Date.now() + WORKBOOK_CACHE_TTL_MS,
+    data,
+  };
+  memoryCachedWorkbook = cached;
+
+  if (typeof indexedDB === "undefined") return;
+
   try {
-    const cached: CachedWorkbook = {
-      expiresAt: Date.now() + WORKBOOK_CACHE_TTL_MS,
-      data,
-    };
-    sessionStorage.setItem(WORKBOOK_CACHE_KEY, JSON.stringify(cached));
+    const database = await openWorkbookCache();
+    await new Promise<void>((resolve, reject) => {
+      const transaction = database.transaction(WORKBOOK_CACHE_STORE_NAME, "readwrite");
+      transaction.objectStore(WORKBOOK_CACHE_STORE_NAME).put(cached);
+      transaction.oncomplete = () => {
+        database.close();
+        resolve();
+      };
+      transaction.onerror = () => {
+        database.close();
+        reject(transaction.error ?? new Error("Could not write workbook cache."));
+      };
+      transaction.onabort = () => {
+        database.close();
+        reject(transaction.error ?? new Error("Workbook cache write was aborted."));
+      };
+    });
   } catch (error) {
-    console.warn("Could not cache the admin workbook in this browser session.", error);
+    console.warn("Could not cache the admin workbook in IndexedDB.", error);
   }
 }
 
@@ -175,7 +228,7 @@ export default function AdminWorkbookEditor() {
     let mounted = true;
 
     async function loadWorkbook() {
-      const cachedData = readCachedWorkbook();
+      const cachedData = await readCachedWorkbook();
       if (cachedData) {
         if (mounted) {
           setWorkbookData(cachedData);
@@ -196,7 +249,7 @@ export default function AdminWorkbookEditor() {
           setWorkbookData(result.data);
           setStatus("Ready");
           setHasLoadError(false);
-          cacheWorkbook(result.data);
+          void cacheWorkbook(result.data);
         }
       } catch (error) {
         console.error("Could not load the admin workbook.", error);
@@ -296,7 +349,7 @@ export default function AdminWorkbookEditor() {
 
       setHasUnsavedChanges(false);
       setStatus("Workbook saved");
-      cacheWorkbook(workbookData);
+      void cacheWorkbook(workbookData);
     } catch (error) {
       console.error("Could not save the admin workbook.", error);
       setStatus("Could not save the workbook. Please try again.");
