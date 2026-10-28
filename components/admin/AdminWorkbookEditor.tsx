@@ -5,6 +5,7 @@ import { DataGrid, renderTextEditor, type Column } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 import * as XLSX from "xlsx";
 import { loadAdminWorkbook } from "@/app/admin/(protected)/actions";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import {
   isAdminWorkbookData,
   type AdminSheetData,
@@ -215,7 +216,7 @@ function normalizeSheetNames(data: AdminWorkbookData): AdminWorkbookData {
 export default function AdminWorkbookEditor() {
   const [workbookData, setWorkbookData] = useState<AdminWorkbookData>({ sheets: [] });
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
-  const [status, setStatus] = useState("Loading workbook...");
+  const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -232,7 +233,6 @@ export default function AdminWorkbookEditor() {
       if (cachedData) {
         if (mounted) {
           setWorkbookData(cachedData);
-          setStatus("Loaded recent workbook data");
           setHasLoadError(false);
           setIsLoading(false);
         }
@@ -247,7 +247,6 @@ export default function AdminWorkbookEditor() {
 
         if (mounted) {
           setWorkbookData(result.data);
-          setStatus("Ready");
           setHasLoadError(false);
           void cacheWorkbook(result.data);
         }
@@ -314,7 +313,7 @@ export default function AdminWorkbookEditor() {
 
   async function handleSave() {
     setIsSaving(true);
-    setStatus("Saving workbook...");
+    setStatus("");
 
     try {
       const workbookJson = JSON.stringify(workbookData);
@@ -358,6 +357,13 @@ export default function AdminWorkbookEditor() {
     }
   }
 
+  const isErrorStatus =
+    status.startsWith("Could not") ||
+    status.startsWith("The saved") ||
+    status.startsWith("You do not") ||
+    status.startsWith("Your session");
+  const shouldShowStatus = Boolean(status) && status !== "Unsaved changes" && !isLoading && !isSaving;
+
   function handleExport() {
     const workbook = dataToWorkbook(workbookData);
     XLSX.writeFile(workbook, "caseit-2027-workbook.xlsx");
@@ -369,12 +375,16 @@ export default function AdminWorkbookEditor() {
   }
 
   return (
-    <section className="mt-8 space-y-4" aria-label="CaseIT workbook editor">
-      <div className="flex flex-col gap-4 border-b border-black/15 pb-5 lg:flex-row lg:items-end lg:justify-between">
+    <section
+      className="mt-8 overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm"
+      aria-label="CaseIT workbook editor"
+    >
+      <div className="flex flex-col gap-5 border-b border-black/10 bg-[#FAFAFA] p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-red">CaseIT 2027</p>
-          <h2 className="mt-2 text-2xl font-bold md:text-3xl">Executive workbook</h2>
-          <p className="mt-2 text-sm text-black/65">Import a workbook or edit its contents, then save your changes to share them with the executive team.</p>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight text-black md:text-3xl">Schedule &amp; logs</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-black/60">
+            Import or edit the event workbook. Save changes when ready.
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <input
@@ -386,7 +396,7 @@ export default function AdminWorkbookEditor() {
             type="file"
           />
           <button
-            className="min-h-11 border-2 border-black bg-white px-4 py-2 text-sm font-bold hover:bg-black hover:text-white"
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isLoading || isSaving || hasLoadError}
             onClick={() => fileInputRef.current?.click()}
             type="button"
@@ -394,7 +404,7 @@ export default function AdminWorkbookEditor() {
             Import
           </button>
           <button
-            className="min-h-11 border-2 border-red bg-red px-4 py-2 text-sm font-bold text-white hover:bg-redDark"
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isLoading || hasLoadError || !workbookData.sheets.length}
             onClick={handleExport}
             type="button"
@@ -402,15 +412,21 @@ export default function AdminWorkbookEditor() {
             Export .xlsx
           </button>
           <button
-            className="min-h-11 border-2 border-black bg-black px-4 py-2 text-sm font-bold text-white hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-redDark bg-redDark px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-buttonRedDark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-redDark disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isLoading || isSaving || hasLoadError || !hasUnsavedChanges || !workbookData.sheets.length}
             onClick={handleSave}
             type="button"
           >
+            {isSaving && (
+              <span
+                aria-hidden="true"
+                className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
+              />
+            )}
             {isSaving ? "Saving..." : "Save changes"}
           </button>
           <button
-            className="min-h-11 border-2 border-pivotBlue bg-pivotBlue px-4 py-2 text-sm font-bold text-white hover:bg-pivotBlueDark"
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isLoading || isSaving || hasLoadError}
             onClick={handleSync}
             type="button"
@@ -420,17 +436,25 @@ export default function AdminWorkbookEditor() {
         </div>
       </div>
 
-      <p aria-live="polite" className="text-sm text-black/60">
-        {status}
-      </p>
+      {shouldShowStatus && (
+        <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 border-b border-black/10 px-5 py-3 sm:px-6">
+          <p
+            aria-live="polite"
+            className={`text-sm ${isErrorStatus ? "font-medium text-redDark" : "text-black/60"}`}
+            role={isErrorStatus ? "alert" : "status"}
+          >
+            {status}
+          </p>
+        </div>
+      )}
 
       {!isLoading && workbookData.sheets.length > 0 && (
-        <div className="flex max-w-full gap-1 overflow-x-auto border-b border-black/15" role="tablist" aria-label="Workbook sheets">
+        <div className="flex max-w-full gap-1 overflow-x-auto px-4 pt-3" role="tablist" aria-label="Workbook sheets">
           {workbookData.sheets.map((sheet, index) => (
             <button
               aria-selected={index === activeSheetIndex}
               aria-controls={`workbook-sheet-panel-${index}`}
-              className={`min-h-11 shrink-0 border-b-2 px-4 py-2 text-sm font-semibold ${index === activeSheetIndex ? "border-red text-red" : "border-transparent text-black/60 hover:border-black"}`}
+              className={`min-h-11 shrink-0 border-b-2 px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-red ${index === activeSheetIndex ? "border-redDark text-redDark" : "border-transparent text-black/55 hover:border-black/25 hover:text-black"}`}
               id={`workbook-sheet-tab-${index}`}
               key={`${sheet.name}-${index}`}
               onClick={() => setActiveSheetIndex(index)}
@@ -443,9 +467,11 @@ export default function AdminWorkbookEditor() {
         </div>
       )}
 
-      <div className="max-w-full overflow-hidden border border-black/20 bg-white">
+      <div className={`mx-4 mb-4 max-w-full overflow-hidden rounded-lg border border-black/10 bg-white ${workbookData.sheets.length > 0 && !isLoading ? "" : "mx-5 mb-5 sm:mx-6 sm:mb-6"}`}>
         {isLoading ? (
-          <div className="p-8 text-center text-sm text-black/60">Loading workbook...</div>
+          <div className="flex min-h-[420px] items-center justify-center p-8">
+            <LoadingSpinner label="Preparing workbook..." />
+          </div>
         ) : workbookData.sheets.length ? (
           workbookData.sheets.map((sheet, index) => (
             <div
@@ -471,8 +497,13 @@ export default function AdminWorkbookEditor() {
             </div>
           ))
         ) : (
-          <div className="p-8 text-center text-sm text-black/60">
+          <div className="flex min-h-64 flex-col items-center justify-center p-8 text-center">
+            <p className="text-base font-semibold text-black">
+              {hasLoadError ? "Workbook unavailable" : "No event workbook yet"}
+            </p>
+            <p className="mt-2 max-w-md text-sm leading-6 text-black/60">
             {hasLoadError ? status : "Import a workbook to begin editing."}
+            </p>
           </div>
         )}
       </div>
