@@ -1,5 +1,6 @@
 import { signOut } from "./actions";
 import AdminWorkbookEditor from "@/components/admin/AdminWorkbookEditor";
+import { SignOutSubmitButton } from "@/components/admin/SignOutSubmitButton";
 
 // DEFAULT /ADMIN PAGE (PROTECTED)
 
@@ -12,12 +13,7 @@ export default function AdminDashboard() {
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-black sm:text-4xl">Executive workspace</h1>
         </div>
         <form action={signOut}>
-          <button
-            className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-60"
-            type="submit"
-          >
-            Sign out
-          </button>
+          <SignOutSubmitButton />
         </form>
       </header>
       <AdminWorkbookEditor />

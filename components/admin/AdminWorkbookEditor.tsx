@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { DataGrid, renderTextEditor, type Column } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 import * as XLSX from "xlsx";
-import { loadAdminWorkbook } from "@/app/admin/(protected)/actions";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import {
   isAdminWorkbookData,
@@ -227,11 +226,14 @@ export default function AdminWorkbookEditor() {
 
   useEffect(() => {
     let mounted = true;
+    const controller = new AbortController();
+    const cancelLoad = () => controller.abort();
+    window.addEventListener("caseit-admin-signout", cancelLoad);
 
     async function loadWorkbook() {
       const cachedData = await readCachedWorkbook();
       if (cachedData) {
-        if (mounted) {
+        if (mounted && !controller.signal.aborted) {
           setWorkbookData(cachedData);
           setHasLoadError(false);
           setIsLoading(false);
@@ -240,30 +242,39 @@ export default function AdminWorkbookEditor() {
       }
 
       try {
-        const result = await loadAdminWorkbook();
-        if (!result.success) {
-          throw new Error(result.error);
+        const response = await fetch("/admin/api/workbook", {
+          signal: controller.signal,
+        });
+        const result = (await response.json()) as
+          | { data: AdminWorkbookData }
+          | { error: string };
+
+        if (!response.ok || "error" in result) {
+          throw new Error("error" in result ? result.error : "Could not load the workbook.");
         }
 
-        if (mounted) {
+        if (mounted && !controller.signal.aborted) {
           setWorkbookData(result.data);
           setHasLoadError(false);
           void cacheWorkbook(result.data);
         }
       } catch (error) {
+        if (controller.signal.aborted) return;
         console.error("Could not load the admin workbook.", error);
         if (mounted) {
           setStatus(error instanceof Error ? error.message : "Could not load the workbook.");
           setHasLoadError(true);
         }
       } finally {
-        if (mounted) setIsLoading(false);
+        if (mounted && !controller.signal.aborted) setIsLoading(false);
       }
     }
 
     void loadWorkbook();
     return () => {
       mounted = false;
+      controller.abort();
+      window.removeEventListener("caseit-admin-signout", cancelLoad);
     };
   }, []);
 
@@ -367,7 +378,6 @@ export default function AdminWorkbookEditor() {
   function handleExport() {
     const workbook = dataToWorkbook(workbookData);
     XLSX.writeFile(workbook, "caseit-2027-workbook.xlsx");
-    setStatus("Workbook exported");
   }
 
   async function handleSync() {

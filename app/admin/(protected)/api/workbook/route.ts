@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { gzipSync } from "node:zlib";
+import { gunzipSync, gzipSync } from "node:zlib";
 import { NextResponse, type NextRequest } from "next/server";
 import { isAdminWorkbookData } from "@/lib/admin/adminDataService";
 import { createClient } from "@/lib/supabase/server";
@@ -8,6 +8,102 @@ const EVENT_ID = "caseit-2027";
 const STORAGE_BUCKET = "caseit-workbooks";
 const MAX_WORKBOOK_SIZE = 40 * 1024 * 1024;
 const MAX_COMPRESSED_SIZE = 40 * 1024 * 1024;
+
+export async function GET() {
+  const supabase = await createClient();
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims?.sub;
+
+  if (claimsError || !userId) {
+    return NextResponse.json(
+      { error: "Your session has expired. Sign in again." },
+      { status: 401 },
+    );
+  }
+
+  const { data: admin, error: adminError } = await supabase
+    .from("admins")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (adminError) {
+    console.error("Could not verify admin access for workbook load.", adminError);
+    return NextResponse.json(
+      { error: "Could not verify admin access. Please try again." },
+      { status: 500 },
+    );
+  }
+
+  if (!admin?.user_id) {
+    return NextResponse.json(
+      { error: "You do not have permission to access this workbook." },
+      { status: 403 },
+    );
+  }
+
+  const { data, error } = await supabase
+    .from("event_workbooks")
+    .select("workbook, storage_path")
+    .eq("event_id", EVENT_ID)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Could not load the event workbook from Supabase.", error);
+    return NextResponse.json(
+      { error: "Could not load the workbook. Please try again." },
+      { status: 500 },
+    );
+  }
+
+  if (!data) {
+    return NextResponse.json({ data: { sheets: [] } });
+  }
+
+  if (data.storage_path) {
+    const { data: file, error: downloadError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .download(data.storage_path);
+
+    if (downloadError) {
+      console.error("Could not download the event workbook from Supabase Storage.", downloadError);
+      return NextResponse.json(
+        { error: "Could not download the workbook. Please try again." },
+        { status: 502 },
+      );
+    }
+
+    try {
+      const compressedData = Buffer.from(await file.arrayBuffer());
+      const workbook = JSON.parse(gunzipSync(compressedData).toString("utf8"));
+      if (!isAdminWorkbookData(workbook)) {
+        console.error("The stored event workbook has an invalid format.");
+        return NextResponse.json(
+          { error: "The saved workbook has an invalid format." },
+          { status: 500 },
+        );
+      }
+
+      return NextResponse.json({ data: workbook });
+    } catch (storageError) {
+      console.error("Could not decode the stored event workbook.", storageError);
+      return NextResponse.json(
+        { error: "The saved workbook could not be read." },
+        { status: 500 },
+      );
+    }
+  }
+
+  if (!isAdminWorkbookData(data.workbook)) {
+    console.error("The saved event workbook has an invalid format.");
+    return NextResponse.json(
+      { error: "The saved workbook has an invalid format." },
+      { status: 500 },
+    );
+  }
+
+  return NextResponse.json({ data: data.workbook });
+}
 
 export async function PUT(request: NextRequest) {
   const supabase = await createClient();
