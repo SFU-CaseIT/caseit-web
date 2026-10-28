@@ -1,5 +1,6 @@
 import { signOut } from "./actions";
 import AdminWorkbookEditor from "@/components/admin/AdminWorkbookEditor";
+import AdminPushNotifications from "@/components/admin/AdminPushNotifications";
 import { SignOutSubmitButton } from "@/components/admin/SignOutSubmitButton";
 
 // DEFAULT /ADMIN PAGE (PROTECTED)
@@ -12,9 +13,12 @@ export default function AdminDashboard() {
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-redDark">CaseIT 2027</p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-black sm:text-4xl">Executive workspace</h1>
         </div>
-        <form action={signOut}>
-          <SignOutSubmitButton />
-        </form>
+        <div className="flex flex-wrap items-center gap-4">
+          <AdminPushNotifications />
+          <form action={signOut}>
+            <SignOutSubmitButton />
+          </form>
+        </div>
       </header>
       <AdminWorkbookEditor />
     </main>

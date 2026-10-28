@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { gunzipSync, gzipSync } from "node:zlib";
 import { NextResponse, type NextRequest } from "next/server";
 import { isAdminWorkbookData } from "@/lib/admin/adminDataService";
+import { notifyAdminsWorkbookUpdated } from "@/lib/admin/webPushNotifications";
 import { createClient } from "@/lib/supabase/server";
 
 const EVENT_ID = "caseit-2027";
@@ -304,6 +305,12 @@ export async function PUT(request: NextRequest) {
     if (cleanupError) {
       console.error("Could not remove the previous workbook upload.", cleanupError);
     }
+  }
+
+  try {
+    await notifyAdminsWorkbookUpdated();
+  } catch (notificationError) {
+    console.error("The workbook was saved, but admin push notifications could not be sent.", notificationError);
   }
 
   return NextResponse.json({ success: true, revision: storagePath });

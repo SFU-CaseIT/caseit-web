@@ -72,6 +72,17 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
 NEXT_PUBLIC_CLARITY_PROJECT_ID=your-clarity-project-id
 ```
 
+For admin push notifications, also set:
+
+```env
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY=your-vapid-public-key
+WEB_PUSH_VAPID_PRIVATE_KEY=your-vapid-private-key
+WEB_PUSH_VAPID_SUBJECT=mailto:your-email@example.com
+```
+
+Web Push key pairs can be generated with `npx web-push generate-vapid-keys`. Keep the service-role key and VAPID private key server-only; only the VAPID public key is exposed to the browser. Apply `supabase/migrations/20261028000000_admin_push_subscriptions.sql` to the Supabase project before enabling notifications. Push permission is requested only after an admin clicks **Enable notifications**, and push requires HTTPS outside local development. Enabled subscriptions remain active when the PWA is closed or the admin signs out, until notifications are turned off in the admin page or browser settings.
+
 Start the development server:
 
 ```bash
