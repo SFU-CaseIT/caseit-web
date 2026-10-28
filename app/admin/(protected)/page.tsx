@@ -1,22 +1,25 @@
 import { signOut } from "./actions";
 import AdminWorkbookEditor from "@/components/admin/AdminWorkbookEditor";
+import AdminPushNotifications from "@/components/admin/AdminPushNotifications";
+import { SignOutSubmitButton } from "@/components/admin/SignOutSubmitButton";
 
 // DEFAULT /ADMIN PAGE (PROTECTED)
 
 export default function AdminDashboard() {
   return (
-    <main className="mx-auto min-h-[60vh] max-w-[1500px] px-4 pb-10 pt-20 sm:px-6 sm:pt-24 lg:px-8 lg:pt-24">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <main className="mx-auto min-h-[60vh] max-w-6xl px-4 pb-10 pt-20 sm:px-6 sm:pt-24 lg:px-8 lg:pt-24">
+      <header className="flex flex-wrap items-center justify-between gap-5 border-b border-black/10 pb-6">
         <div>
-          <h1 className="text-header1">CaseIT admin</h1>
-          <p className="mt-2 text-sm text-black/65">Internal tools for the 2027 executive team.</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-redDark">CaseIT 2027</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-black sm:text-4xl">Executive workspace</h1>
         </div>
-        <form action={signOut}>
-          <button className="min-h-11 border-2 border-black px-4 py-2 text-sm font-semibold hover:bg-black hover:text-white" type="submit">
-            Sign out
-          </button>
-        </form>
-      </div>
+        <div className="flex flex-wrap items-center gap-4">
+          <AdminPushNotifications />
+          <form action={signOut}>
+            <SignOutSubmitButton />
+          </form>
+        </div>
+      </header>
       <AdminWorkbookEditor />
     </main>
   );
