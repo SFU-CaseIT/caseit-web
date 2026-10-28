@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { DataGrid, renderTextEditor, type Column } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 import * as XLSX from "xlsx";
@@ -11,18 +11,18 @@ import {
   type AdminWorkbookData,
   type CellValue,
 } from "@/lib/admin/adminDataService";
-import { syncWithOneDrive } from "@/lib/admin/oneDriveSync";
 
 type GridRow = Record<string, CellValue> & { id: number };
 
-const WORKBOOK_CACHE_KEY = "caseit-admin-workbook-caseit-2027";
-const WORKBOOK_CACHE_TTL_MS = 30_000;
+const WORKBOOK_CACHE_KEY = "caseit-admin-workbook-caseit-2027-v2";
+const WORKBOOK_CACHE_TTL_MS = 365 * 24 * 60 * 60 * 1000;
 const WORKBOOK_CACHE_DB_NAME = "caseit-admin-cache";
 const WORKBOOK_CACHE_STORE_NAME = "workbooks";
 
 type CachedWorkbook = {
   key: string;
   expiresAt: number;
+  revision: string | null;
   data: AdminWorkbookData;
 };
 
@@ -44,19 +44,27 @@ function openWorkbookCache(): Promise<IDBDatabase> {
 
 function isValidCachedWorkbook(value: unknown): value is CachedWorkbook {
   if (typeof value !== "object" || value === null) return false;
-  if (!("key" in value) || !("expiresAt" in value) || !("data" in value)) return false;
+  if (
+    !("key" in value) ||
+    !("expiresAt" in value) ||
+    !("revision" in value) ||
+    !("data" in value)
+  ) {
+    return false;
+  }
 
   return (
     value.key === WORKBOOK_CACHE_KEY &&
     typeof value.expiresAt === "number" &&
     value.expiresAt > Date.now() &&
+    (typeof value.revision === "string" || value.revision === null) &&
     isAdminWorkbookData(value.data)
   );
 }
 
-async function readCachedWorkbook(): Promise<AdminWorkbookData | null> {
+async function readCachedWorkbook(): Promise<CachedWorkbook | null> {
   if (memoryCachedWorkbook && isValidCachedWorkbook(memoryCachedWorkbook)) {
-    return memoryCachedWorkbook.data;
+    return memoryCachedWorkbook;
   }
 
   if (typeof indexedDB === "undefined") return null;
@@ -81,17 +89,18 @@ async function readCachedWorkbook(): Promise<AdminWorkbookData | null> {
 
     if (!isValidCachedWorkbook(cached)) return null;
     memoryCachedWorkbook = cached;
-    return cached.data;
+    return cached;
   } catch (error) {
     console.warn("Could not read the cached admin workbook.", error);
     return null;
   }
 }
 
-async function cacheWorkbook(data: AdminWorkbookData): Promise<void> {
+async function cacheWorkbook(data: AdminWorkbookData, revision: string | null): Promise<void> {
   const cached: CachedWorkbook = {
     key: WORKBOOK_CACHE_KEY,
     expiresAt: Date.now() + WORKBOOK_CACHE_TTL_MS,
+    revision,
     data,
   };
   memoryCachedWorkbook = cached;
@@ -154,6 +163,16 @@ function rowsToSheetData(name: string, values: unknown[][]): AdminSheetData {
   return { name, columns, rows };
 }
 
+function cloneWorkbook(data: AdminWorkbookData): AdminWorkbookData {
+  return {
+    sheets: data.sheets.map((sheet) => ({
+      ...sheet,
+      columns: [...sheet.columns],
+      rows: sheet.rows.map((row) => ({ ...row })),
+    })),
+  };
+}
+
 function workbookToData(workbook: XLSX.WorkBook): AdminWorkbookData {
   return {
     sheets: workbook.SheetNames.map((name) => {
@@ -189,7 +208,7 @@ function dataToWorkbook(data: AdminWorkbookData): XLSX.WorkBook {
         }
       }),
     );
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheet.name.slice(0, 31) || "Sheet1");
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheet.name.slice(0, 31) || "Sheet");
   });
 
   return workbook;
@@ -217,26 +236,57 @@ export default function AdminWorkbookEditor() {
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefetching, setIsRefetching] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUndoing, startUndoTransition] = useTransition();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [hasLoadError, setHasLoadError] = useState(false);
+  const [hasRemoteUpdate, setHasRemoteUpdate] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const loadControllerRef = useRef<AbortController | null>(null);
+  const lastSavedWorkbookRef = useRef<AdminWorkbookData>({ sheets: [] });
 
   const activeSheet = workbookData.sheets[activeSheetIndex];
 
   useEffect(() => {
     let mounted = true;
     const controller = new AbortController();
+    loadControllerRef.current = controller;
     const cancelLoad = () => controller.abort();
     window.addEventListener("caseit-admin-signout", cancelLoad);
 
-    async function loadWorkbook() {
-      const cachedData = await readCachedWorkbook();
-      if (cachedData) {
+    async function checkForRemoteUpdate(revision: string | null) {
+      try {
+        const response = await fetch("/admin/api/workbook?check=1", {
+          signal: controller.signal,
+        });
+        const result = (await response.json()) as
+          | { revision: string | null }
+          | { error: string };
+
+        if (!response.ok || "error" in result) {
+          throw new Error("error" in result ? result.error : "Could not check for workbook updates.");
+        }
+
         if (mounted && !controller.signal.aborted) {
-          setWorkbookData(cachedData);
+          setHasRemoteUpdate(result.revision !== revision);
+        }
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.error("Could not check for workbook updates.", error);
+        if (mounted) setStatus("Could not check for workbook updates.");
+      }
+    }
+
+    async function loadWorkbook() {
+      const cached = await readCachedWorkbook();
+      if (cached) {
+        if (mounted && !controller.signal.aborted) {
+          setWorkbookData(cached.data);
+          lastSavedWorkbookRef.current = cloneWorkbook(cached.data);
           setHasLoadError(false);
           setIsLoading(false);
+          void checkForRemoteUpdate(cached.revision);
         }
         return;
       }
@@ -246,7 +296,7 @@ export default function AdminWorkbookEditor() {
           signal: controller.signal,
         });
         const result = (await response.json()) as
-          | { data: AdminWorkbookData }
+          | { data: AdminWorkbookData; revision: string | null }
           | { error: string };
 
         if (!response.ok || "error" in result) {
@@ -255,8 +305,10 @@ export default function AdminWorkbookEditor() {
 
         if (mounted && !controller.signal.aborted) {
           setWorkbookData(result.data);
+          lastSavedWorkbookRef.current = cloneWorkbook(result.data);
           setHasLoadError(false);
-          void cacheWorkbook(result.data);
+          setHasRemoteUpdate(false);
+          void cacheWorkbook(result.data, result.revision);
         }
       } catch (error) {
         if (controller.signal.aborted) return;
@@ -274,6 +326,7 @@ export default function AdminWorkbookEditor() {
     return () => {
       mounted = false;
       controller.abort();
+      loadControllerRef.current = null;
       window.removeEventListener("caseit-admin-signout", cancelLoad);
     };
   }, []);
@@ -286,15 +339,37 @@ export default function AdminWorkbookEditor() {
         renderEditCell: renderTextEditor,
         resizable: true,
         width: 160,
-        editable: !isSaving && !isLoading,
+        editable: !isSaving && !isLoading && !isRefetching && !isUndoing,
       })) ?? [],
-    [activeSheet, isLoading, isSaving],
+    [activeSheet, isLoading, isRefetching, isSaving, isUndoing],
   );
 
   function updateWorkbook(nextData: AdminWorkbookData, message = "Unsaved changes") {
     setWorkbookData(nextData);
     setHasUnsavedChanges(true);
     setStatus(message);
+  }
+
+  function handleUndoChanges() {
+    startUndoTransition(() => {
+      const restoredWorkbook = cloneWorkbook(lastSavedWorkbookRef.current);
+      setWorkbookData(restoredWorkbook);
+      setActiveSheetIndex((currentIndex) =>
+        Math.min(currentIndex, Math.max(restoredWorkbook.sheets.length - 1, 0)),
+      );
+      setHasUnsavedChanges(false);
+      setStatus("");
+    });
+  }
+
+  function handleDeleteSheet() {
+    if (!activeSheet || isLoading || isRefetching || isSaving) return;
+
+    const sheets = workbookData.sheets.filter((_, index) => index !== activeSheetIndex);
+    setWorkbookData({ sheets });
+    setActiveSheetIndex((index) => Math.min(index, Math.max(sheets.length - 1, 0)));
+    setHasUnsavedChanges(true);
+    setStatus("");
   }
 
   function handleRowsChange(rows: GridRow[]) {
@@ -312,12 +387,26 @@ export default function AdminWorkbookEditor() {
 
     try {
       const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
-      const importedData = normalizeSheetNames(workbookToData(workbook));
-      setWorkbookData(importedData);
-      setActiveSheetIndex(0);
+      const sourceName = file.name.replace(/\.[^.]+$/, "").trim() || "Workbook";
+      const importedSheets = workbookToData(workbook).sheets.map((sheet) => ({
+        ...sheet,
+        name: `${sourceName} — ${sheet.name}`,
+      }));
+
+      if (importedSheets.length === 0) {
+        setStatus("The selected file does not contain any sheets.");
+        return;
+      }
+
+      const nextWorkbook = normalizeSheetNames({
+        sheets: [...workbookData.sheets, ...importedSheets],
+      });
+      setWorkbookData(nextWorkbook);
+      setActiveSheetIndex(nextWorkbook.sheets.length - 1);
       setHasUnsavedChanges(true);
-      setStatus(`Imported ${importedData.sheets.length} sheet${importedData.sheets.length === 1 ? "" : "s"}`);
-    } catch {
+      setStatus(`Added ${importedSheets.length} sheet${importedSheets.length === 1 ? "" : "s"}`);
+    } catch (error) {
+      console.error("Could not read the selected workbook.", error);
       setStatus("Could not read that workbook.");
     }
   }
@@ -349,7 +438,7 @@ export default function AdminWorkbookEditor() {
         body: requestBody,
       });
       const result = (await response.json()) as
-        | { success: true }
+        | { success: true; revision: string }
         | { error: string };
 
       if (!response.ok || "error" in result) {
@@ -358,13 +447,47 @@ export default function AdminWorkbookEditor() {
       }
 
       setHasUnsavedChanges(false);
+      lastSavedWorkbookRef.current = cloneWorkbook(workbookData);
       setStatus("Workbook saved");
-      void cacheWorkbook(workbookData);
+      setHasRemoteUpdate(false);
+      void cacheWorkbook(workbookData, result.revision);
     } catch (error) {
       console.error("Could not save the admin workbook.", error);
       setStatus("Could not save the workbook. Please try again.");
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function handleRefetch() {
+    if (hasUnsavedChanges || isRefetching || isSaving) return;
+    const signal = loadControllerRef.current?.signal;
+    setIsRefetching(true);
+    setStatus("");
+
+    try {
+      const response = await fetch("/admin/api/workbook", { signal });
+      const result = (await response.json()) as
+        | { data: AdminWorkbookData; revision: string | null }
+        | { error: string };
+
+      if (!response.ok || "error" in result) {
+        throw new Error("error" in result ? result.error : "Could not reload the workbook.");
+      }
+
+      setWorkbookData(result.data);
+      lastSavedWorkbookRef.current = cloneWorkbook(result.data);
+      setActiveSheetIndex(0);
+      setHasRemoteUpdate(false);
+      setHasLoadError(false);
+      setStatus("Workbook re-fetched");
+      void cacheWorkbook(result.data, result.revision);
+    } catch (error) {
+      if (signal?.aborted) return;
+      console.error("Could not re-fetch the admin workbook.", error);
+      setStatus(error instanceof Error ? error.message : "Could not reload the workbook.");
+    } finally {
+      setIsRefetching(false);
     }
   }
 
@@ -378,10 +501,6 @@ export default function AdminWorkbookEditor() {
   function handleExport() {
     const workbook = dataToWorkbook(workbookData);
     XLSX.writeFile(workbook, "caseit-2027-workbook.xlsx");
-  }
-
-  async function handleSync() {
-    setStatus(await syncWithOneDrive());
   }
 
   return (
@@ -401,13 +520,13 @@ export default function AdminWorkbookEditor() {
             ref={fileInputRef}
             accept=".xlsx,.xls,.csv"
             className="sr-only"
-            disabled={isLoading || isSaving || hasLoadError}
+            disabled={isLoading || isRefetching || isSaving || isUndoing || hasLoadError}
             onChange={handleImport}
             type="file"
           />
           <button
             className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isLoading || isSaving || hasLoadError}
+            disabled={isLoading || isRefetching || isSaving || hasLoadError}
             onClick={() => fileInputRef.current?.click()}
             type="button"
           >
@@ -415,15 +534,45 @@ export default function AdminWorkbookEditor() {
           </button>
           <button
             className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isLoading || hasLoadError || !workbookData.sheets.length}
+            disabled={isLoading || isRefetching || hasLoadError || !workbookData.sheets.length}
             onClick={handleExport}
             type="button"
           >
             Export .xlsx
           </button>
           <button
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isLoading || isRefetching || isSaving || isUndoing || hasLoadError || !activeSheet}
+            onClick={handleDeleteSheet}
+            type="button"
+          >
+            Delete sheet
+          </button>
+          <button
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isLoading || isRefetching || isSaving || isUndoing || hasLoadError || !hasUnsavedChanges}
+            onClick={handleUndoChanges}
+            type="button"
+          >
+            {isUndoing ? <LoadingSpinner label="Undoing changes..." /> : "Undo changes"}
+          </button>
+          <button
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isLoading || isRefetching || isSaving || isUndoing || hasLoadError || hasUnsavedChanges}
+            onClick={handleRefetch}
+            type="button"
+          >
+            {isRefetching && (
+              <span
+                aria-hidden="true"
+                className="size-4 animate-spin rounded-full border-2 border-black/20 border-t-black"
+              />
+            )}
+            {isRefetching ? "Re-fetching..." : "Re-fetch"}
+          </button>
+          <button
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-redDark bg-redDark px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-buttonRedDark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-redDark disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isLoading || isSaving || hasLoadError || !hasUnsavedChanges || !workbookData.sheets.length}
+            disabled={isLoading || isRefetching || isSaving || isUndoing || hasLoadError || !hasUnsavedChanges}
             onClick={handleSave}
             type="button"
           >
@@ -434,14 +583,6 @@ export default function AdminWorkbookEditor() {
               />
             )}
             {isSaving ? "Saving..." : "Save changes"}
-          </button>
-          <button
-            className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isLoading || isSaving || hasLoadError}
-            onClick={handleSync}
-            type="button"
-          >
-            OneDrive sync (WIP)
           </button>
         </div>
       </div>
@@ -455,6 +596,19 @@ export default function AdminWorkbookEditor() {
           >
             {status}
           </p>
+        </div>
+      )}
+
+      {hasRemoteUpdate && !isLoading && (
+        <div className="flex flex-col gap-3 border-b border-blue-100 bg-blue-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div>
+            <p className="text-sm font-semibold text-blue-950">A newer workbook is available.</p>
+            <p className="mt-1 text-sm text-blue-900/75">
+              {hasUnsavedChanges
+                ? "Save or discard your local edits before re-fetching."
+                : "Re-fetch to load the latest version from Supabase."}
+            </p>
+          </div>
         </div>
       )}
 

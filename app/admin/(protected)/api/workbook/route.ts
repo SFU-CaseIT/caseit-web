@@ -9,7 +9,19 @@ const STORAGE_BUCKET = "caseit-workbooks";
 const MAX_WORKBOOK_SIZE = 40 * 1024 * 1024;
 const MAX_COMPRESSED_SIZE = 40 * 1024 * 1024;
 
-export async function GET() {
+type EventWorkbookRow = {
+  workbook: unknown;
+  storage_path: string | null;
+  updated_at: string;
+};
+
+function workbookRevision(
+  row: Pick<EventWorkbookRow, "storage_path" | "updated_at"> | null,
+): string | null {
+  return row ? row.storage_path ?? row.updated_at : null;
+}
+
+export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
   const userId = claimsData?.claims?.sub;
@@ -42,9 +54,28 @@ export async function GET() {
     );
   }
 
+  if (new URL(request.url).searchParams.get("check") === "1") {
+    const { data, error } = await supabase
+      .from("event_workbooks")
+      .select("storage_path, updated_at")
+      .eq("event_id", EVENT_ID)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Could not check the event workbook version.", error);
+      return NextResponse.json(
+        { error: "Could not check for workbook updates. Please try again." },
+        { status: 500 },
+      );
+    }
+
+    const version = data as unknown as Pick<EventWorkbookRow, "storage_path" | "updated_at"> | null;
+    return NextResponse.json({ revision: workbookRevision(version) });
+  }
+
   const { data, error } = await supabase
     .from("event_workbooks")
-    .select("workbook, storage_path")
+    .select("workbook, storage_path, updated_at")
     .eq("event_id", EVENT_ID)
     .maybeSingle();
 
@@ -57,13 +88,15 @@ export async function GET() {
   }
 
   if (!data) {
-    return NextResponse.json({ data: { sheets: [] } });
+    return NextResponse.json({ data: { sheets: [] }, revision: null });
   }
 
-  if (data.storage_path) {
+  const workbookRecord = data as unknown as EventWorkbookRow;
+
+  if (workbookRecord.storage_path) {
     const { data: file, error: downloadError } = await supabase.storage
       .from(STORAGE_BUCKET)
-      .download(data.storage_path);
+      .download(workbookRecord.storage_path);
 
     if (downloadError) {
       console.error("Could not download the event workbook from Supabase Storage.", downloadError);
@@ -84,7 +117,10 @@ export async function GET() {
         );
       }
 
-      return NextResponse.json({ data: workbook });
+      return NextResponse.json({
+        data: workbook,
+        revision: workbookRevision(workbookRecord),
+      });
     } catch (storageError) {
       console.error("Could not decode the stored event workbook.", storageError);
       return NextResponse.json(
@@ -94,7 +130,7 @@ export async function GET() {
     }
   }
 
-  if (!isAdminWorkbookData(data.workbook)) {
+  if (!isAdminWorkbookData(workbookRecord.workbook)) {
     console.error("The saved event workbook has an invalid format.");
     return NextResponse.json(
       { error: "The saved workbook has an invalid format." },
@@ -102,7 +138,10 @@ export async function GET() {
     );
   }
 
-  return NextResponse.json({ data: data.workbook });
+  return NextResponse.json({
+    data: workbookRecord.workbook,
+    revision: workbookRevision(workbookRecord),
+  });
 }
 
 export async function PUT(request: NextRequest) {
@@ -187,9 +226,9 @@ export async function PUT(request: NextRequest) {
     );
   }
 
-  if (!isAdminWorkbookData(body) || body.sheets.length === 0) {
+  if (!isAdminWorkbookData(body)) {
     return NextResponse.json(
-      { error: "Import a valid workbook before saving." },
+      { error: "Save request contains an invalid workbook." },
       { status: 400 },
     );
   }
@@ -228,12 +267,13 @@ export async function PUT(request: NextRequest) {
     );
   }
 
+  const updatedAt = new Date().toISOString();
   const { error } = await supabase.from("event_workbooks").upsert(
     {
       event_id: EVENT_ID,
       workbook: { sheets: [] },
       storage_path: storagePath,
-      updated_at: new Date().toISOString(),
+      updated_at: updatedAt,
       updated_by: userId,
     },
     { onConflict: "event_id" },
@@ -266,5 +306,5 @@ export async function PUT(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, revision: storagePath });
 }
