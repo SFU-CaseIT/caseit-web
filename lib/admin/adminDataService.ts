@@ -1,6 +1,7 @@
 export type CellValue = string | number | boolean | null;
 
 export type AdminSheetData = {
+  id: string;
   name: string;
   columns: string[];
   rows: Array<Record<string, CellValue> & { id: number }>;
@@ -23,6 +24,8 @@ export function isAdminWorkbookData(value: unknown): value is AdminWorkbookData 
       if (!("name" in sheet) || !("columns" in sheet) || !("rows" in sheet)) return false;
 
       return (
+        "id" in sheet &&
+        typeof sheet.id === "string" &&
         typeof sheet.name === "string" &&
         Array.isArray(sheet.columns) &&
         sheet.columns.every((column: unknown) => typeof column === "string") &&
@@ -44,3 +47,19 @@ export function isAdminWorkbookData(value: unknown): value is AdminWorkbookData 
     })
   );
 }
+
+export type SheetMetadata = {
+  id: string;
+  name: string;
+  path: string;
+};
+
+export type SheetManifest = {
+  revision: string;
+  sheets: SheetMetadata[];
+};
+
+export type WorkbookInfo = {
+  id: string;
+  name: string;
+};

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { NavBar } from "@/components/navigation/nav";
 import { Footer } from "@/components/footer";
+import Script from "next/script";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
@@ -30,6 +31,18 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/imgs/favicon-32x32.png" sizes="32x32" />
+        <Script id="capture-install-prompt" strategy="beforeInteractive">
+          {`window.addEventListener("beforeinstallprompt", function (event) {
+            event.preventDefault();
+            window.caseitInstallPrompt = event;
+            window.dispatchEvent(new Event("caseit-install-change"));
+          });
+          window.addEventListener("appinstalled", function () {
+            window.caseitInstallPrompt = null;
+            window.caseitAppInstalled = true;
+            window.dispatchEvent(new Event("caseit-install-change"));
+          });`}
+        </Script>
       </head>
       <body className="font-dinProRegular ">
         <NavBar />
