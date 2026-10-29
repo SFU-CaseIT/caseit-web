@@ -3,7 +3,7 @@ import { gunzipSync } from "node:zlib";
 import { NextResponse, type NextRequest } from "next/server";
 import { isAdminWorkbookData, type SheetManifest, type SheetMetadata } from "@/lib/admin/adminDataService";
 import { createSheetUploadGrant, verifySheetUploadGrant } from "@/lib/admin/sheetUploadGrant";
-import { notifyAdminsWorkbookUpdated } from "@/lib/admin/webPushNotifications";
+import { notifyWorkbook, readWorkbookNotificationTargets, type DeletedNotificationTarget } from "@/lib/admin/webPushNotifications";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -105,11 +105,28 @@ export async function POST(request: NextRequest) {
         p_expected: body.expected, p_workbooks: body.workbooks, p_deleted: body.deleted,
       });
       if (error) throw error;
-      if (!data) return NextResponse.json({ error: "The workbook list or a deleted workbook changed. Export any sheet drafts you need, then undo changes and re-fetch." }, { status: 409 });
-      try {
-        await notifyAdminsWorkbookUpdated();
-      } catch (error) {
-        console.error("Workbook names or order were saved, but push notifications failed.", error);
+      if (!data || typeof data.success !== "boolean" || !Array.isArray(data.deleted_notifications) && data.success) {
+        throw new Error("Invalid workbook list save response.");
+      }
+      if (!data.success) return NextResponse.json({ error: "The workbook list or a deleted workbook changed. Export any sheet drafts you need, then undo changes and re-fetch." }, { status: 409 });
+      const deletedTargets: DeletedNotificationTarget[] = data.deleted_notifications;
+      const deletedNames = new Map(deletedTargets.map((target) => [target.id, target.name]));
+      for (const [id, name] of deletedNames) {
+        try {
+          await notifyWorkbook(name, "deleted", deletedTargets.filter((target) => target.id === id));
+        } catch (error) {
+          console.error("Workbook was deleted, but push notifications failed.", error);
+        }
+      }
+      for (const [index, workbook] of body.workbooks.entries()) {
+        const previousIndex = body.expected.findIndex((previous) => previous.id === workbook.id);
+        if (previousIndex >= 0 && (previousIndex !== index || body.expected[previousIndex].name !== workbook.name)) {
+          try {
+            await notifyWorkbook(workbook.name, "updated", await readWorkbookNotificationTargets(workbook.id));
+          } catch (error) {
+            console.error("Workbook names or order were saved, but push notifications failed.", error);
+          }
+        }
       }
       return NextResponse.json({ success: true });
     } catch (error) {
@@ -250,7 +267,10 @@ export async function PUT(request: NextRequest) {
     }
 
     try {
-      await notifyAdminsWorkbookUpdated();
+      const { data: workbook, error: nameError } = await createAdminClient().from("event_sheet_workbooks")
+        .select("name").eq("event_id", body.workbookId).maybeSingle();
+      if (nameError || !workbook) throw nameError ?? new Error("Workbook no longer exists.");
+      await notifyWorkbook(workbook.name, "updated", await readWorkbookNotificationTargets(body.workbookId));
     } catch (error) {
       console.error("The workbook was saved, but push notifications could not be sent.", error);
     }

@@ -81,7 +81,11 @@ WEB_PUSH_VAPID_PRIVATE_KEY=your-vapid-private-key
 WEB_PUSH_VAPID_SUBJECT=mailto:your-email@example.com
 ```
 
+For an existing admin database, apply `supabase/migrations/20261105000000_admin_master_and_timestamps.sql` in the Supabase SQL Editor to remove unused admin and push-subscription timestamps. The migration stops if it finds a timestamp-dependent trigger that needs review. Apply `supabase/migrations/20261106000000_remove_workbook_admins.sql` to remove the unused workbook-admin association table and any previously added `admins.master` column. The `admins` table remains the authorization allowlist.
+
 In the admin workspace, **Install app** opens the browser's install prompt when available. On iPhone or iPad, use Safari's Share menu and select Add to Home Screen. Other browsers may offer installation through their own menu; installation generally requires HTTPS or localhost. Notifications are enabled separately.
+
+Run `supabase/migrations/20261107000000_workbook_push_preferences.sql` in the Supabase SQL Editor before deploying workbook-specific notifications. In **Notifications**, select the workbooks for this device and confirm. Existing devices start with no workbooks selected. The dropdown reuses the saved workbook list and keeps device selections in memory while the page is open; Re-fetch refreshes the workbook list. The selection can be changed at any time; saved workbook changes and deletions notify only subscribed devices. Push delivery failures do not undo a workbook save.
 
 Start the development server:
 

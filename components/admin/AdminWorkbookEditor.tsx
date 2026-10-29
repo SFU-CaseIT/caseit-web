@@ -5,7 +5,9 @@ import { DataGrid, renderTextEditor, type Column } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 import * as XLSX from "xlsx";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import FadeIn from "@/components/FadeIn";
 import EditableTabs from "@/components/admin/EditableTabs";
+import { useWorkbookList } from "@/components/admin/WorkbookListContext";
 import {
   cacheSnapshot,
   fetchManifest,
@@ -145,6 +147,7 @@ function normalizeSheetNames(data: AdminWorkbookData): AdminWorkbookData {
 }
 
 export default function AdminWorkbookEditor() {
+  const { setSavedWorkbooks, setWorkbookListError } = useWorkbookList();
   const [workbooks, setWorkbooks] = useState<WorkbookInfo[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [visitedIds, setVisitedIds] = useState<string[]>([]);
@@ -178,11 +181,14 @@ export default function AdminWorkbookEditor() {
         if (!controller.signal.aborted) {
           setBaseline(result);
           setWorkbooks(result);
+          setSavedWorkbooks(result);
+          setWorkbookListError("");
         }
       } catch (error) {
         if (controller.signal.aborted) return;
         console.error("Could not load workbooks.", error);
         setListError(error instanceof Error ? error.message : "Could not load workbooks.");
+        setWorkbookListError("Could not load workbooks. Use Re-fetch to try again.");
       } finally {
         if (!controller.signal.aborted) setLoadingList(false);
       }
@@ -192,7 +198,7 @@ export default function AdminWorkbookEditor() {
       controller.abort();
       window.removeEventListener("caseit-admin-signout", cancelLoad);
     };
-  }, []);
+  }, [setSavedWorkbooks, setWorkbookListError]);
 
   function selectWorkbook(id: string) {
     if (controlsDisabled) return;
@@ -240,6 +246,8 @@ export default function AdminWorkbookEditor() {
       if (listDirty) {
         await saveWorkbookList(baseline, workbooks, deleted.flatMap((item) => item.revision ? [{ id: item.id, revision: item.revision }] : []));
         setBaseline(workbooks);
+        setSavedWorkbooks(workbooks);
+        setWorkbookListError("");
       }
       const deletedIds = new Set(deleted.map((item) => item.id));
       setDeleted([]);
@@ -288,6 +296,8 @@ export default function AdminWorkbookEditor() {
       if (controller.signal.aborted) return;
       setBaseline(latest);
       setWorkbooks(latest);
+      setSavedWorkbooks(latest);
+      setWorkbookListError("");
       setVisitedIds((ids) => ids.filter((id) => latest.some((item) => item.id === id)));
       setEditorStates((states) => Object.fromEntries(Object.entries(states).filter(([id]) => latest.some((item) => item.id === id))));
       if (selectedId && latest.some((item) => item.id === selectedId)) {
@@ -330,10 +340,12 @@ export default function AdminWorkbookEditor() {
           <div className="relative" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setDeleteOpen(false); }} onKeyDown={(event) => { if (event.key === "Escape") setDeleteOpen(false); }}>
             <button aria-expanded={deleteOpen} aria-controls="delete-options" className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || !selectedId || !selectedState?.ready} onClick={() => setDeleteOpen((open) => !open)} type="button">Delete</button>
             {deleteOpen && (
-              <div id="delete-options" className="absolute right-0 z-20 mt-1 min-w-40 rounded-md border border-black/10 bg-white p-1 shadow-lg">
+              <FadeIn className="absolute right-0 z-20 mt-1 min-w-40">
+              <div id="delete-options" className="rounded-md border border-black/10 bg-white p-1 shadow-lg">
                 <button className="block min-h-11 w-full rounded px-3 text-left text-sm hover:bg-black/5 disabled:opacity-50" disabled={controlsDisabled || !selectedState?.hasSheet} onClick={() => { if (selectedId) editorRefs.current[selectedId]?.deleteSheet(); setDeleteOpen(false); }} type="button">Delete sheet</button>
                 <button className="block min-h-11 w-full rounded px-3 text-left text-sm hover:bg-black/5 disabled:opacity-50" disabled={controlsDisabled || !selectedId || !selectedState?.ready} onClick={() => { deleteWorkbook(); setDeleteOpen(false); }} type="button">Delete workbook</button>
               </div>
+              </FadeIn>
             )}
           </div>
         </div>
