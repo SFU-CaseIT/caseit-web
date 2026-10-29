@@ -5,131 +5,21 @@ import { DataGrid, renderTextEditor, type Column } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 import * as XLSX from "xlsx";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { createClient as createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
-  isAdminWorkbookData,
+  cacheSnapshot,
+  fetchManifest,
+  loadSnapshot,
+  readCachedSnapshot,
+  saveSnapshot,
+  type WorkbookSnapshot,
+} from "@/lib/admin/sheetWorkbookClient";
+import {
   type AdminSheetData,
   type AdminWorkbookData,
   type CellValue,
 } from "@/lib/admin/adminDataService";
 
 type GridRow = Record<string, CellValue> & { id: number };
-
-const WORKBOOK_CACHE_KEY = "caseit-admin-workbook-caseit-2027-v2";
-const WORKBOOK_CACHE_TTL_MS = 365 * 24 * 60 * 60 * 1000;
-const WORKBOOK_CACHE_DB_NAME = "caseit-admin-cache";
-const WORKBOOK_CACHE_STORE_NAME = "workbooks";
-
-type CachedWorkbook = {
-  key: string;
-  expiresAt: number;
-  revision: string | null;
-  data: AdminWorkbookData;
-};
-
-let memoryCachedWorkbook: CachedWorkbook | null = null;
-
-function openWorkbookCache(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(WORKBOOK_CACHE_DB_NAME, 1);
-    request.onupgradeneeded = () => {
-      if (!request.result.objectStoreNames.contains(WORKBOOK_CACHE_STORE_NAME)) {
-        request.result.createObjectStore(WORKBOOK_CACHE_STORE_NAME, { keyPath: "key" });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error("Could not open workbook cache."));
-    request.onblocked = () => reject(new Error("Workbook cache is blocked by another tab."));
-  });
-}
-
-function isValidCachedWorkbook(value: unknown): value is CachedWorkbook {
-  if (typeof value !== "object" || value === null) return false;
-  if (
-    !("key" in value) ||
-    !("expiresAt" in value) ||
-    !("revision" in value) ||
-    !("data" in value)
-  ) {
-    return false;
-  }
-
-  return (
-    value.key === WORKBOOK_CACHE_KEY &&
-    typeof value.expiresAt === "number" &&
-    value.expiresAt > Date.now() &&
-    (typeof value.revision === "string" || value.revision === null) &&
-    isAdminWorkbookData(value.data)
-  );
-}
-
-async function readCachedWorkbook(): Promise<CachedWorkbook | null> {
-  if (memoryCachedWorkbook && isValidCachedWorkbook(memoryCachedWorkbook)) {
-    return memoryCachedWorkbook;
-  }
-
-  if (typeof indexedDB === "undefined") return null;
-
-  try {
-    const database = await openWorkbookCache();
-    const cached = await new Promise<unknown>((resolve, reject) => {
-      const transaction = database.transaction(WORKBOOK_CACHE_STORE_NAME, "readonly");
-      const request = transaction.objectStore(WORKBOOK_CACHE_STORE_NAME).get(WORKBOOK_CACHE_KEY);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error ?? new Error("Could not read workbook cache."));
-      transaction.oncomplete = () => database.close();
-      transaction.onerror = () => {
-        database.close();
-        reject(transaction.error ?? new Error("Could not read workbook cache."));
-      };
-      transaction.onabort = () => {
-        database.close();
-        reject(transaction.error ?? new Error("Workbook cache read was aborted."));
-      };
-    });
-
-    if (!isValidCachedWorkbook(cached)) return null;
-    memoryCachedWorkbook = cached;
-    return cached;
-  } catch (error) {
-    console.warn("Could not read the cached admin workbook.", error);
-    return null;
-  }
-}
-
-async function cacheWorkbook(data: AdminWorkbookData, revision: string | null): Promise<void> {
-  const cached: CachedWorkbook = {
-    key: WORKBOOK_CACHE_KEY,
-    expiresAt: Date.now() + WORKBOOK_CACHE_TTL_MS,
-    revision,
-    data,
-  };
-  memoryCachedWorkbook = cached;
-
-  if (typeof indexedDB === "undefined") return;
-
-  try {
-    const database = await openWorkbookCache();
-    await new Promise<void>((resolve, reject) => {
-      const transaction = database.transaction(WORKBOOK_CACHE_STORE_NAME, "readwrite");
-      transaction.objectStore(WORKBOOK_CACHE_STORE_NAME).put(cached);
-      transaction.oncomplete = () => {
-        database.close();
-        resolve();
-      };
-      transaction.onerror = () => {
-        database.close();
-        reject(transaction.error ?? new Error("Could not write workbook cache."));
-      };
-      transaction.onabort = () => {
-        database.close();
-        reject(transaction.error ?? new Error("Workbook cache write was aborted."));
-      };
-    });
-  } catch (error) {
-    console.warn("Could not cache the admin workbook in IndexedDB.", error);
-  }
-}
 
 function columnName(index: number): string {
   let name = "";
@@ -161,7 +51,7 @@ function rowsToSheetData(name: string, values: unknown[][]): AdminSheetData {
     return row;
   });
 
-  return { name, columns, rows };
+  return { id: crypto.randomUUID(), name, columns, rows };
 }
 
 function cloneWorkbook(data: AdminWorkbookData): AdminWorkbookData {
@@ -239,6 +129,7 @@ export default function AdminWorkbookEditor() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefetching, setIsRefetching] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [isUndoing, startUndoTransition] = useTransition();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [hasLoadError, setHasLoadError] = useState(false);
@@ -246,6 +137,8 @@ export default function AdminWorkbookEditor() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const loadControllerRef = useRef<AbortController | null>(null);
   const lastSavedWorkbookRef = useRef<AdminWorkbookData>({ sheets: [] });
+  const savedSnapshotRef = useRef<WorkbookSnapshot | null>(null);
+  const dirtySheetIdsRef = useRef(new Set<string>());
 
   const activeSheet = workbookData.sheets[activeSheetIndex];
 
@@ -256,21 +149,11 @@ export default function AdminWorkbookEditor() {
     const cancelLoad = () => controller.abort();
     window.addEventListener("caseit-admin-signout", cancelLoad);
 
-    async function checkForRemoteUpdate(revision: string | null) {
+    async function checkForRemoteUpdate(revision: string) {
       try {
-        const response = await fetch("/admin/api/workbook?check=1", {
-          signal: controller.signal,
-        });
-        const result = (await response.json()) as
-          | { revision: string | null }
-          | { error: string };
-
-        if (!response.ok || "error" in result) {
-          throw new Error("error" in result ? result.error : "Could not check for workbook updates.");
-        }
-
-        if (mounted && !controller.signal.aborted) {
-          setHasRemoteUpdate(result.revision !== revision);
+        const manifest = await fetchManifest(controller.signal);
+        if (mounted && !controller.signal.aborted && savedSnapshotRef.current?.manifest.revision === revision) {
+          setHasRemoteUpdate(manifest.revision !== revision);
         }
       } catch (error) {
         if (controller.signal.aborted) return;
@@ -280,36 +163,30 @@ export default function AdminWorkbookEditor() {
     }
 
     async function loadWorkbook() {
-      const cached = await readCachedWorkbook();
+      const cached = await readCachedSnapshot();
       if (cached) {
         if (mounted && !controller.signal.aborted) {
-          setWorkbookData(cached.data);
-          lastSavedWorkbookRef.current = cloneWorkbook(cached.data);
+          savedSnapshotRef.current = cached;
+          setWorkbookData(cached.workbook);
+          lastSavedWorkbookRef.current = cloneWorkbook(cached.workbook);
           setHasLoadError(false);
           setIsLoading(false);
-          void checkForRemoteUpdate(cached.revision);
+          void checkForRemoteUpdate(cached.manifest.revision);
         }
         return;
       }
 
       try {
-        const response = await fetch("/admin/api/workbook", {
-          signal: controller.signal,
-        });
-        const result = (await response.json()) as
-          | { data: AdminWorkbookData; revision: string | null }
-          | { error: string };
-
-        if (!response.ok || "error" in result) {
-          throw new Error("error" in result ? result.error : "Could not load the workbook.");
-        }
+        const manifest = await fetchManifest(controller.signal);
+        const snapshot = await loadSnapshot(manifest, null, controller.signal);
 
         if (mounted && !controller.signal.aborted) {
-          setWorkbookData(result.data);
-          lastSavedWorkbookRef.current = cloneWorkbook(result.data);
+          savedSnapshotRef.current = snapshot;
+          setWorkbookData(snapshot.workbook);
+          lastSavedWorkbookRef.current = cloneWorkbook(snapshot.workbook);
           setHasLoadError(false);
           setHasRemoteUpdate(false);
-          void cacheWorkbook(result.data, result.revision);
+          await cacheSnapshot(snapshot);
         }
       } catch (error) {
         if (controller.signal.aborted) return;
@@ -340,9 +217,9 @@ export default function AdminWorkbookEditor() {
         renderEditCell: renderTextEditor,
         resizable: true,
         width: 160,
-        editable: !isSaving && !isLoading && !isRefetching && !isUndoing,
+        editable: !isSaving && !isLoading && !isRefetching && !isUndoing && !isImporting,
       })) ?? [],
-    [activeSheet, isLoading, isRefetching, isSaving, isUndoing],
+    [activeSheet, isLoading, isRefetching, isSaving, isUndoing, isImporting],
   );
 
   function updateWorkbook(nextData: AdminWorkbookData, message = "Unsaved changes") {
@@ -359,6 +236,7 @@ export default function AdminWorkbookEditor() {
         Math.min(currentIndex, Math.max(restoredWorkbook.sheets.length - 1, 0)),
       );
       setHasUnsavedChanges(false);
+      dirtySheetIdsRef.current.clear();
       setStatus("");
     });
   }
@@ -375,6 +253,7 @@ export default function AdminWorkbookEditor() {
 
   function handleRowsChange(rows: GridRow[]) {
     if (!activeSheet) return;
+    dirtySheetIdsRef.current.add(activeSheet.id);
     const sheets = workbookData.sheets.map((sheet, index) =>
       index === activeSheetIndex ? { ...sheet, rows } : sheet,
     );
@@ -386,6 +265,7 @@ export default function AdminWorkbookEditor() {
     event.target.value = "";
     if (!file) return;
 
+    setIsImporting(true);
     try {
       const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
       const sourceName = file.name.replace(/\.[^.]+$/, "").trim() || "Workbook";
@@ -409,6 +289,8 @@ export default function AdminWorkbookEditor() {
     } catch (error) {
       console.error("Could not read the selected workbook.", error);
       setStatus("Could not read that workbook.");
+    } finally {
+      setIsImporting(false);
     }
   }
 
@@ -417,68 +299,16 @@ export default function AdminWorkbookEditor() {
     setStatus("");
 
     try {
-      const workbookJson = JSON.stringify(workbookData);
-      let requestBody = new Blob([workbookJson], { type: "application/json" });
-
-      if (typeof CompressionStream !== "undefined") {
-        const compressedBody = await new Response(
-          requestBody.stream().pipeThrough(new CompressionStream("gzip")),
-        ).blob();
-
-        if (compressedBody.size < requestBody.size) {
-          requestBody = new Blob([compressedBody], { type: "application/gzip" });
-        }
-      }
-
-      const uploadResponse = await fetch("/admin/api/workbook", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: "{}",
-      });
-      const uploadResult = (await uploadResponse.json()) as
-        | { path: string; token: string }
-        | { error: string };
-
-      if (!uploadResponse.ok || "error" in uploadResult) {
-        throw new Error(
-          "error" in uploadResult
-            ? uploadResult.error
-            : "Could not prepare the workbook upload. Please try again.",
-        );
-      }
-
-      const supabase = createSupabaseBrowserClient();
-      const { error: uploadError } = await supabase.storage
-        .from("caseit-workbooks")
-        .uploadToSignedUrl(uploadResult.path, uploadResult.token, requestBody, {
-          contentType: requestBody.type,
-          upsert: false,
-        });
-
-      if (uploadError) {
-        throw new Error(`Could not upload the workbook to Supabase Storage: ${uploadError.message}`);
-      }
-
-      const response = await fetch("/admin/api/workbook", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ storagePath: uploadResult.path }),
-      });
-      const result = (await response.json()) as
-        | { success: true; revision: string }
-        | { error: string };
-
-      if (!response.ok || "error" in result) {
-        throw new Error(
-          "error" in result ? result.error : "Could not save the workbook. Please try again.",
-        );
-      }
+      if (!savedSnapshotRef.current) throw new Error("Could not save without a loaded workbook.");
+      const snapshot = await saveSnapshot(workbookData, savedSnapshotRef.current, dirtySheetIdsRef.current);
+      savedSnapshotRef.current = snapshot;
 
       setHasUnsavedChanges(false);
       lastSavedWorkbookRef.current = cloneWorkbook(workbookData);
+      dirtySheetIdsRef.current.clear();
       setStatus("Workbook saved");
       setHasRemoteUpdate(false);
-      void cacheWorkbook(workbookData, result.revision);
+      await cacheSnapshot(snapshot);
     } catch (error) {
       console.error("Could not save the admin workbook.", error);
       setStatus(error instanceof Error ? error.message : "Could not save the workbook. Please try again.");
@@ -494,22 +324,17 @@ export default function AdminWorkbookEditor() {
     setStatus("");
 
     try {
-      const response = await fetch("/admin/api/workbook", { signal });
-      const result = (await response.json()) as
-        | { data: AdminWorkbookData; revision: string | null }
-        | { error: string };
-
-      if (!response.ok || "error" in result) {
-        throw new Error("error" in result ? result.error : "Could not reload the workbook.");
-      }
-
-      setWorkbookData(result.data);
-      lastSavedWorkbookRef.current = cloneWorkbook(result.data);
+      const manifest = await fetchManifest(signal);
+      const snapshot = await loadSnapshot(manifest, savedSnapshotRef.current, signal);
+      savedSnapshotRef.current = snapshot;
+      setWorkbookData(snapshot.workbook);
+      lastSavedWorkbookRef.current = cloneWorkbook(snapshot.workbook);
+      dirtySheetIdsRef.current.clear();
       setActiveSheetIndex(0);
       setHasRemoteUpdate(false);
       setHasLoadError(false);
       setStatus("Workbook re-fetched");
-      void cacheWorkbook(result.data, result.revision);
+      await cacheSnapshot(snapshot);
     } catch (error) {
       if (signal?.aborted) return;
       console.error("Could not re-fetch the admin workbook.", error);
@@ -521,6 +346,7 @@ export default function AdminWorkbookEditor() {
 
   const isErrorStatus =
     status.startsWith("Could not") ||
+    status.startsWith("The workbook changed") ||
     status.startsWith("The saved") ||
     status.startsWith("You do not") ||
     status.startsWith("Your session");
@@ -548,13 +374,13 @@ export default function AdminWorkbookEditor() {
             ref={fileInputRef}
             accept=".xlsx,.xls,.csv"
             className="sr-only"
-            disabled={isLoading || isRefetching || isSaving || isUndoing || hasLoadError}
+            disabled={isLoading || isRefetching || isSaving || isUndoing || isImporting || hasLoadError}
             onChange={handleImport}
             type="file"
           />
           <button
             className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isLoading || isRefetching || isSaving || hasLoadError}
+            disabled={isLoading || isRefetching || isSaving || isUndoing || isImporting || hasLoadError}
             onClick={() => fileInputRef.current?.click()}
             type="button"
           >
@@ -562,7 +388,7 @@ export default function AdminWorkbookEditor() {
           </button>
           <button
             className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isLoading || isRefetching || hasLoadError || !workbookData.sheets.length}
+            disabled={isLoading || isRefetching || isImporting || hasLoadError || !workbookData.sheets.length}
             onClick={handleExport}
             type="button"
           >
@@ -570,7 +396,7 @@ export default function AdminWorkbookEditor() {
           </button>
           <button
             className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isLoading || isRefetching || isSaving || isUndoing || hasLoadError || !activeSheet}
+            disabled={isLoading || isRefetching || isSaving || isUndoing || isImporting || hasLoadError || !activeSheet}
             onClick={handleDeleteSheet}
             type="button"
           >
@@ -578,7 +404,7 @@ export default function AdminWorkbookEditor() {
           </button>
           <button
             className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isLoading || isRefetching || isSaving || isUndoing || hasLoadError || !hasUnsavedChanges}
+            disabled={isLoading || isRefetching || isSaving || isUndoing || isImporting || hasLoadError || !hasUnsavedChanges}
             onClick={handleUndoChanges}
             type="button"
           >
@@ -586,7 +412,7 @@ export default function AdminWorkbookEditor() {
           </button>
           <button
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isLoading || isRefetching || isSaving || isUndoing || hasLoadError || hasUnsavedChanges}
+            disabled={isLoading || isRefetching || isSaving || isUndoing || isImporting || hasLoadError || hasUnsavedChanges}
             onClick={handleRefetch}
             type="button"
           >
@@ -600,7 +426,7 @@ export default function AdminWorkbookEditor() {
           </button>
           <button
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-redDark bg-redDark px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-buttonRedDark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-redDark disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isLoading || isRefetching || isSaving || isUndoing || hasLoadError || !hasUnsavedChanges}
+            disabled={isLoading || isRefetching || isSaving || isUndoing || isImporting || hasLoadError || !hasUnsavedChanges}
             onClick={handleSave}
             type="button"
           >
