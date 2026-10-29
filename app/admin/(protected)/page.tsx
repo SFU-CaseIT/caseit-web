@@ -1,6 +1,7 @@
 import { signOut } from "./actions";
 import AdminWorkbookEditor from "@/components/admin/AdminWorkbookEditor";
 import AdminPushNotifications from "@/components/admin/AdminPushNotifications";
+import InstallAppButton from "@/components/admin/InstallAppButton";
 import { SignOutSubmitButton } from "@/components/admin/SignOutSubmitButton";
 
 // DEFAULT /ADMIN PAGE (PROTECTED)
@@ -15,6 +16,7 @@ export default function AdminDashboard() {
         </div>
         <div className="flex flex-wrap items-center gap-4">
           <AdminPushNotifications />
+          <InstallAppButton />
           <form action={signOut}>
             <SignOutSubmitButton />
           </form>

@@ -81,7 +81,7 @@ WEB_PUSH_VAPID_PRIVATE_KEY=your-vapid-private-key
 WEB_PUSH_VAPID_SUBJECT=mailto:your-email@example.com
 ```
 
-For an existing workbook database, apply `supabase/migrations/20261101000000_remove_workbook_updated_at.sql` once in the Supabase SQL Editor to remove the workbook's last-updated timestamp. Workbook revisions continue to detect changes and protect against conflicting saves.
+In the admin workspace, **Install app** opens the browser's install prompt when available. On iPhone or iPad, use Safari's Share menu and select Add to Home Screen. Other browsers may offer installation through their own menu; installation generally requires HTTPS or localhost. Notifications are enabled separately.
 
 Start the development server:
 

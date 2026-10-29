@@ -7,6 +7,7 @@ import {
   type AdminWorkbookData,
   type SheetManifest,
   type SheetMetadata,
+  type WorkbookInfo,
 } from "@/lib/admin/adminDataService";
 
 export type WorkbookSnapshot = {
@@ -45,14 +46,14 @@ function openCache(): Promise<IDBDatabase> {
   });
 }
 
-export async function readCachedSnapshot(): Promise<WorkbookSnapshot | null> {
+export async function readCachedSnapshot(workbookId: string): Promise<WorkbookSnapshot | null> {
   if (typeof indexedDB === "undefined") return null;
   try {
     const db = await openCache();
     return await new Promise((resolve, reject) => {
       const tx = db.transaction(STORE, "readonly");
       const store = tx.objectStore(STORE);
-      const manifestRequest = store.get("manifest");
+      const manifestRequest = store.get(`manifest:${workbookId}`);
       let snapshot: WorkbookSnapshot | null = null;
       manifestRequest.onsuccess = () => {
         const manifest: unknown = manifestRequest.result;
@@ -60,7 +61,7 @@ export async function readCachedSnapshot(): Promise<WorkbookSnapshot | null> {
         const sheets: AdminSheetData[] = [];
         let received = 0;
         manifest.sheets.forEach((meta, index) => {
-          const sheetRequest = store.get(`sheet:${meta.id}:${meta.path}`);
+          const sheetRequest = store.get(`sheet:${workbookId}:${meta.id}:${meta.path}`);
           sheetRequest.onsuccess = () => {
             sheets[index] = sheetRequest.result as AdminSheetData;
             received += 1;
@@ -89,31 +90,31 @@ export async function readCachedSnapshot(): Promise<WorkbookSnapshot | null> {
   }
 }
 
-export async function cacheSnapshot(snapshot: WorkbookSnapshot): Promise<void> {
+export async function cacheSnapshot(workbookId: string, snapshot: WorkbookSnapshot): Promise<void> {
   if (typeof indexedDB === "undefined") return;
   try {
     const db = await openCache();
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(STORE, "readwrite");
       const store = tx.objectStore(STORE);
-      const previousRequest = store.get("manifest");
+      const previousRequest = store.get(`manifest:${workbookId}`);
       previousRequest.onsuccess = () => {
         const previous: unknown = previousRequest.result;
-        const nextKeys = new Set(snapshot.manifest.sheets.map((meta) => `sheet:${meta.id}:${meta.path}`));
+        const nextKeys = new Set(snapshot.manifest.sheets.map((meta) => `sheet:${workbookId}:${meta.id}:${meta.path}`));
         if (isSheetManifest(previous)) {
           previous.sheets.forEach((meta) => {
-            const key = `sheet:${meta.id}:${meta.path}`;
+            const key = `sheet:${workbookId}:${meta.id}:${meta.path}`;
             if (!nextKeys.has(key)) store.delete(key);
           });
         }
         snapshot.manifest.sheets.forEach((meta, index) => {
-          const key = `sheet:${meta.id}:${meta.path}`;
+          const key = `sheet:${workbookId}:${meta.id}:${meta.path}`;
           const entry = store.getKey(key);
           entry.onsuccess = () => {
             if (entry.result === undefined) store.put(snapshot.workbook.sheets[index], key);
           };
         });
-        store.put(snapshot.manifest, "manifest");
+        store.put(snapshot.manifest, `manifest:${workbookId}`);
       };
       tx.oncomplete = () => { db.close(); resolve(); };
       tx.onerror = () => { db.close(); reject(tx.error); };
@@ -142,13 +143,32 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   return result as T;
 }
 
-export async function fetchManifest(signal?: AbortSignal): Promise<SheetManifest> {
-  const result = await requestJson<unknown>("/admin/api/workbook", { signal, cache: "no-store" });
+export async function fetchWorkbooks(signal?: AbortSignal): Promise<WorkbookInfo[]> {
+  const result = await requestJson<{ workbooks: unknown }>("/admin/api/workbook", { signal, cache: "no-store" });
+  if (!Array.isArray(result.workbooks) || !result.workbooks.every((item: unknown) =>
+    typeof item === "object" && item !== null && "id" in item && "name" in item
+    && typeof item.id === "string" && typeof item.name === "string")) {
+    throw new Error("The workbook list is invalid.");
+  }
+  return result.workbooks;
+}
+
+export async function saveWorkbookList(expected: WorkbookInfo[], workbooks: WorkbookInfo[], deleted: { id: string; revision: string }[]): Promise<void> {
+  await requestJson<{ success: boolean }>("/admin/api/workbook", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "save-list", expected, workbooks, deleted }),
+  });
+}
+
+export async function fetchManifest(workbookId: string, signal?: AbortSignal): Promise<SheetManifest> {
+  const result = await requestJson<unknown>(`/admin/api/workbook?workbookId=${encodeURIComponent(workbookId)}`, { signal, cache: "no-store" });
   if (!isSheetManifest(result)) throw new Error("The workbook manifest is invalid.");
   return result;
 }
 
 export async function loadSnapshot(
+  workbookId: string,
   manifest: SheetManifest,
   cached: WorkbookSnapshot | null,
   signal?: AbortSignal,
@@ -163,7 +183,7 @@ export async function loadSnapshot(
     const { urls } = await requestJson<{ urls: { id: string; url: string }[] }>("/admin/api/workbook", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "download", revision: manifest.revision, ids: missing.map((meta) => meta.id) }),
+      body: JSON.stringify({ action: "download", workbookId, revision: manifest.revision, ids: missing.map((meta) => meta.id) }),
       signal,
     });
     const expectedIds = new Set(missing.map((sheet) => sheet.id));
@@ -204,6 +224,7 @@ export async function loadSnapshot(
 }
 
 export async function saveSnapshot(
+  workbookId: string,
   workbook: AdminWorkbookData,
   baseline: WorkbookSnapshot,
   dirtyIds: Set<string>,
@@ -229,7 +250,7 @@ export async function saveSnapshot(
     const upload = await requestJson<{ path: string; token: string; grant: string }>("/admin/api/workbook", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "upload", sheetId: sheet.id }),
+      body: JSON.stringify({ action: "upload", workbookId, sheetId: sheet.id }),
     });
     const { error } = await supabase.storage.from("caseit-workbooks")
       .uploadToSignedUrl(upload.path, upload.token, file, { contentType: file.type, upsert: false });
@@ -240,7 +261,7 @@ export async function saveSnapshot(
   const manifest = await requestJson<unknown>("/admin/api/workbook", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ revision: baseline.manifest.revision, sheets, grants }),
+    body: JSON.stringify({ workbookId, revision: baseline.manifest.revision, sheets, grants }),
   });
   if (!isSheetManifest(manifest)
     || manifest.sheets.length !== sheets.length

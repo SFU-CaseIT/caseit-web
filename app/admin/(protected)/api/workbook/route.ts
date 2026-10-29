@@ -7,7 +7,6 @@ import { notifyAdminsWorkbookUpdated } from "@/lib/admin/webPushNotifications";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-const EVENT_ID = "94fcefcf-3b5a-4894-b2a5-770f2a33dce4";
 const BUCKET = "caseit-workbooks";
 const MAX_SHEET_BYTES = 40 * 1024 * 1024;
 const MAX_SHEETS = 100;
@@ -31,13 +30,13 @@ async function authorize() {
   return { userId };
 }
 
-async function readManifest(): Promise<SheetManifest> {
-  const { data, error } = await createAdminClient().rpc("read_sheet_workbook", { p_event_id: EVENT_ID });
-  if (error || !data) {
+async function readManifest(workbookId: string): Promise<SheetManifest | null> {
+  const { data, error } = await createAdminClient().rpc("read_sheet_workbook", { p_event_id: workbookId });
+  if (error) {
     console.error("Could not read the workbook sheet manifest.", error);
     throw new Error("Could not load the workbook. Check that the sheet migration has been applied.");
   }
-  return data as SheetManifest;
+  return data as SheetManifest | null;
 }
 
 function isSheetMetadata(value: unknown): value is SheetMetadata {
@@ -48,11 +47,24 @@ function isSheetMetadata(value: unknown): value is SheetMetadata {
     && typeof value.path === "string" && value.path.length <= 512;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const auth = await authorize();
   if (auth.response) return auth.response;
   try {
-    return NextResponse.json(await readManifest(), { headers: { "Cache-Control": "no-store" } });
+    const workbookId = request.nextUrl.searchParams.get("workbookId");
+    if (workbookId === null) {
+      const { data, error } = await createAdminClient().from("event_sheet_workbooks")
+        .select("event_id, name").order("position").order("event_id");
+      if (error) throw error;
+      return NextResponse.json(
+        { workbooks: data.map((workbook) => ({ id: workbook.event_id, name: workbook.name })) },
+        { headers: { "Cache-Control": "no-store" } },
+      );
+    }
+    if (!UUID.test(workbookId)) return NextResponse.json({ error: "Invalid workbook ID." }, { status: 400 });
+    const manifest = await readManifest(workbookId);
+    if (!manifest) return NextResponse.json({ error: "Workbook not found." }, { status: 404 });
+    return NextResponse.json(manifest, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("Could not load workbook metadata.", error);
     return NextResponse.json({ error: "Could not load workbook metadata. Please try again." }, { status: 500 });
@@ -72,14 +84,53 @@ export async function POST(request: NextRequest) {
   if (!body || typeof body !== "object" || !("action" in body)) {
     return NextResponse.json({ error: "Invalid workbook request." }, { status: 400 });
   }
+  if (body.action === "save-list") {
+    const validList = (value: unknown): value is { id: string; name: string }[] =>
+      Array.isArray(value) && value.length <= 500 && value.every((item: unknown) =>
+        typeof item === "object" && item !== null && "id" in item && "name" in item
+        && typeof item.id === "string" && UUID.test(item.id)
+        && typeof item.name === "string" && item.name.trim() === item.name
+        && item.name.length > 0 && item.name.length <= 120);
+    if (!("expected" in body) || !("workbooks" in body) || !("deleted" in body)
+      || !validList(body.expected) || !validList(body.workbooks)
+      || !Array.isArray(body.deleted) || body.deleted.length > 500
+      || !body.deleted.every((item: unknown) =>
+        typeof item === "object" && item !== null && "id" in item && "revision" in item
+        && typeof item.id === "string" && UUID.test(item.id)
+        && typeof item.revision === "string" && UUID.test(item.revision))) {
+      return NextResponse.json({ error: "Invalid workbook list." }, { status: 400 });
+    }
+    try {
+      const { data, error } = await createAdminClient().rpc("save_workbook_list", {
+        p_expected: body.expected, p_workbooks: body.workbooks, p_deleted: body.deleted,
+      });
+      if (error) throw error;
+      if (!data) return NextResponse.json({ error: "The workbook list or a deleted workbook changed. Export any sheet drafts you need, then undo changes and re-fetch." }, { status: 409 });
+      try {
+        await notifyAdminsWorkbookUpdated();
+      } catch (error) {
+        console.error("Workbook names or order were saved, but push notifications failed.", error);
+      }
+      return NextResponse.json({ success: true });
+    } catch (error) {
+      console.error("Could not save workbook names and order.", error);
+      return NextResponse.json({ error: "Could not save workbook names and order." }, { status: 500 });
+    }
+  }
+  if (!("workbookId" in body)
+    || typeof body.workbookId !== "string" || !UUID.test(body.workbookId)) {
+    return NextResponse.json({ error: "Invalid workbook request." }, { status: 400 });
+  }
 
   try {
+    const manifest = await readManifest(body.workbookId);
+    if (!manifest) return NextResponse.json({ error: "Workbook not found." }, { status: 404 });
     const storage = createAdminClient().storage.from(BUCKET);
     if (body.action === "upload") {
       if (!("sheetId" in body) || typeof body.sheetId !== "string" || !UUID.test(body.sheetId)) {
         return NextResponse.json({ error: "Invalid sheet ID." }, { status: 400 });
       }
-      const path = `${EVENT_ID}/${body.sheetId}/${randomUUID()}.json`;
+      const path = `${body.workbookId}/${body.sheetId}/${randomUUID()}.json`;
       const { data, error } = await storage.createSignedUploadUrl(path, { upsert: false });
       if (error || !data) throw error ?? new Error("No signed upload returned.");
       return NextResponse.json({ path, token: data.token, grant: createSheetUploadGrant(auth.userId, path) }, {
@@ -90,7 +141,6 @@ export async function POST(request: NextRequest) {
     if (body.action === "download" && "revision" in body && "ids" in body
       && typeof body.revision === "string" && Array.isArray(body.ids)
       && body.ids.length <= MAX_SHEETS && body.ids.every((id: unknown) => typeof id === "string" && UUID.test(id))) {
-      const manifest = await readManifest();
       if (manifest.revision !== body.revision) {
         return NextResponse.json({ error: "The workbook changed. Please re-fetch." }, { status: 409 });
       }
@@ -123,7 +173,9 @@ export async function PUT(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Invalid workbook save request." }, { status: 400 });
   }
-  if (!body || typeof body !== "object" || !("revision" in body) || !("sheets" in body)
+  if (!body || typeof body !== "object" || !("workbookId" in body)
+    || typeof body.workbookId !== "string" || !UUID.test(body.workbookId)
+    || !("revision" in body) || !("sheets" in body)
     || typeof body.revision !== "string" || !UUID.test(body.revision)
     || !Array.isArray(body.sheets) || body.sheets.length > MAX_SHEETS
     || !body.sheets.every(isSheetMetadata)) {
@@ -140,7 +192,8 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    const manifest = await readManifest();
+    const manifest = await readManifest(body.workbookId);
+    if (!manifest) return NextResponse.json({ error: "Workbook not found." }, { status: 404 });
     if (manifest.revision !== body.revision) {
       return NextResponse.json({ error: "The workbook changed on another device. Your draft is preserved; export it before undoing and re-fetching." }, { status: 409 });
     }
@@ -155,7 +208,7 @@ export async function PUT(request: NextRequest) {
     const storage = createAdminClient().storage.from(BUCKET);
     for (const sheet of sheets) {
       if (existing.get(sheet.id)?.path === sheet.path) continue;
-      const prefix = `${EVENT_ID}/${sheet.id}/`;
+      const prefix = `${body.workbookId}/${sheet.id}/`;
       const filename = sheet.path.slice(prefix.length);
       if (!sheet.path.startsWith(prefix) || !filename.endsWith(".json") || !UUID.test(filename.slice(0, -5))
         || !verifySheetUploadGrant(auth.userId, sheet.path, Reflect.get(grants, sheet.id))) {
@@ -186,7 +239,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const { data: revision, error } = await createAdminClient().rpc("commit_sheet_workbook", {
-      p_event_id: EVENT_ID,
+      p_event_id: body.workbookId,
       p_expected_revision: body.revision,
       p_sheets: sheets,
       p_user_id: auth.userId,

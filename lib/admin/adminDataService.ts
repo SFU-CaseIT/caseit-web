@@ -58,3 +58,8 @@ export type SheetManifest = {
   revision: string;
   sheets: SheetMetadata[];
 };
+
+export type WorkbookInfo = {
+  id: string;
+  name: string;
+};
