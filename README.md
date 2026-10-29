@@ -1,138 +1,30 @@
-
 # CaseIT Website
 
-The official website for CaseIT, a Simon Fraser University Beedie School of Business club focused on case competitions. The site gives students, alumni, sponsors, and visitors an overview of CaseIT's team, achievements, partnerships, events, competition results, and ways to get involved.
+The website for CaseIT, a case competition club at SFU Beedie. Built with Next.js, React, TypeScript, and Supabase.
 
-## Tech Stack
+## Local setup
 
-- Next.js with the App Router
-- React and TypeScript
-- Tailwind CSS
-- `react-data-grid` for editable spreadsheet views
-- `xlsx` for workbook and CSV import/export
-- Supabase for authentication and admin functionality
-- Microsoft Clarity for analytics
-- Vercel-compatible deployment
-
-## Project Structure
-
-```text
-app/
-	(public)/          Public website pages and layouts
-		2025/            2025 event content
-		2026/            2026 event content
-		about/           About CaseIT and get-involved pages
-		contact/         Contact page
-		history/         History, media, and recap pages
-		sponsor/         Sponsor information and opportunities
-	admin/             Admin login and protected admin pages
-		(protected)/     Authenticated admin dashboard and workbook editor
-components/          Reusable UI components and navigation
-	admin/             Workbook editor and admin controls
-content/              Text and page data used throughout the site
-lib/admin/           Workbook data service and sync integration hooks
-lib/supabase/         Supabase browser, server, and middleware helpers
-public/               Images, fonts, logos, and other static assets
-styles/               Global CSS and Tailwind styles
-```
-
-The public site is grouped under `app/(public)`. Parentheses indicate a Next.js route group and are not included in the URL. The protected admin area is available at `/admin` and requires Supabase authentication and authorization.
-
-## Requirements
-
-- Node.js 20.9 or newer
-- npm
-- Supabase credentials for features that use the admin area or Supabase-backed data
-
-## Local Setup
-
-From the repository root:
+Requires Node.js 20.9 or newer and npm.
 
 ```bash
 npm install
 ```
 
-Create a local environment file from the provided template:
-
-```bash
-cp .env.example .env.local
-```
-
-On Windows PowerShell, use:
-
-```powershell
-Copy-Item .env.example .env.local
-```
-
-Set the following values in `.env.local`:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
-NEXT_PUBLIC_CLARITY_PROJECT_ID=your-clarity-project-id
-```
-
-For admin push notifications, also set:
-
-```env
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
-NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY=your-vapid-public-key
-WEB_PUSH_VAPID_PRIVATE_KEY=your-vapid-private-key
-WEB_PUSH_VAPID_SUBJECT=mailto:your-email@example.com
-```
-
-For an existing admin database, apply `supabase/migrations/20261105000000_admin_master_and_timestamps.sql` in the Supabase SQL Editor to remove unused admin and push-subscription timestamps. The migration stops if it finds a timestamp-dependent trigger that needs review. Apply `supabase/migrations/20261106000000_remove_workbook_admins.sql` to remove the unused workbook-admin association table and any previously added `admins.master` column. The `admins` table remains the authorization allowlist.
-
-In the admin workspace, **Install app** opens the browser's install prompt when available. On iPhone or iPad, use Safari's Share menu and select Add to Home Screen. Other browsers may offer installation through their own menu; installation generally requires HTTPS or localhost. Notifications are enabled separately.
-
-Run `supabase/migrations/20261107000000_workbook_push_preferences.sql` in the Supabase SQL Editor before deploying workbook-specific notifications. In **Notifications**, select the workbooks for this device and confirm. Existing devices start with no workbooks selected. The dropdown reuses the saved workbook list and keeps device selections in memory while the page is open; Re-fetch refreshes the workbook list. The selection can be changed at any time; saved workbook changes and deletions notify only subscribed devices. Push delivery failures do not undo a workbook save.
-
-Start the development server:
+Copy `.env.example` to `.env.local` and provide the Supabase credentials. Configure the Clarity and web push variables if those features are needed. Never commit credentials.
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The site reloads automatically as files are changed.
+Open [http://localhost:3000](http://localhost:3000). The `/admin` area requires an authorized Supabase account.
 
-If PowerShell blocks `npm.ps1`, run the npm executable directly:
+## Commands
 
-```powershell
-npm.cmd run dev
-```
-
-## Available Commands
-
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Start the local development server |
-| `npm run build` | Create an optimized production build |
-| `npm run start` | Serve the production build locally |
-| `npm run lint` | Run ESLint and apply automatic fixes |
-| `npm audit` | Audit all dependencies, including development tools |
-| `npm audit --omit=dev` | Audit production dependencies only |
-
-To test the production build locally:
-
-```bash
-npm run build
-npm run start
-```
-
-## Content and Assets
-
-- Add or update page copy in the appropriate file under `content/`.
-- Add reusable UI in `components/` rather than duplicating page markup.
-- Add images, fonts, and logos under `public/` and reference them with paths beginning with `/`.
-- Add new pages in the matching directory under `app/(public)/`.
+- `npm run dev` - start the development server
+- `npm run build` - build for production
+- `npm run start` - serve the production build
+- `npm run lint` - run ESLint with automatic fixes
 
 ## Deployment
 
-The project can be deployed to Vercel as a standard Next.js application:
-
-1. Import the repository into Vercel.
-2. Set the variables from `.env.example` in the project environment settings.
-3. Use the default build command, `npm run build`.
-4. Deploy.
-
-Do not commit `.env.local` or any Supabase credentials to the repository.
+Deploy as a Next.js application, setting the required environment variables in the hosting provider.

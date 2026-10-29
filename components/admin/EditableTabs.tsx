@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 
 type Item = { id: string; name: string };
 
-export default function EditableTabs({ items, selectedId, label, disabled, maxLength, onSelect, onRename, onMove, onEditingChange, trailingAction }: {
+export default function EditableTabs({ items, selectedId, label, disabled, maxLength, onSelect, onRename, onMove, onEditingChange, trailingAction, workbookDropTargets, highlightedDropTarget, onExternalDrag, onExternalDrop }: {
   items: Item[];
   selectedId: string | null;
   label: string;
@@ -16,6 +16,10 @@ export default function EditableTabs({ items, selectedId, label, disabled, maxLe
   onMove: (id: string, to: number) => void;
   onEditingChange: (editing: boolean) => void;
   trailingAction?: ReactNode;
+  workbookDropTargets?: boolean;
+  highlightedDropTarget?: string | null;
+  onExternalDrag?: (workbookId: string | null) => void;
+  onExternalDrop?: (id: string, workbookId: string) => void;
 }) {
   const [editing, setEditing] = useState<string | null>(null);
   const [value, setValue] = useState("");
@@ -54,7 +58,7 @@ export default function EditableTabs({ items, selectedId, label, disabled, maxLe
     <div>
       <div ref={tabListRef} className="flex w-full min-w-0 max-w-full gap-1 overflow-x-auto px-4" role="tablist" aria-label={label}>
         {items.map((item, index) => (
-          <div className={`flex shrink-0 items-center border-b-2 border-transparent ${dragPreview?.id === item.id ? "opacity-30" : ""}`} data-tab-id={item.id} key={item.id}>
+          <div className={`flex shrink-0 items-center border-b-2 border-transparent ${dragPreview?.id === item.id ? "opacity-30" : ""} ${highlightedDropTarget === item.id ? "rounded-t-md bg-redDark/10" : ""}`} data-tab-id={item.id} data-workbook-drop-id={workbookDropTargets ? item.id : undefined} key={item.id}>
             <button
               aria-label={`Move ${item.name}; use left and right arrow keys`}
               className="touch-none cursor-grab rounded px-2 py-3 text-black/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-redDark disabled:opacity-40"
@@ -76,6 +80,8 @@ export default function EditableTabs({ items, selectedId, label, disabled, maxLe
                 if (!current.active && Math.hypot(event.clientX - current.x, event.clientY - current.y) < 5) return;
                 current.active = true;
                 setDragPreview({ id: current.id, x: event.clientX - current.offsetX, y: event.clientY - current.offsetY, width: current.width });
+                const target = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-workbook-drop-id]");
+                onExternalDrag?.(target?.getAttribute("data-workbook-drop-id") ?? null);
               }}
               onPointerUp={(event) => {
                 const current = drag.current;
@@ -84,11 +90,17 @@ export default function EditableTabs({ items, selectedId, label, disabled, maxLe
                 const targetId = target && tabListRef.current?.contains(target) ? target.getAttribute("data-tab-id") : null;
                 const to = items.findIndex((entry) => entry.id === targetId);
                 if (current.active && to >= 0) onMove(current.id, to);
+                else if (current.active) {
+                  const workbook = target?.closest("[data-workbook-drop-id]");
+                  const workbookId = workbook?.getAttribute("data-workbook-drop-id");
+                  if (workbookId) onExternalDrop?.(current.id, workbookId);
+                }
                 drag.current = null;
                 setDragPreview(null);
+                onExternalDrag?.(null);
               }}
-              onPointerCancel={() => { drag.current = null; setDragPreview(null); }}
-              onLostPointerCapture={() => { drag.current = null; setDragPreview(null); }}
+              onPointerCancel={() => { drag.current = null; setDragPreview(null); onExternalDrag?.(null); }}
+              onLostPointerCapture={() => { drag.current = null; setDragPreview(null); onExternalDrag?.(null); }}
               onKeyDown={(event) => {
                 if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
                   event.preventDefault();

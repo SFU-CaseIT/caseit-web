@@ -1,13 +1,14 @@
 "use client";
 
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, useTransition } from "react";
-import { DataGrid, renderTextEditor, type Column } from "react-data-grid";
+import { Cell, DataGrid, renderTextEditor, type Column, type Renderers } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 import * as XLSX from "xlsx";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import FadeIn from "@/components/FadeIn";
 import EditableTabs from "@/components/admin/EditableTabs";
 import { useWorkbookList } from "@/components/admin/WorkbookListContext";
+import { readXlsxAppearance } from "@/lib/admin/xlsxAppearance";
 import {
   cacheSnapshot,
   fetchManifest,
@@ -19,9 +20,10 @@ import {
   type WorkbookSnapshot,
 } from "@/lib/admin/sheetWorkbookClient";
 import {
-  type AdminSheetData,
   type AdminWorkbookData,
+  type AdminSheetData,
   type CellValue,
+  type CellAppearance,
   type WorkbookInfo,
 } from "@/lib/admin/adminDataService";
 
@@ -34,8 +36,31 @@ type EditorHandle = {
   exportFile: () => void;
   deleteSheet: () => void;
   revision: () => string | null;
+  getSheet: (id: string) => AdminSheetData | undefined;
+  addSheet: (sheet: AdminSheetData) => string | null;
+  removeSheet: (id: string) => void;
 };
 type EditorState = { dirty: boolean; busy: boolean; ready: boolean; hasSheet: boolean; status: string };
+type SheetMove = { source: string; destination: string };
+
+function orderWorkbookSaves(ids: string[], moves: SheetMove[]): string[] | null {
+  const result: string[] = [];
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+  function visit(id: string): boolean {
+    if (visiting.has(id)) return false;
+    if (visited.has(id)) return true;
+    visiting.add(id);
+    for (const move of moves) {
+      if (move.source === id && !visit(move.destination)) return false;
+    }
+    visiting.delete(id);
+    visited.add(id);
+    result.push(id);
+    return true;
+  }
+  return ids.every(visit) ? result : null;
+}
 
 function moveItem<T>(items: T[], from: number, to: number): T[] {
   if (from < 0 || from === to || to < 0 || to >= items.length) return items;
@@ -58,26 +83,6 @@ function columnName(index: number): string {
   return name;
 }
 
-function rowsToSheetData(name: string, values: unknown[][]): AdminSheetData {
-  const width = Math.max(1, ...values.map((row) => row.length));
-  const columns = Array.from({ length: width }, (_, index) => columnName(index));
-  const rows: GridRow[] = values.map((valueRow, rowIndex) => {
-    const row: GridRow = { id: rowIndex };
-    columns.forEach((column, columnIndex) => {
-      const value = valueRow[columnIndex];
-      row[column] =
-        typeof value === "string" || typeof value === "number" || typeof value === "boolean"
-          ? value
-          : value == null
-            ? ""
-            : String(value);
-    });
-    return row;
-  });
-
-  return { id: crypto.randomUUID(), name, columns, rows };
-}
-
 function cloneWorkbook(data: AdminWorkbookData): AdminWorkbookData {
   return {
     sheets: data.sheets.map((sheet) => ({
@@ -88,23 +93,33 @@ function cloneWorkbook(data: AdminWorkbookData): AdminWorkbookData {
   };
 }
 
-function workbookToData(workbook: XLSX.WorkBook): AdminWorkbookData {
+function workbookToData(workbook: XLSX.WorkBook, appearance: Record<string, Record<string, CellAppearance>> = {}): AdminWorkbookData {
   return {
     sheets: workbook.SheetNames.map((name) => {
       const worksheet = workbook.Sheets[name];
-      const values = XLSX.utils.sheet_to_json<unknown[]>(worksheet, {
-        header: 1,
-        defval: "",
-        raw: true,
-      });
-      const valuesWithFormulas = values.map((row, rowIndex) =>
-        row.map((value, columnIndex) => {
-          const formula =
-            worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })]?.f;
-          return formula ? `=${formula}` : value;
-        }),
-      );
-      return rowsToSheetData(name, valuesWithFormulas);
+      const range = worksheet["!ref"] ? XLSX.utils.decode_range(worksheet["!ref"]) : null;
+      if (range && (range.e.r >= 100_000 || range.e.c >= 16_384)) {
+        throw new Error("A sheet exceeds the supported row or column limit.");
+      }
+      const columns = Array.from({ length: (range?.e.c ?? 0) + 1 }, (_, index) => columnName(index));
+      const rows: GridRow[] = Array.from({ length: range ? range.e.r + 1 : 0 }, (_, id) => ({ id }));
+      const formattedDates: NonNullable<AdminWorkbookData["sheets"][number]["formattedDates"]> = {};
+      for (const [address, entry] of Object.entries(worksheet)) {
+        if (!/^[A-Z]{1,3}[1-9][0-9]*$/.test(address)) continue;
+        const { r, c } = XLSX.utils.decode_cell(address);
+        const cell = entry as XLSX.CellObject;
+        if (!rows[r] || !columns[c]) continue;
+        const value = cell.f ? `=${cell.f}` : cell.v;
+        if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+          rows[r][columns[c]] = value;
+          if (typeof value === "number" && typeof cell.z === "string" && typeof cell.w === "string" && XLSX.SSF.is_date(cell.z)) {
+            formattedDates[address] = { value, text: cell.w };
+          }
+        } else if (value != null) {
+          rows[r][columns[c]] = String(value);
+        }
+      }
+      return { id: crypto.randomUUID(), name, columns, rows, appearance: appearance[name], formattedDates };
     }),
   };
 }
@@ -129,21 +144,16 @@ function dataToWorkbook(data: AdminWorkbookData): XLSX.WorkBook {
   return workbook;
 }
 
-function normalizeSheetNames(data: AdminWorkbookData): AdminWorkbookData {
-  const usedNames = new Set<string>();
-  return {
-    sheets: data.sheets.map((sheet, index) => {
-      const baseName = sheet.name.trim().slice(0, 31) || `Sheet${index + 1}`;
-      let name = baseName;
-      let suffix = 2;
-      while (usedNames.has(name)) {
-        name = `${baseName.slice(0, 31 - String(suffix).length - 1)}_${suffix}`;
-        suffix += 1;
-      }
-      usedNames.add(name);
-      return { ...sheet, name };
-    }),
-  };
+function uniqueSheetName(name: string, usedNames: Set<string>, fallback: string): string {
+  const baseName = name.trim() ? name.slice(0, 31) : fallback;
+  let result = baseName;
+  let suffix = 2;
+  while (usedNames.has(result.toLowerCase())) {
+    result = `${baseName.slice(0, 31 - String(suffix).length - 1)}_${suffix}`;
+    suffix += 1;
+  }
+  usedNames.add(result.toLowerCase());
+  return result;
 }
 
 export default function AdminWorkbookEditor() {
@@ -163,11 +173,14 @@ export default function AdminWorkbookEditor() {
   const [baseline, setBaseline] = useState<WorkbookInfo[]>([]);
   const [deleted, setDeleted] = useState<{ id: string; name: string; revision: string | null }[]>([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [moves, setMoves] = useState<SheetMove[]>([]);
+  const [pendingMove, setPendingMove] = useState<{ source: string; destination: string; sheet: string } | null>(null);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
   const editorRefs = useRef<Record<string, EditorHandle | null>>({});
   const listDirty = JSON.stringify(workbooks) !== JSON.stringify(baseline);
   const anyDirty = listDirty || deleted.length > 0 || Object.values(editorStates).some((state) => state.dirty);
   const selectedState = selectedId ? editorStates[selectedId] : undefined;
-  const controlsDisabled = busy || savingAll || undoingAll || refetchingList || editingList || Boolean(selectedState?.busy);
+  const controlsDisabled = busy || savingAll || undoingAll || refetchingList || editingList || Boolean(pendingMove) || Boolean(selectedState?.busy);
   const statusMessage = listError || selectedState?.status || listStatus;
   const statusIsError = Boolean(listError) || /^(Could not|The workbook changed|The saved|You do not|Your session)/.test(statusMessage);
 
@@ -220,6 +233,10 @@ export default function AdminWorkbookEditor() {
 
   function deleteWorkbook() {
     if (!selectedId) return;
+    if (moves.length) {
+      setListError("Save or undo sheet moves before deleting a workbook.");
+      return;
+    }
     const id = selectedId;
     const saved = baseline.some((item) => item.id === id);
     const revision = saved ? editorRefs.current[id]?.revision() : null;
@@ -253,12 +270,15 @@ export default function AdminWorkbookEditor() {
       setDeleted([]);
       setVisitedIds((ids) => ids.filter((id) => !deletedIds.has(id)));
       setEditorStates((states) => Object.fromEntries(Object.entries(states).filter(([id]) => !deletedIds.has(id))));
-      for (const id of visitedIds) {
+      const saveOrder = orderWorkbookSaves(visitedIds, moves);
+      if (!saveOrder) throw new Error("Save or undo the current sheet moves before moving sheets in both directions.");
+      for (const id of saveOrder) {
         if (deleted.some((item) => item.id === id)) continue;
         if (editorStates[id]?.dirty && !(await editorRefs.current[id]?.save())) {
           const name = workbooks.find((workbook) => workbook.id === id)?.name ?? "A workbook";
           throw new Error(`${name} could not be saved. Previously saved changes remain saved; other drafts are preserved. Select the workbook for details.`);
         }
+        setMoves((current) => current.filter((move) => move.source !== id));
       }
       setListStatus("Changes saved");
     } catch (error) {
@@ -274,6 +294,7 @@ export default function AdminWorkbookEditor() {
     startUndoAll(() => {
       setWorkbooks(baseline);
       setDeleted([]);
+      setMoves([]);
       const savedIds = new Set(baseline.map((item) => item.id));
       visitedIds.filter((id) => savedIds.has(id)).forEach((id) => editorRefs.current[id]?.undo());
       setVisitedIds((ids) => ids.filter((id) => savedIds.has(id)));
@@ -324,6 +345,41 @@ export default function AdminWorkbookEditor() {
     });
   }, []);
 
+  function moveSheet(source: string, sheet: string, destination: string) {
+    if (controlsDisabled || source === destination || !workbooks.some((workbook) => workbook.id === destination)) return;
+    if (!orderWorkbookSaves(visitedIds, [...moves, { source, destination }])) {
+      setListError("Save or undo the current sheet moves before moving sheets in both directions.");
+      return;
+    }
+    setListError("");
+    setListStatus("");
+    setVisitedIds((ids) => ids.includes(destination) ? ids : [...ids, destination]);
+    setPendingMove({ source, destination, sheet });
+  }
+
+  useEffect(() => {
+    if (!pendingMove) return;
+    const state = editorStates[pendingMove.destination];
+    if (!state || state.busy) return;
+    const source = editorRefs.current[pendingMove.source];
+    const destination = editorRefs.current[pendingMove.destination];
+    const sheet = source?.getSheet(pendingMove.sheet);
+    if (!state.ready || !source || !destination || !sheet) {
+      setListError("Could not move the sheet. Check that both workbooks are loaded and try again.");
+      setPendingMove(null);
+      return;
+    }
+    const error = destination.addSheet({ ...sheet, id: crypto.randomUUID() });
+    if (error) {
+      setListError(error);
+    } else {
+      source.removeSheet(sheet.id);
+      setMoves((current) => [...current, { source: pendingMove.source, destination: pendingMove.destination }]);
+      setListStatus(`Moved ${sheet.name}. Save changes to confirm.`);
+    }
+    setPendingMove(null);
+  }, [pendingMove, editorStates]);
+
   return (
     <section className="mt-8 overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm" aria-label="CaseIT workbook editor">
       <div className="flex flex-col gap-5 border-b border-black/10 bg-[#FAFAFA] p-5 sm:p-6">
@@ -335,7 +391,7 @@ export default function AdminWorkbookEditor() {
           <button className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || !selectedState?.ready} onClick={() => selectedId && editorRefs.current[selectedId]?.importFile()} type="button">Import</button>
           <button className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || anyDirty || loadingList} onClick={() => void refetchAll()} type="button">{refetchingList ? <LoadingSpinner label="Re-fetching..." /> : "Re-fetch"}</button>
           <button className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || !anyDirty} onClick={undoAll} type="button">{undoingAll ? <LoadingSpinner label="Undoing changes..." /> : "Undo changes"}</button>
-          <button className="min-h-11 rounded-md border border-redDark bg-redDark px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" disabled={controlsDisabled || !anyDirty} onClick={() => void saveAll()} type="button">{savingAll ? "Saving..." : "Save changes"}</button>
+          <button className="min-h-11 rounded-md border border-redDark bg-redDark px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" disabled={controlsDisabled || !anyDirty} onClick={() => void saveAll()} type="button">{savingAll ? <LoadingSpinner label="Saving..." light /> : "Save changes"}</button>
           <button className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || !selectedState?.ready || !selectedState.hasSheet} onClick={() => selectedId && editorRefs.current[selectedId]?.exportFile()} type="button">Export .xlsx</button>
           <div className="relative" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setDeleteOpen(false); }} onKeyDown={(event) => { if (event.key === "Escape") setDeleteOpen(false); }}>
             <button aria-expanded={deleteOpen} aria-controls="delete-options" className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || !selectedId || !selectedState?.ready} onClick={() => setDeleteOpen((open) => !open)} type="button">Delete</button>
@@ -363,6 +419,7 @@ export default function AdminWorkbookEditor() {
         <>
           <div className="min-w-0 border-b border-black/10 bg-[#FAFAFA] px-4 pt-3">
             <EditableTabs items={workbooks} label="Workbooks" selectedId={selectedId} disabled={controlsDisabled}
+              workbookDropTargets highlightedDropTarget={dropTarget}
               maxLength={120} onSelect={selectWorkbook} onEditingChange={setEditingList}
               trailingAction={<button aria-label="Add workbook" className="min-h-11 shrink-0 rounded-md px-3 text-xl font-semibold text-redDark focus-visible:outline focus-visible:outline-2 focus-visible:outline-redDark disabled:opacity-50" disabled={controlsDisabled || workbooks.length >= 500} onClick={addWorkbook} title="Add workbook" type="button">+</button>}
               onRename={(id, name) => {
@@ -383,9 +440,10 @@ export default function AdminWorkbookEditor() {
             >
               {visitedIds.includes(workbook.id) && (
                 <WorkbookEditor ref={(handle) => { editorRefs.current[workbook.id] = handle; }}
-                  workbookId={workbook.id} globalBusy={savingAll}
+                  workbookId={workbook.id} globalBusy={savingAll || Boolean(pendingMove)}
                   isNew={!baseline.some((item) => item.id === workbook.id)}
-                  selected={selectedId === workbook.id} onBusyChange={setBusy} onStateChange={reportState} />
+                  selected={selectedId === workbook.id} onBusyChange={setBusy} onStateChange={reportState}
+                  onSheetDrop={moveSheet} onSheetDrag={setDropTarget} />
               )}
             </div>
           ))}
@@ -402,7 +460,9 @@ const WorkbookEditor = forwardRef<EditorHandle, {
   onStateChange: (id: string, state: EditorState) => void;
   globalBusy: boolean;
   isNew: boolean;
-}>(function WorkbookEditor({ workbookId, selected, onBusyChange, onStateChange, globalBusy, isNew }, ref) {
+  onSheetDrop: (source: string, sheet: string, destination: string) => void;
+  onSheetDrag: (destination: string | null) => void;
+}>(function WorkbookEditor({ workbookId, selected, onBusyChange, onStateChange, globalBusy, isNew, onSheetDrop, onSheetDrag }, ref) {
   const [workbookData, setWorkbookData] = useState<AdminWorkbookData>({ sheets: [] });
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
   const [status, setStatus] = useState("");
@@ -536,6 +596,11 @@ const WorkbookEditor = forwardRef<EditorHandle, {
       activeSheet?.columns.map((column) => ({
         key: column,
         name: column,
+        renderCell: ({ row }) => {
+          const value = row[column];
+          const formatted = activeSheet.formattedDates?.[`${column}${row.id + 1}`];
+          return formatted && value === formatted.value ? formatted.text : value;
+        },
         renderEditCell: renderTextEditor,
         resizable: true,
         width: 160,
@@ -543,6 +608,22 @@ const WorkbookEditor = forwardRef<EditorHandle, {
       })) ?? [],
     [activeSheet, isLoading, isRefetching, isSaving, isUndoing, isImporting, globalBusy],
   );
+
+  const renderers = useMemo<Renderers<GridRow, unknown>>(() => ({
+    renderCell: (key, props) => {
+      const style = activeSheet?.appearance?.[`${props.column.key}${props.row.id + 1}`];
+      return <Cell key={key} {...props} style={{
+        ...props.style,
+        backgroundColor: style?.background,
+        color: style?.color,
+        fontFamily: style?.fontFamily,
+        fontSize: style?.fontSize ? `${style.fontSize}pt` : undefined,
+        fontWeight: style?.bold ? "bold" : undefined,
+        fontStyle: style?.italic ? "italic" : undefined,
+        textDecoration: [style?.underline && "underline", style?.strike && "line-through"].filter(Boolean).join(" ") || undefined,
+      }} />;
+    },
+  }), [activeSheet?.appearance]);
 
   function updateWorkbook(nextData: AdminWorkbookData, message = "Unsaved changes") {
     setWorkbookData(nextData);
@@ -566,11 +647,27 @@ const WorkbookEditor = forwardRef<EditorHandle, {
   function handleDeleteSheet() {
     if (!activeSheet || isLoading || isRefetching || isSaving) return;
 
-    const sheets = workbookData.sheets.filter((_, index) => index !== activeSheetIndex);
+    removeSheet(activeSheet.id);
+  }
+
+  function removeSheet(id: string) {
+    const sheets = workbookData.sheets.filter((sheet) => sheet.id !== id);
     setWorkbookData({ sheets });
-    setActiveSheetIndex((index) => Math.min(index, Math.max(sheets.length - 1, 0)));
+    setActiveSheetIndex((index) => {
+      const selectedId = workbookData.sheets[index]?.id;
+      const selectedIndex = sheets.findIndex((sheet) => sheet.id === selectedId);
+      return selectedIndex >= 0 ? selectedIndex : Math.min(index, Math.max(sheets.length - 1, 0));
+    });
     setHasUnsavedChanges(true);
     setStatus("");
+  }
+
+  function addSheet(sheet: AdminSheetData): string | null {
+    if (workbookData.sheets.length >= 100) return "A workbook can contain at most 100 sheets.";
+    const existing = new Set(workbookData.sheets.map((item) => item.name.toLowerCase()));
+    const name = uniqueSheetName(sheet.name, existing, `Sheet${workbookData.sheets.length + 1}`);
+    updateWorkbook({ sheets: [...workbookData.sheets, { ...sheet, name }] });
+    return null;
   }
 
   function handleRowsChange(rows: GridRow[]) {
@@ -589,11 +686,14 @@ const WorkbookEditor = forwardRef<EditorHandle, {
 
     setIsImporting(true);
     try {
-      const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
+      const bytes = await file.arrayBuffer();
+      const isXlsx = file.name.toLowerCase().endsWith(".xlsx");
+      const workbook = XLSX.read(bytes, { type: "array", cellStyles: isXlsx, cellNF: isXlsx, sheetStubs: isXlsx });
+      const appearance = isXlsx ? await readXlsxAppearance(bytes, workbook) : {};
       const sourceName = file.name.replace(/\.[^.]+$/, "").trim() || "Workbook";
-      const importedSheets = workbookToData(workbook).sheets.map((sheet) => ({
+      const importedSheets = workbookToData(workbook, appearance).sheets.map((sheet) => ({
         ...sheet,
-        name: `${sourceName} — ${sheet.name}`,
+        name: isXlsx ? sheet.name : `${sourceName} — ${sheet.name}`,
       }));
 
       if (importedSheets.length === 0) {
@@ -601,16 +701,20 @@ const WorkbookEditor = forwardRef<EditorHandle, {
         return;
       }
 
-      const nextWorkbook = normalizeSheetNames({
-        sheets: [...workbookData.sheets, ...importedSheets],
-      });
+      const usedNames = new Set(workbookData.sheets.map((sheet) => sheet.name.toLowerCase()));
+      const nextWorkbook = {
+        sheets: [...workbookData.sheets, ...importedSheets.map((sheet, index) => ({
+          ...sheet,
+          name: uniqueSheetName(sheet.name, usedNames, `Sheet${workbookData.sheets.length + index + 1}`),
+        }))],
+      };
       setWorkbookData(nextWorkbook);
       setActiveSheetIndex(nextWorkbook.sheets.length - 1);
       setHasUnsavedChanges(true);
       setStatus(`Added ${importedSheets.length} sheet${importedSheets.length === 1 ? "" : "s"}`);
     } catch (error) {
       console.error("Could not read the selected workbook.", error);
-      setStatus("Could not read that workbook.");
+      setStatus(error instanceof Error ? `Could not read that workbook: ${error.message}` : "Could not read that workbook.");
     } finally {
       setIsImporting(false);
     }
@@ -687,6 +791,9 @@ const WorkbookEditor = forwardRef<EditorHandle, {
     exportFile: handleExport,
     deleteSheet: handleDeleteSheet,
     revision: () => savedSnapshotRef.current?.manifest.revision ?? null,
+    getSheet: (id) => workbookData.sheets.find((sheet) => sheet.id === id),
+    addSheet,
+    removeSheet,
   }));
 
   return (
@@ -716,6 +823,7 @@ const WorkbookEditor = forwardRef<EditorHandle, {
       {!isLoading && workbookData.sheets.length > 0 && (
         <EditableTabs items={workbookData.sheets} label="Workbook sheets" selectedId={activeSheet?.id ?? null}
           disabled={globalBusy || isSaving || isRefetching || isImporting || isUndoing} maxLength={31}
+          onExternalDrag={onSheetDrag} onExternalDrop={(sheet, destination) => onSheetDrop(workbookId, sheet, destination)}
           onEditingChange={setIsRenaming}
           onSelect={(id) => setActiveSheetIndex(workbookData.sheets.findIndex((sheet) => sheet.id === id))}
           onRename={(id, name) => {
@@ -755,6 +863,7 @@ const WorkbookEditor = forwardRef<EditorHandle, {
                     onCellClick={({ setActivePosition }) => setActivePosition(true)}
                     onCellDoubleClick={({ setActivePosition }) => setActivePosition(true)}
                     onRowsChange={handleRowsChange}
+                    renderers={renderers}
                     rowKeyGetter={(row) => row.id}
                     rows={sheet.rows}
                   />
