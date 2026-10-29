@@ -83,6 +83,8 @@ WEB_PUSH_VAPID_SUBJECT=mailto:your-email@example.com
 
 Web Push key pairs can be generated with `npx web-push generate-vapid-keys`. Keep the service-role key and VAPID private key server-only; only the VAPID public key is exposed to the browser. Apply `supabase/migrations/20261028000000_admin_push_subscriptions.sql` to the Supabase project before enabling notifications. Push permission is requested only after an admin clicks **Enable notifications**, and push requires HTTPS outside local development. Enabled subscriptions remain active when the PWA is closed or the admin signs out, until notifications are turned off in the admin page or browser settings.
 
+Workbook saves upload the workbook directly to Supabase Storage using a short-lived signed upload token, then send only the small storage path to the application server. This avoids production hosting request-body limits on large workbooks. The private `caseit-workbooks` bucket must permit authenticated admins to create signed uploads and download workbook files through the server. If the bucket restricts MIME types, allow both `application/gzip` and `application/json`: the browser uses gzip when available and smaller, and otherwise uploads JSON.
+
 Start the development server:
 
 ```bash

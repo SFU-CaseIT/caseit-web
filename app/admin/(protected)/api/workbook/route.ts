@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { gunzipSync, gzipSync } from "node:zlib";
+import { gunzipSync } from "node:zlib";
 import { NextResponse, type NextRequest } from "next/server";
 import { isAdminWorkbookData } from "@/lib/admin/adminDataService";
 import { notifyAdminsWorkbookUpdated } from "@/lib/admin/webPushNotifications";
@@ -9,6 +9,15 @@ const EVENT_ID = "caseit-2027";
 const STORAGE_BUCKET = "caseit-workbooks";
 const MAX_WORKBOOK_SIZE = 40 * 1024 * 1024;
 const MAX_COMPRESSED_SIZE = 40 * 1024 * 1024;
+
+function decodeWorkbookBytes(data: Buffer): Buffer {
+  const isGzip = data.length >= 2 && data[0] === 0x1f && data[1] === 0x8b;
+  const decoded = isGzip ? gunzipSync(data, { maxOutputLength: MAX_WORKBOOK_SIZE }) : data;
+  if (decoded.byteLength > MAX_WORKBOOK_SIZE) {
+    throw new Error("The workbook exceeds the maximum uncompressed size.");
+  }
+  return decoded;
+}
 
 type EventWorkbookRow = {
   workbook: unknown;
@@ -108,8 +117,8 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      const compressedData = Buffer.from(await file.arrayBuffer());
-      const workbook = JSON.parse(gunzipSync(compressedData).toString("utf8"));
+      const fileData = Buffer.from(await file.arrayBuffer());
+      const workbook = JSON.parse(decodeWorkbookBytes(fileData).toString("utf8"));
       if (!isAdminWorkbookData(workbook)) {
         console.error("The stored event workbook has an invalid format.");
         return NextResponse.json(
@@ -145,6 +154,55 @@ export async function GET(request: NextRequest) {
   });
 }
 
+export async function POST() {
+  const supabase = await createClient();
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims?.sub;
+
+  if (claimsError || !userId) {
+    return NextResponse.json(
+      { error: "Your session has expired. Sign in again." },
+      { status: 401 },
+    );
+  }
+
+  const { data: admin, error: adminError } = await supabase
+    .from("admins")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (adminError) {
+    console.error("Could not verify admin access for workbook save.", adminError);
+    return NextResponse.json(
+      { error: "Could not verify admin access. Please try again." },
+      { status: 500 },
+    );
+  }
+
+  if (!admin?.user_id) {
+    return NextResponse.json(
+      { error: "You do not have permission to access this workbook." },
+      { status: 403 },
+    );
+  }
+
+  const storagePath = `${EVENT_ID}/${randomUUID()}.json.gz`;
+  const { data, error } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .createSignedUploadUrl(storagePath, { upsert: false });
+
+  if (error || !data) {
+    console.error("Could not prepare a signed event workbook upload.", error);
+    return NextResponse.json(
+      { error: "Could not prepare the workbook upload. Please try again." },
+      { status: 502 },
+    );
+  }
+
+  return NextResponse.json({ path: data.path, token: data.token });
+}
+
 export async function PUT(request: NextRequest) {
   const supabase = await createClient();
   const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
@@ -178,58 +236,70 @@ export async function PUT(request: NextRequest) {
     );
   }
 
-  const contentLength = Number(request.headers.get("content-length"));
-  if (Number.isFinite(contentLength) && contentLength > MAX_COMPRESSED_SIZE) {
-    return NextResponse.json(
-      { error: "The save request is too large (maximum 40 MB)." },
-      { status: 413 },
-    );
+  let storagePath: unknown;
+  try {
+    const body = await request.json();
+    storagePath =
+      typeof body === "object" && body !== null && "storagePath" in body
+        ? body.storagePath
+        : undefined;
+  } catch (error) {
+    console.error("Received an invalid workbook save request.", error);
   }
 
-  let body: unknown;
-  let uploadedWorkbook: Buffer | null = null;
-  try {
-    const requestBody = await request.arrayBuffer();
-    if (requestBody.byteLength > MAX_COMPRESSED_SIZE) {
-      return NextResponse.json(
-        { error: "The save request is too large (maximum 40 MB)." },
-        { status: 413 },
-      );
-    }
-
-    const contentType = request.headers.get("content-type")?.split(";")[0].trim();
-    if (contentType === "application/gzip") {
-      uploadedWorkbook = Buffer.from(requestBody);
-    }
-
-    const bodyText =
-      contentType === "application/gzip"
-        ? await new Response(
-            new Blob([requestBody])
-              .stream()
-              .pipeThrough(new DecompressionStream("gzip")),
-          ).text()
-        : new TextDecoder().decode(requestBody);
-
-    if (new TextEncoder().encode(bodyText).length > MAX_WORKBOOK_SIZE) {
-      return NextResponse.json(
-        { error: "The workbook is too large to save (maximum 40 MB uncompressed)." },
-        { status: 413 },
-      );
-    }
-
-    body = JSON.parse(bodyText);
-  } catch (error) {
-    console.error("Received an invalid or incomplete workbook save request.", error);
+  if (
+    typeof storagePath !== "string" ||
+    !new RegExp(`^${EVENT_ID}/[0-9a-f-]{36}\\.json\\.gz$`, "i").test(storagePath)
+  ) {
     return NextResponse.json(
-      { error: "The save request was incomplete or invalid. Please try saving again." },
+      { error: "The workbook upload reference is invalid. Please try saving again." },
       { status: 400 },
     );
   }
 
-  if (!isAdminWorkbookData(body)) {
+  const { data: uploadedFile, error: downloadError } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .download(storagePath);
+
+  if (downloadError) {
+    console.error("Could not verify the uploaded event workbook.", downloadError);
     return NextResponse.json(
-      { error: "Save request contains an invalid workbook." },
+      { error: "Could not verify the workbook upload. Please try saving again." },
+      { status: 502 },
+    );
+  }
+
+  const removeTemporaryUpload = async () => {
+    const { error } = await supabase.storage.from(STORAGE_BUCKET).remove([storagePath]);
+    if (error) {
+      console.error("Could not remove an uncommitted workbook upload.", error);
+    }
+  };
+
+  try {
+    const compressedWorkbook = Buffer.from(await uploadedFile.arrayBuffer());
+    if (compressedWorkbook.byteLength > MAX_COMPRESSED_SIZE) {
+      await removeTemporaryUpload();
+      return NextResponse.json(
+        { error: "The workbook is too large to save (maximum 40 MB compressed)." },
+        { status: 413 },
+      );
+    }
+
+    const workbookBytes = decodeWorkbookBytes(compressedWorkbook);
+    const workbook = JSON.parse(workbookBytes.toString("utf8"));
+    if (!isAdminWorkbookData(workbook)) {
+      await removeTemporaryUpload();
+      return NextResponse.json(
+        { error: "Save request contains an invalid workbook." },
+        { status: 400 },
+      );
+    }
+  } catch (error) {
+    console.error("Could not validate the uploaded event workbook.", error);
+    await removeTemporaryUpload();
+    return NextResponse.json(
+      { error: "The uploaded workbook is invalid or too large to save." },
       { status: 400 },
     );
   }
@@ -242,32 +312,12 @@ export async function PUT(request: NextRequest) {
 
   if (previousWorkbookError) {
     console.error("Could not read the previous event workbook record.", previousWorkbookError);
+    await removeTemporaryUpload();
     return NextResponse.json(
       { error: "Could not prepare the workbook save. Please try again." },
       { status: 500 },
     );
   }
-  const storagePath = `${EVENT_ID}/${randomUUID()}.json.gz`;
-  const compressedWorkbook =
-    uploadedWorkbook ?? gzipSync(Buffer.from(JSON.stringify(body), "utf8"));
-  const { error: uploadError } = await supabase.storage
-    .from(STORAGE_BUCKET)
-    .upload(storagePath, compressedWorkbook, {
-      contentType: "application/gzip",
-      upsert: false,
-    });
-
-  if (uploadError) {
-    console.error("Could not upload the event workbook to Supabase Storage.", {
-      message: uploadError.message,
-      statusCode: uploadError.statusCode,
-    });
-    return NextResponse.json(
-      { error: "Could not upload the workbook to Supabase Storage. Please try again." },
-      { status: 502 },
-    );
-  }
-
   const updatedAt = new Date().toISOString();
   const { error } = await supabase.from("event_workbooks").upsert(
     {
@@ -286,12 +336,7 @@ export async function PUT(request: NextRequest) {
       code: error.code,
       details: error.details,
     });
-    const { error: cleanupError } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .remove([storagePath]);
-    if (cleanupError) {
-      console.error("Could not remove the unreferenced workbook upload.", cleanupError);
-    }
+    await removeTemporaryUpload();
     return NextResponse.json(
       { error: "Could not save the workbook. Please try again." },
       { status: 500 },

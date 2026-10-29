@@ -5,6 +5,7 @@ import { DataGrid, renderTextEditor, type Column } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 import * as XLSX from "xlsx";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { createClient as createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   isAdminWorkbookData,
   type AdminSheetData,
@@ -417,33 +418,60 @@ export default function AdminWorkbookEditor() {
 
     try {
       const workbookJson = JSON.stringify(workbookData);
-      let requestBody: BodyInit = workbookJson;
-      const headers = new Headers({ "Content-Type": "application/json" });
+      let requestBody = new Blob([workbookJson], { type: "application/json" });
 
       if (typeof CompressionStream !== "undefined") {
-        const uncompressedBody = new Blob([workbookJson]);
         const compressedBody = await new Response(
-          uncompressedBody.stream().pipeThrough(new CompressionStream("gzip")),
+          requestBody.stream().pipeThrough(new CompressionStream("gzip")),
         ).blob();
 
-        if (compressedBody.size < uncompressedBody.size) {
-          requestBody = compressedBody;
-          headers.set("Content-Type", "application/gzip");
+        if (compressedBody.size < requestBody.size) {
+          requestBody = new Blob([compressedBody], { type: "application/gzip" });
         }
+      }
+
+      const uploadResponse = await fetch("/admin/api/workbook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      const uploadResult = (await uploadResponse.json()) as
+        | { path: string; token: string }
+        | { error: string };
+
+      if (!uploadResponse.ok || "error" in uploadResult) {
+        throw new Error(
+          "error" in uploadResult
+            ? uploadResult.error
+            : "Could not prepare the workbook upload. Please try again.",
+        );
+      }
+
+      const supabase = createSupabaseBrowserClient();
+      const { error: uploadError } = await supabase.storage
+        .from("caseit-workbooks")
+        .uploadToSignedUrl(uploadResult.path, uploadResult.token, requestBody, {
+          contentType: requestBody.type,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw new Error(`Could not upload the workbook to Supabase Storage: ${uploadError.message}`);
       }
 
       const response = await fetch("/admin/api/workbook", {
         method: "PUT",
-        headers,
-        body: requestBody,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ storagePath: uploadResult.path }),
       });
       const result = (await response.json()) as
         | { success: true; revision: string }
         | { error: string };
 
       if (!response.ok || "error" in result) {
-        setStatus("error" in result ? result.error : "Could not save the workbook. Please try again.");
-        return;
+        throw new Error(
+          "error" in result ? result.error : "Could not save the workbook. Please try again.",
+        );
       }
 
       setHasUnsavedChanges(false);
@@ -453,7 +481,7 @@ export default function AdminWorkbookEditor() {
       void cacheWorkbook(workbookData, result.revision);
     } catch (error) {
       console.error("Could not save the admin workbook.", error);
-      setStatus("Could not save the workbook. Please try again.");
+      setStatus(error instanceof Error ? error.message : "Could not save the workbook. Please try again.");
     } finally {
       setIsSaving(false);
     }
