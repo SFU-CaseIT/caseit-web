@@ -83,6 +83,24 @@ function columnName(index: number): string {
   return name;
 }
 
+function getRowHeight(row: GridRow, sheet: AdminSheetData): number {
+  let height = 35;
+  for (const column of sheet.columns) {
+    const address = `${column}${row.id + 1}`;
+    const value = row[column];
+    const formatted = sheet.formattedDates?.[address];
+    const text = formatted && value === formatted.value ? formatted.text : value == null ? "" : String(value);
+    if (!text) continue;
+
+    const style = sheet.appearance?.[address];
+    const fontSize = style?.fontSize ? style.fontSize * 4 / 3 : 14;
+    const charsPerLine = Math.max(1, Math.floor(144 / (fontSize * 0.58)));
+    const lines = text.split("\n").reduce((total, line) => total + Math.max(1, Math.ceil(Array.from(line).length / charsPerLine)), 0);
+    height = Math.max(height, Math.ceil(lines * fontSize * 1.35 + 16));
+  }
+  return height;
+}
+
 function cloneWorkbook(data: AdminWorkbookData): AdminWorkbookData {
   return {
     sheets: data.sheets.map((sheet) => ({
@@ -621,6 +639,11 @@ const WorkbookEditor = forwardRef<EditorHandle, {
         fontWeight: style?.bold ? "bold" : undefined,
         fontStyle: style?.italic ? "italic" : undefined,
         textDecoration: [style?.underline && "underline", style?.strike && "line-through"].filter(Boolean).join(" ") || undefined,
+        whiteSpace: "pre-wrap",
+        overflowWrap: "anywhere",
+        alignContent: "start",
+        paddingBlock: 8,
+        lineHeight: 1.35,
       }} />;
     },
   }), [activeSheet?.appearance]);
@@ -864,6 +887,7 @@ const WorkbookEditor = forwardRef<EditorHandle, {
                     onCellDoubleClick={({ setActivePosition }) => setActivePosition(true)}
                     onRowsChange={handleRowsChange}
                     renderers={renderers}
+                    rowHeight={(row) => getRowHeight(row, sheet)}
                     rowKeyGetter={(row) => row.id}
                     rows={sheet.rows}
                   />

@@ -17,7 +17,7 @@ export async function readWorkbookNotificationTargets(workbookId: string): Promi
 }
 
 export async function notifyWorkbook(
-  name: string, action: "updated" | "deleted", subscriptions: NotificationTarget[],
+  name: string, action: "updated" | "deleted", subscriptions: NotificationTarget[], sheetNames: string[] = [],
 ): Promise<void> {
   if (!subscriptions.length) return;
   const publicKey = process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY;
@@ -26,10 +26,16 @@ export async function notifyWorkbook(
   if (!publicKey || !privateKey || !subject) throw new Error("Web Push VAPID configuration is missing.");
   webPush.setVapidDetails(subject, publicKey, privateKey);
 
+  const fullBody = sheetNames.length
+    ? `${name} — ${sheetNames.length === 1 ? "sheet" : "sheets"} changed: ${sheetNames.join(", ")}.`
+    : `${name} was ${action}.`;
+  const body = Array.from(fullBody).length <= 400
+    ? fullBody
+    : `${Array.from(fullBody).slice(0, 397).join("")}...`;
   const expiredEndpoints: string[] = [];
   const payload = JSON.stringify({
     title: `CaseIT workbook ${action}`,
-    body: `${name} was ${action}.`,
+    body,
     url: "/admin",
   });
   const results = await Promise.allSettled(subscriptions.map(async (subscription) => {
