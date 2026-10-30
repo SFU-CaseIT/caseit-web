@@ -47,6 +47,24 @@ function isSheetMetadata(value: unknown): value is SheetMetadata {
     && typeof value.path === "string" && value.path.length <= 512;
 }
 
+function changedSheetNames(previous: SheetMetadata[], next: SheetMetadata[]): string[] {
+  const previousById = new Map(previous.map((sheet, index) => [sheet.id, { sheet, index }]));
+  const nextById = new Map(next.map((sheet, index) => [sheet.id, { sheet, index }]));
+  const names = new Set<string>();
+
+  previous.forEach((sheet, index) => {
+    const current = nextById.get(sheet.id);
+    if (!current) names.add(sheet.name);
+    else if (current.sheet.name !== sheet.name || current.sheet.path !== sheet.path || current.index !== index) {
+      names.add(current.sheet.name);
+    }
+  });
+  next.forEach((sheet) => {
+    if (!previousById.has(sheet.id)) names.add(sheet.name);
+  });
+  return [...names];
+}
+
 export async function GET(request: NextRequest) {
   const auth = await authorize();
   if (auth.response) return auth.response;
@@ -222,6 +240,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const existing = new Map(manifest.sheets.map((sheet) => [sheet.id, sheet]));
+    const updatedSheetNames = changedSheetNames(manifest.sheets, sheets);
     const storage = createAdminClient().storage.from(BUCKET);
     for (const sheet of sheets) {
       if (existing.get(sheet.id)?.path === sheet.path) continue;
@@ -270,7 +289,7 @@ export async function PUT(request: NextRequest) {
       const { data: workbook, error: nameError } = await createAdminClient().from("event_sheet_workbooks")
         .select("name").eq("event_id", body.workbookId).maybeSingle();
       if (nameError || !workbook) throw nameError ?? new Error("Workbook no longer exists.");
-      await notifyWorkbook(workbook.name, "updated", await readWorkbookNotificationTargets(body.workbookId));
+      await notifyWorkbook(workbook.name, "updated", await readWorkbookNotificationTargets(body.workbookId), updatedSheetNames);
     } catch (error) {
       console.error("The workbook was saved, but push notifications could not be sent.", error);
     }
