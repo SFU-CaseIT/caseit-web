@@ -1,13 +1,52 @@
 import { signOut } from "./actions";
-import AdminWorkbookEditor from "@/components/admin/AdminWorkbookEditor";
+import AdminWorkbookEditorLoader from "@/components/admin/AdminWorkbookEditorLoader";
 import AdminPushNotifications from "@/components/admin/AdminPushNotifications";
 import InstallAppButton from "@/components/admin/InstallAppButton";
 import { SignOutSubmitButton } from "@/components/admin/SignOutSubmitButton";
 import { WorkbookListProvider } from "@/components/admin/WorkbookListContext";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 
 // DEFAULT /ADMIN PAGE (PROTECTED)
 
-export default function AdminDashboard() {
+async function requireAdminAccess() {
+  const startedAt = performance.now();
+  const supabase = await createClient();
+  const claimsStartedAt = performance.now();
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+  const claimsMs = performance.now() - claimsStartedAt;
+  const userId = claimsData?.claims?.sub;
+
+  if (claimsError || !userId) {
+    console.info("[admin-auth] access check", {
+      claimsMs: Math.round(claimsMs),
+      roleMs: null,
+      totalMs: Math.round(performance.now() - startedAt),
+    });
+    redirect("/admin/login");
+  }
+
+  const roleStartedAt = performance.now();
+  const { data: admin, error: adminError } = await supabase
+    .from("admins")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const roleMs = performance.now() - roleStartedAt;
+
+  console.info("[admin-auth] access check", {
+    claimsMs: Math.round(claimsMs),
+    roleMs: Math.round(roleMs),
+    totalMs: Math.round(performance.now() - startedAt),
+  });
+
+  if (adminError || !admin?.user_id) {
+    redirect("/admin/login?error=You+do+not+have+admin+access.");
+  }
+}
+
+export default async function AdminDashboard() {
+  await requireAdminAccess();
   return (
     <main className="mx-auto min-h-[60vh] max-w-6xl px-4 pb-10 pt-20 sm:px-6 sm:pt-24 lg:px-8 lg:pt-24">
       <WorkbookListProvider>
@@ -24,7 +63,7 @@ export default function AdminDashboard() {
           </form>
         </div>
       </header>
-      <AdminWorkbookEditor />
+      <AdminWorkbookEditorLoader />
       </WorkbookListProvider>
     </main>
   );

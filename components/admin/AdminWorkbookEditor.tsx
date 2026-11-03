@@ -3,7 +3,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, useTransition } from "react";
 import { Cell, DataGrid, renderTextEditor, type Column, type Renderers } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
-import * as XLSX from "xlsx";
+import type * as XLSX from "xlsx";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import FadeIn from "@/components/FadeIn";
 import EditableTabs from "@/components/admin/EditableTabs";
@@ -111,11 +111,15 @@ function cloneWorkbook(data: AdminWorkbookData): AdminWorkbookData {
   };
 }
 
-function workbookToData(workbook: XLSX.WorkBook, appearance: Record<string, Record<string, CellAppearance>> = {}): AdminWorkbookData {
+function workbookToData(
+  xlsx: typeof import("xlsx"),
+  workbook: XLSX.WorkBook,
+  appearance: Record<string, Record<string, CellAppearance>> = {},
+): AdminWorkbookData {
   return {
     sheets: workbook.SheetNames.map((name) => {
       const worksheet = workbook.Sheets[name];
-      const range = worksheet["!ref"] ? XLSX.utils.decode_range(worksheet["!ref"]) : null;
+      const range = worksheet["!ref"] ? xlsx.utils.decode_range(worksheet["!ref"]) : null;
       if (range && (range.e.r >= 100_000 || range.e.c >= 16_384)) {
         throw new Error("A sheet exceeds the supported row or column limit.");
       }
@@ -124,13 +128,13 @@ function workbookToData(workbook: XLSX.WorkBook, appearance: Record<string, Reco
       const formattedDates: NonNullable<AdminWorkbookData["sheets"][number]["formattedDates"]> = {};
       for (const [address, entry] of Object.entries(worksheet)) {
         if (!/^[A-Z]{1,3}[1-9][0-9]*$/.test(address)) continue;
-        const { r, c } = XLSX.utils.decode_cell(address);
+        const { r, c } = xlsx.utils.decode_cell(address);
         const cell = entry as XLSX.CellObject;
         if (!rows[r] || !columns[c]) continue;
         const value = cell.f ? `=${cell.f}` : cell.v;
         if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
           rows[r][columns[c]] = value;
-          if (typeof value === "number" && typeof cell.z === "string" && typeof cell.w === "string" && XLSX.SSF.is_date(cell.z)) {
+          if (typeof value === "number" && typeof cell.z === "string" && typeof cell.w === "string" && xlsx.SSF.is_date(cell.z)) {
             formattedDates[address] = { value, text: cell.w };
           }
         } else if (value != null) {
@@ -142,21 +146,21 @@ function workbookToData(workbook: XLSX.WorkBook, appearance: Record<string, Reco
   };
 }
 
-function dataToWorkbook(data: AdminWorkbookData): XLSX.WorkBook {
-  const workbook = XLSX.utils.book_new();
+function dataToWorkbook(xlsx: typeof import("xlsx"), data: AdminWorkbookData): XLSX.WorkBook {
+  const workbook = xlsx.utils.book_new();
 
   data.sheets.forEach((sheet) => {
     const values = sheet.rows.map((row) => sheet.columns.map((column) => row[column] ?? ""));
-    const worksheet = XLSX.utils.aoa_to_sheet(values);
+    const worksheet = xlsx.utils.aoa_to_sheet(values);
     values.forEach((row, rowIndex) =>
       row.forEach((value, columnIndex) => {
         if (typeof value === "string" && value.startsWith("=") && value.length > 1) {
-          const address = XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex });
+          const address = xlsx.utils.encode_cell({ r: rowIndex, c: columnIndex });
           worksheet[address] = { t: "n", f: value.slice(1), v: 0 };
         }
       }),
     );
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheet.name.slice(0, 31) || "Sheet");
+    xlsx.utils.book_append_sheet(workbook, worksheet, sheet.name.slice(0, 31) || "Sheet");
   });
 
   return workbook;
@@ -488,6 +492,7 @@ const WorkbookEditor = forwardRef<EditorHandle, {
   const [isRefetching, setIsRefetching] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [isUndoing, startUndoTransition] = useTransition();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -575,18 +580,18 @@ const WorkbookEditor = forwardRef<EditorHandle, {
   }, [workbookId]);
 
   useEffect(() => {
-    if (selected) onBusyChange(isSaving || isImporting || isUndoing || isRefetching || isRenaming);
-  }, [selected, isSaving, isImporting, isUndoing, isRefetching, isRenaming, onBusyChange]);
+    if (selected) onBusyChange(isSaving || isImporting || isExporting || isUndoing || isRefetching || isRenaming);
+  }, [selected, isSaving, isImporting, isExporting, isUndoing, isRefetching, isRenaming, onBusyChange]);
 
   useEffect(() => {
     onStateChange(workbookId, {
       dirty: hasUnsavedChanges,
-      busy: isLoading || isSaving || isImporting || isUndoing || isRefetching || isRenaming,
+      busy: isLoading || isSaving || isImporting || isExporting || isUndoing || isRefetching || isRenaming,
       ready: !isLoading && !hasLoadError,
       hasSheet: Boolean(activeSheet),
-      status: status === "Unsaved changes" || isLoading || isSaving ? "" : status,
+      status: status === "Unsaved changes" || isLoading || isSaving || isExporting ? "" : status,
     });
-  }, [workbookId, hasUnsavedChanges, isLoading, isSaving, isImporting, isUndoing, isRefetching, isRenaming, hasLoadError, activeSheet, status, onStateChange]);
+  }, [workbookId, hasUnsavedChanges, isLoading, isSaving, isImporting, isExporting, isUndoing, isRefetching, isRenaming, hasLoadError, activeSheet, status, onStateChange]);
 
   useEffect(() => {
     if (!selected || !savedSnapshotRef.current || savedSnapshotRef.current.manifest.revision === "pending") return;
@@ -622,9 +627,9 @@ const WorkbookEditor = forwardRef<EditorHandle, {
         renderEditCell: renderTextEditor,
         resizable: true,
         width: 160,
-        editable: !isSaving && !isLoading && !isRefetching && !isUndoing && !isImporting && !globalBusy,
+        editable: !isSaving && !isLoading && !isRefetching && !isUndoing && !isImporting && !isExporting && !globalBusy,
       })) ?? [],
-    [activeSheet, isLoading, isRefetching, isSaving, isUndoing, isImporting, globalBusy],
+    [activeSheet, isLoading, isRefetching, isSaving, isUndoing, isImporting, isExporting, globalBusy],
   );
 
   const renderers = useMemo<Renderers<GridRow, unknown>>(() => ({
@@ -711,10 +716,11 @@ const WorkbookEditor = forwardRef<EditorHandle, {
     try {
       const bytes = await file.arrayBuffer();
       const isXlsx = file.name.toLowerCase().endsWith(".xlsx");
-      const workbook = XLSX.read(bytes, { type: "array", cellStyles: isXlsx, cellNF: isXlsx, sheetStubs: isXlsx });
-      const appearance = isXlsx ? await readXlsxAppearance(bytes, workbook) : {};
+      const xlsx = await import("xlsx");
+      const workbook = xlsx.read(bytes, { type: "array", cellStyles: isXlsx, cellNF: isXlsx, sheetStubs: isXlsx });
+      const appearance = isXlsx ? await readXlsxAppearance(bytes, workbook, xlsx) : {};
       const sourceName = file.name.replace(/\.[^.]+$/, "").trim() || "Workbook";
-      const importedSheets = workbookToData(workbook, appearance).sheets.map((sheet) => ({
+      const importedSheets = workbookToData(xlsx, workbook, appearance).sheets.map((sheet) => ({
         ...sheet,
         name: isXlsx ? sheet.name : `${sourceName} — ${sheet.name}`,
       }));
@@ -800,10 +806,19 @@ const WorkbookEditor = forwardRef<EditorHandle, {
     }
   }
 
-  function handleExport() {
+  async function handleExport() {
     if (!activeSheet) return;
-    const workbook = dataToWorkbook({ sheets: [activeSheet] });
-    XLSX.writeFile(workbook, `${activeSheet.name.replace(/[\\/:*?"<>|]/g, "_") || "sheet"}.xlsx`);
+    setIsExporting(true);
+    try {
+      const xlsx = await import("xlsx");
+      const workbook = dataToWorkbook(xlsx, { sheets: [activeSheet] });
+      xlsx.writeFile(workbook, `${activeSheet.name.replace(/[\\/:*?"<>|]/g, "_") || "sheet"}.xlsx`);
+    } catch (error) {
+      console.error("Could not export the workbook.", error);
+      setStatus(error instanceof Error ? error.message : "Could not export the workbook.");
+    } finally {
+      setIsExporting(false);
+    }
   }
 
   useImperativeHandle(ref, () => ({
@@ -825,7 +840,7 @@ const WorkbookEditor = forwardRef<EditorHandle, {
             ref={fileInputRef}
             accept=".xlsx,.xls,.csv"
             className="sr-only"
-            disabled={isLoading || isRefetching || isSaving || isUndoing || isImporting || hasLoadError}
+            disabled={isLoading || isRefetching || isSaving || isUndoing || isImporting || isExporting || hasLoadError}
             onChange={handleImport}
             type="file"
           />
@@ -845,7 +860,7 @@ const WorkbookEditor = forwardRef<EditorHandle, {
 
       {!isLoading && workbookData.sheets.length > 0 && (
         <EditableTabs items={workbookData.sheets} label="Workbook sheets" selectedId={activeSheet?.id ?? null}
-          disabled={globalBusy || isSaving || isRefetching || isImporting || isUndoing} maxLength={31}
+          disabled={globalBusy || isSaving || isRefetching || isImporting || isExporting || isUndoing} maxLength={31}
           onExternalDrag={onSheetDrag} onExternalDrop={(sheet, destination) => onSheetDrop(workbookId, sheet, destination)}
           onEditingChange={setIsRenaming}
           onSelect={(id) => setActiveSheetIndex(workbookData.sheets.findIndex((sheet) => sheet.id === id))}

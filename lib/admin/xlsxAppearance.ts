@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+import type * as XLSX from "xlsx";
 import type { CellAppearance } from "@/lib/admin/adminDataService";
 import type { Workbook as ExcelWorkbook, Color } from "exceljs";
 
@@ -12,6 +12,7 @@ function fontColor(color: Partial<Color> | undefined, workbook: XLSX.WorkBook): 
 
 export async function readXlsxAppearance(
   bytes: ArrayBuffer, workbook: XLSX.WorkBook,
+  xlsx: typeof import("xlsx"),
 ): Promise<Record<string, Record<string, CellAppearance>>> {
   const ExcelJS = await import("exceljs");
   const styledWorkbook: ExcelWorkbook = new ExcelJS.Workbook();
@@ -46,14 +47,14 @@ export async function readXlsxAppearance(
       if (Object.keys(style).length) styles[address] = style;
     }
     for (const merge of source["!merges"] ?? []) {
-      const master = styles[XLSX.utils.encode_cell(merge.s)];
+      const master = styles[xlsx.utils.encode_cell(merge.s)];
       if (!master?.background) continue;
       if ((merge.e.r - merge.s.r + 1) * (merge.e.c - merge.s.c + 1) > 1_000_000) {
         throw new Error("A merged range is too large to display its background colour.");
       }
       for (let row = merge.s.r; row <= merge.e.r; row++) {
         for (let column = merge.s.c; column <= merge.e.c; column++) {
-          const address = XLSX.utils.encode_cell({ r: row, c: column });
+          const address = xlsx.utils.encode_cell({ r: row, c: column });
           if (!styles[address]?.background) {
             styles[address] = { ...styles[address], background: master.background };
           }

@@ -25,6 +25,12 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
+  const startedAt = performance.now();
   await supabase.auth.getClaims();
+  if (request.nextUrl.pathname === "/admin" && request.method === "GET") {
+    console.info("[admin-auth] middleware claims", {
+      durationMs: Math.round(performance.now() - startedAt),
+    });
+  }
   return response;
 }

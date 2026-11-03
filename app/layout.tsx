@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { NavBar } from "@/components/navigation/nav";
-import { Footer } from "@/components/footer";
 import Script from "next/script";
 import "@/styles/globals.css";
 
@@ -45,14 +43,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="font-dinProRegular ">
-        <NavBar />
-        <div
-          className="transition-all duration-[700ms] origin-[center_458px] ease-[cubic-bezier(.16,1,.3,1)] "
-          id="nav-animation"
-        >
-          {children}
-        </div>
-        <Footer />
+        {children}
       </body>
     </html>
   );
