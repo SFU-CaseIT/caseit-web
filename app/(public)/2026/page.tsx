@@ -28,7 +28,7 @@ export default function CaseIt2027() {
         </BgImgCenter>
       </section>
       {/* ---COMPETITION INFORMATION--- */}
-      <section className="flex flex-col justify-center items-center px-4 md:px-8 xl:px-20 md:mx-auto max-w-[1920px] my-10">
+      <section className="site-container my-10 flex flex-col items-center justify-center">
         <h2 className="mx-auto w-fit font-semibold text-[2rem]  md:text-[2.5rem]">
           Competition Information
         </h2>

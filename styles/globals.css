@@ -1,9 +1,17 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
+html {
+  scroll-behavior: smooth;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .site-container {
+    width: min(calc(100% - clamp(3rem, 10.4vw, 12rem)), 120rem);
+    margin-inline: auto;
   }
   .pause {
     animation-play-state: paused;
@@ -32,4 +40,140 @@
 }
 .menu-open {
   @apply scale-95 opacity-30 overflow-y-hidden;
+}
+
+.scroll-gradient-scenes {
+  display: grid;
+  width: 100%;
+}
+
+.scroll-gradient-final {
+  background-color: transparent;
+}
+
+.scroll-gradient-scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  grid-area: 1 / 1;
+  width: 100%;
+  padding-inline: 1.5rem;
+}
+
+.typewriter-static {
+  display: none;
+}
+
+.typewriter-animated,
+.typewriter-static {
+  align-items: center;
+}
+
+.typewriter-animated {
+  display: inline-flex;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .scroll-gradient-section {
+    height: auto !important;
+  }
+
+  .scroll-gradient-background {
+    position: relative;
+    display: block;
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+    background-image: linear-gradient(180deg, #000000, #be3b35) !important;
+  }
+
+  .scroll-gradient-scenes {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .scroll-gradient-scene {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    transition: none;
+  }
+
+  .scroll-gradient-final {
+    background-color: white;
+  }
+
+  .typewriter-animated {
+    display: none;
+  }
+
+  .typewriter-static {
+    display: inline-flex;
+  }
+
+}
+
+.nav-dropdown {
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-0.5rem);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    visibility 180ms;
+}
+
+.nav-dropdown-root.nav-dropdown-open > .nav-dropdown {
+  pointer-events: auto;
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nav-dropdown li {
+  opacity: 0;
+  transform: translateY(-0.35rem);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.nav-dropdown-root.nav-dropdown-open > .nav-dropdown li {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nav-dropdown li:nth-child(1) {
+  transition-delay: 30ms;
+}
+
+.nav-dropdown li:nth-child(2) {
+  transition-delay: 75ms;
+}
+
+.nav-dropdown li:nth-child(3) {
+  transition-delay: 120ms;
+}
+
+.nav-dropdown-arrow {
+  transition: transform 180ms ease;
+}
+
+.nav-dropdown-root.nav-dropdown-open > button .nav-dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-dropdown,
+  .nav-dropdown li,
+  .nav-dropdown-arrow {
+    transition: none;
+  }
 }

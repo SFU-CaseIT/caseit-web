@@ -1,7 +1,7 @@
 import { signIn } from "./actions";
 import { TextBox } from "@/components/TextBox";
 import { SignInSubmitButton } from "@/components/admin/SignInSubmitButton";
-import FadeIn from "@/components/FadeIn";
+import FadeIn from "@/components/animations/FadeIn";
 
 // LOGIN PAGE
 

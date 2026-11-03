@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import FadeIn from "@/components/FadeIn";
+import FadeIn from "@/components/animations/FadeIn";
 import { useWorkbookList } from "@/components/admin/WorkbookListContext";
 
 function decodeVapidPublicKey(key: string): ArrayBuffer {

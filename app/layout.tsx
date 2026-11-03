@@ -7,12 +7,25 @@ const din = localFont({
   src: [
     { path: "../public/fonts/D-DIN.woff2", weight: "400", style: "normal" },
     {
+      path: "../public/fonts/DINCond-Medium.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
       path: "../public/fonts/D-DIN-Bold.woff2",
       weight: "700",
       style: "normal",
     },
   ],
   variable: "--font-din",
+  display: "swap",
+});
+
+const dinText = localFont({
+  src: "../public/fonts/DIN.woff2",
+  variable: "--font-din-text",
+  weight: "400",
+  style: "normal",
   display: "swap",
 });
 
@@ -56,7 +69,7 @@ export default function RootLayout({
           });`}
         </Script>
       </head>
-      <body className={`${din.variable} font-sans`}>
+      <body className={`${din.variable} ${dinText.variable} font-sans`}>
         {children}
       </body>
     </html>

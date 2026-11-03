@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { LoadingSpinner } from "@/components/animations/LoadingSpinner";
 
 const AdminWorkbookEditor = dynamic(() => import("./AdminWorkbookEditor"), {
   ssr: false,

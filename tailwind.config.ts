@@ -15,6 +15,7 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-din)", "sans-serif"],
         din: ["var(--font-din)", "sans-serif"],
+        dinText: ["var(--font-din-text)", "sans-serif"],
       },
       fontSize: { /* ... unchanged ... */ },
 

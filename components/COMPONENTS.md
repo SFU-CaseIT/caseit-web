@@ -10,15 +10,16 @@ This is an inventory of the reusable React components currently defined under
 | [`Carousel.tsx`](./Carousel.tsx) | `Carousel` | Draggable, automatically scrolling carousel for child elements. |
 | [`CaseItCountdown.tsx`](./CaseItCountdown.tsx) | `CaseItCountdown` | Countdown to a CaseIT event in a selected time zone. |
 | [`ClarityAnalytics.tsx`](./ClarityAnalytics.tsx) | `ClarityAnalytics` | Consent UI and opt-in Microsoft Clarity analytics. |
-| [`LoadingSpinner.tsx`](./LoadingSpinner.tsx) | `LoadingSpinner` | Accessible, reusable loading indicator with a status label. |
-| [`HeroSection.tsx`](./HeroSection.tsx) | `HeroSection` | Animated home-page hero image layout. |
+| [`Countdown.tsx`](./Countdown.tsx) | `Countdown` | Animated numeric statistic with a label. |
 | [`ImgButton.tsx`](./ImgButton.tsx) | `ImgButton` | Image card linked to a page, with an overlaid label. |
 | [`buttons.tsx`](./buttons.tsx) | `ActionButton`, `ImgButton`, `RoundedButton`, `SquareButton`, `PivotButton`, `ArrowButton` | Native action button, link button styles, and a scroll-to-top control. |
+| [`animations/FadeIn.tsx`](./animations/FadeIn.tsx) | `FadeIn` | Animated entrance wrapper. |
+| [`animations/LoadingSpinner.tsx`](./animations/LoadingSpinner.tsx) | `LoadingSpinner` | Accessible, reusable loading indicator with a status label. |
+| [`animations/Typerwriter.tsx`](./animations/Typerwriter.tsx) | `Typerwriter` | Accessible landing headline with a reduced-motion fallback. |
 | [`faq.tsx`](./faq.tsx) | `DesktopFAQ`, `MobileFAQ` | Expandable desktop FAQ and static mobile FAQ presentation. |
 | [`footer.tsx`](./footer.tsx) | `Footer` | Site footer, navigation links, social links, and acknowledgements. |
 | [`img.tsx`](./img.tsx) | `BgImgCenter`, `BgImgLeft`, `ImgLeft`, `ImgRight`, `IconImg` | Background image sections, paired image layouts, and icon/text layout. |
 | [`imgRibbons.tsx`](./imgRibbons.tsx) | `ImgRibbonLeft`, `ImgRibbonRight` | Responsive image-and-content ribbons with optional hover images. |
-| [`stats.tsx`](./stats.tsx) | `StatCard` | Large numeric statistic with a label. |
 | [`subpageBanner.tsx`](./subpageBanner.tsx) | `SubpageBanner`, `DiscoverITBanner` | Active subpage link and DiscoverIT section navigation. |
 | [`TextBox.tsx`](./TextBox.tsx) | `TextBox` | Labeled, reusable native text input. |
 | [`text.tsx`](./text.tsx) | `TextDot`, `OCText`, `BoldedText`, `NewLineText` | Reusable text treatments for profiles and formatted content. |
@@ -28,9 +29,9 @@ This is an inventory of the reusable React components currently defined under
 
 | File | Components | Purpose |
 | --- | --- | --- |
-| [`navigation/nav.tsx`](./navigation/nav.tsx) | `NavBar` | Responsive site header and main navigation. |
-| [`navigation/NavList.tsx`](./navigation/NavList.tsx) | `NavList` | Desktop navigation list with hover submenus. |
-| [`navigation/NavListMobile.tsx`](./navigation/NavListMobile.tsx) | `NavListMobile` | Mobile navigation list with tap-to-open submenus. |
+| [`layout/Header.tsx`](./layout/Header.tsx) | `Header` | Transparent responsive site header with navigation dropdowns. |
+| [`layout/Footer.tsx`](./layout/Footer.tsx) | `Footer` | Responsive site footer with links and social destinations. |
+| [`layout/ScrollGradient.tsx`](./layout/ScrollGradient.tsx) | `ScrollGradient` | GSAP ScrollTrigger gradient with pinned, scrubbed scene transitions. |
 
 ## Page-focused components
 

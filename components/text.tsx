@@ -2,7 +2,6 @@
 import Image from "next/image";
 import { ReactNode } from "react";
 
-// Anything that edits text is HeroSection, like pragraph styling or font bolding
 type TextItems = {
   title?: string;
   text?: string;

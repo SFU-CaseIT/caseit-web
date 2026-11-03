@@ -4,8 +4,8 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRe
 import { Cell, DataGrid, renderTextEditor, type Column, type Renderers } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 import type * as XLSX from "xlsx";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
-import FadeIn from "@/components/FadeIn";
+import { LoadingSpinner } from "@/components/animations/LoadingSpinner";
+import FadeIn from "@/components/animations/FadeIn";
 import EditableTabs from "@/components/admin/EditableTabs";
 import { useWorkbookList } from "@/components/admin/WorkbookListContext";
 import { readXlsxAppearance } from "@/lib/admin/xlsxAppearance";

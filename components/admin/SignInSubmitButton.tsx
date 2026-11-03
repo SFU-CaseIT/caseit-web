@@ -2,7 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 import { ActionButton } from "@/components/buttons";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { LoadingSpinner } from "@/components/animations/LoadingSpinner";
 
 export function SignInSubmitButton() {
   const { pending } = useFormStatus();

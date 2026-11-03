@@ -1,26 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { ScrollGradientContext } from "@/components/layout/ScrollGradient";
 
-type StatItem = {
+type CountdownProps = {
   number: number;
   label: string;
-  isActive: boolean;
-  className?:string;
 };
 
-export default function StatCard({
-  number,
-  label,
-  isActive,
-  className,
-}: StatItem) {
+export default function Countdown({ number, label }: CountdownProps) {
   const [count, setCount] = useState(0);
+  const isActive = useContext(ScrollGradientContext);
   const duration = 1200;
 
   useEffect(() => {
-    if (!isActive) return;
-
     const motionPreference = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     );
@@ -28,6 +21,8 @@ export default function StatCard({
       const frameId = requestAnimationFrame(() => setCount(number));
       return () => cancelAnimationFrame(frameId);
     }
+
+    if (!isActive) return;
 
     let frameId = 0;
     const startTime = performance.now();
@@ -45,11 +40,13 @@ export default function StatCard({
     return () => cancelAnimationFrame(frameId);
   }, [duration, isActive, number]);
   return (
-    <div
-      className={`text-[4.5rem] xl:text-[152px] font-din text-redDark flex flex-col items-center leading-none ${className}`}
-    >
-      {String(count).padStart(2, "0")}
-      <span className="text-paragraph xl:text-[1.5rem] font-sans">{label}</span>
+    <div className="flex min-w-0 flex-col items-center text-center text-black">
+      <span className="font-din text-[clamp(4rem,8vw,6rem)] font-medium leading-none tracking-[0em]">
+        {String(count).padStart(2, "0")}
+      </span>
+      <span className="mt-4 font-dinText text-[1rem] font-normal leading-none tracking-[0em]">
+        {label}
+      </span>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { LoadingSpinner } from "@/components/animations/LoadingSpinner";
 
 export function SignOutSubmitButton() {
   const { pending } = useFormStatus();
