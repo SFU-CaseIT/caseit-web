@@ -5,7 +5,6 @@ export const NavLinks = [
     sublinks: [
       { name: "About CaseIT", ref: "/about" },
       { name: "2027 Organizing Committee", ref: "/about/oc" },
-      { name: "Get Involved", ref: "/about/Get-Involved" },
     ],
   },
   {
@@ -27,17 +26,7 @@ export const NavLinks = [
       { name: "Overview", ref: "/2026"},
       { name: "Chair's Welcome", ref: "/2026/chair"},
       { name: "DiscoverIT", ref: "/2026/DiscoverIT/overview"},
-      { name: "Sponsor Showcase", ref: "/2026/Sponsor-Showcase"}
     ]
-  },
-  {
-    ref: "/history",
-    name: "History",
-    sublinks: [
-      { name: "Last Year", ref: "/history/recap" },
-      { name: "Timeline", ref: "/history" },
-      { name: "Media Gallery", ref: "/history/media" },
-    ],
   },
   {
     ref: "/contact",

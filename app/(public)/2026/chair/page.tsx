@@ -26,7 +26,7 @@ export default function Chair() {
             height={500}
             className=" rounded-2xl object-contain md:w-screen lg:w-[50vw]"
             quality={100}
-            alt="portrait of CaseIT 2026 Chair"
+            alt="portrait of the CaseIT 2027 Chair"
           />
 
         {/* Text Content */}

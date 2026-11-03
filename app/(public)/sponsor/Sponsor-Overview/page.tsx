@@ -5,7 +5,6 @@ import { ImgRibbonLeft, ImgRibbonRight } from "@/components/imgRibbons";
 import {
   SponsorOverviewRibbonText,
   SponsorBanner,
-  SponsorTiles,
   MobileButtons,
 } from "@/components/pages/sponsorItems";
 import { RoundedButton, ArrowButton } from "@/components/buttons";
@@ -32,24 +31,6 @@ export default function SponsorOverview() {
             />
           </SponsorBanner>
         </BgImgLeft>
-      </section>
-      {/* ---SPONSOR TILES--- */}
-      <section className="flex flex-col justify-center ">
-        <div className="text-header3 md:text-header2 md:text-center px-7 py-[8vh]">
-          {sponsor.sponsorTileContent.sectionTitle[0].title}
-        </div>
-        <div className="max-w-[80vw] mx-auto grid grid-cols-2 grid-rows-6 grid-flow-row gap-[1.644rem] md:gap-[6.5rem] md:grid-cols-3 md:grid-rows-4 lg:gap-[4rem] lg:grid-cols-3 lg:grid-rows-4 lg:p-[8%] xl:grid-cols-4 xl:grid-rows-3 ">
-          {sponsor.sponsorTileContent.sponsors.map((item, index) => (
-            // Populated by the content
-            <div key={index}>
-              <SponsorTiles
-                img={item.img}
-                text={item.text}
-                alt={item.alt}
-              />
-            </div>
-          ))}
-        </div>
       </section>
       {/* ---INFO AND IMGS--- */}
       <section>

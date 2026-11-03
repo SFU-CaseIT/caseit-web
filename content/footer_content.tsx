@@ -6,7 +6,6 @@ const competitionLinks = [
 ];
 
 const sponsorshipLinks = [
-  { name: "2026 Sponsors", ref: "/2026/Sponsor-Showcase" },
   { name: "Benefits", ref: "/sponsor/Sponsor-Overview" },
   {
     name: "Sponsorship Opportunities",
@@ -16,7 +15,6 @@ const sponsorshipLinks = [
 
 const aboutLinks = [
   { name: "Chair's Welcome", ref: "/2026/chair" },
-  { name: "CaseIT History", ref: "/history" },
   { name: "Our Team", ref: "/about/oc" },
 ];
 

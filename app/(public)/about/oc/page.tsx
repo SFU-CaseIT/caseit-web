@@ -29,7 +29,7 @@ export default function OC() {
           <div className="w-[80vw] xl:w-[60vw] text-header2">{oc.ocText.header2}</div>
           <Image
             src={groupPic}
-            alt="CaseIT OC Group Pic"
+            alt="CaseIT 2027 Organizing Committee group photo"
             className="w-[90vw] xl:w-[50vw] h-auto xl:rounded-2xl rounded-xl"
           />
         </div>

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 import { IconImg } from "@/components/img";
 import * as text from "@/components/text";
-import { ImgButton, RoundedButton, PivotButton } from "@/components/buttons";
+import { ImgButton, PivotButton } from "@/components/buttons";
 import { ImgRibbonLeft } from "@/components/imgRibbons";
 import * as about from "@/content/about_content";
 
@@ -24,11 +24,6 @@ export default function About() {
                 {about.aboutText.paragraph[0]}
               </div>
             </div>
-            <RoundedButton
-              text="CaseIT History"
-              link="/history"
-              variant="black"
-            />
           </ImgRibbonLeft>
         </div>
       </section>

@@ -26,8 +26,8 @@ export const ocText = {
       },
       img: "/imgs/oc/2026/ops.jpg",
       img2: "/imgs/oc/2026/ops_funny.jpg",
-      alt: "Group photo of CaseIT 2026 Operations team members posing professionally",
-      hoverAlt: "Funny group photo of CaseIT 2026 Operations team members",
+      alt: "Group photo of CaseIT 2027 Operations team members posing professionally",
+      hoverAlt: "Funny group photo of CaseIT 2027 Operations team members",
     },
     {
       title: "Competition Execution",
@@ -39,8 +39,8 @@ export const ocText = {
       },
       img: "/imgs/oc/2026/compEx.jpg",
       img2: "/imgs/oc/2026/compEx_funny.jpg",
-      alt: "Group photo of CaseIT 2026 Competition Execution team members posing professionally",
-      hoverAlt: "Funny group photo of CaseIT 2026 Competition Execution team members",
+      alt: "Group photo of CaseIT 2027 Competition Execution team members posing professionally",
+      hoverAlt: "Funny group photo of CaseIT 2027 Competition Execution team members",
     },
     {
       title: "Marketing",
@@ -52,22 +52,9 @@ export const ocText = {
       },
       img: "/imgs/oc/2026/marketing.jpg",
       img2: "/imgs/oc/2026/marketing_funny.jpg",
-      alt: "Group photo of CaseIT 2026 Marketing team members posing professionally",
-      hoverAlt: "Funny group photo of CaseIT 2026 Marketing team members",
+      alt: "Group photo of CaseIT 2027 Marketing team members posing professionally",
+      hoverAlt: "Funny group photo of CaseIT 2027 Marketing team members",
     },
-    // {
-    //   title: "PIVOT",
-    //   desc: "This team works together to host our local rendition of CaseIT, designed specifically for British Columbia’s next generation of business leaders. With a focus on Business Technology Management (BTM), this competition is built for local CaseIT enthusiasts who are eager to showcase their skills and looking to compete.",
-    //   names: {
-    //     // Names are ordered left to right as they appear in the photo
-    //     available: "Yumi Kawagoe, Knacky Sun, Alexis Yew, Joshua Chang, Devangi Bajaj.",
-    //     missing: ""
-    //   },
-    //   img: "/imgs/oc/2025/pivot.jpg",
-    //   img2: "/imgs/oc/2025/pivot_silly.jpg",
-    //   alt: "Group photo of CaseIT PIVOT team members posing professionally",
-    //   hoverAlt: "Funny group photo of CaseIT PIVOT team members",
-    // },
     {
       title: "Team Host",
       desc: "Team Hosts are our competitors’ ultimate guides during competition week. They are responsible for ensuring teams are where they need to be, while also showing them an unforgettable time around the city of Vancouver.",
@@ -78,8 +65,8 @@ export const ocText = {
       },
       img: "/imgs/oc/2026/teamHost.jpg",
       img2: "/imgs/oc/2026/teamHost_funny.jpg",
-      alt: "Group photo of CaseIT 2026 Team Host members posing professionally",
-      hoverAlt: "Funny group photo of CaseIT 2026 Team Host members",
+      alt: "Group photo of CaseIT 2027 Team Host members posing professionally",
+      hoverAlt: "Funny group photo of CaseIT 2027 Team Host members",
     },
   ],
 };

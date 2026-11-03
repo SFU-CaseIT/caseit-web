@@ -3,14 +3,11 @@ import { useInView } from "react-intersection-observer";
 import * as home from "@/content/home_content";
 import { SquareButton } from "@/components/buttons";
 import { TextDot } from "@/components/text";
-import { Icon2025 } from "@/public/svgs/2026";
 import HeroSection from "@/components/HeroSection";
 import { useCountUp } from "@/hooks/useCountUp";
 import Image from "next/image";
 import StatCard from "@/components/stats";
 import { BoldedText } from "@/components/text";
-import Banner2026 from "@/public/imgs/2026.png";
-import TawkTo from "@/components/TawkTo";
 
 export default function Home() {
   const { ref: sectionRef, inView } = useInView({
@@ -84,13 +81,8 @@ export default function Home() {
             />
           ))}
         </div>
-        {/*When you are here, to add back the icon, modified the padding */}
         {/* Vancouver card  */}
         <div className="  mt-12 flex flex-col  border-redDark border-2 rounded-2xl gap-12 p-4 md:p-6 xl:p-10 w-[90%] max-w-[25rem] md:max-w-[1200px] mx-auto drop-shadow-[0_0_15px_rgba(197,52,52,0.25)] bg-white text-center">
-          {/* <div className="w-full">
-            <Image src={Banner2026} alt="2026" className="w-[100%] h-[100%]"/>
-          </div> */}
-
           <div className=" text-[1rem] lg:text-[1rem] flex flex-col justify-center">
             <h2 className="font-bold text-redDark md:text-[1.5rem]">
               {home.HomeText.header2[0]}
@@ -120,31 +112,12 @@ export default function Home() {
         <div className="flex flex-col md:flex-row gap-4">
           <SquareButton
             variant="white"
-            text="CASEIT History"
-            subtext="Learn about the CaseIT evolution"
-            link="/history"
-          />
-          <SquareButton
-            variant="white"
-            text="Our 2026 Recap"
-            subtext="Relive some of our best moments"
-            link="/history/recap"
-          />
-          <SquareButton
-            variant="white"
             text="PIVOT"
             subtext="Our local rendition for BC students"
             link="https://pivot.caseit.org/"
           />
         </div>
       </section>
-      {/* LIVECHAT CODE */}
-      {/* Uncomment and set "Overview > Status" and "Channels > Chat Widget > Widget Status" to Active on TawkTo */}
-      {/* {
-        <section>
-          <TawkTo />
-        </section>
-      } */}
     </main>
   );
 }

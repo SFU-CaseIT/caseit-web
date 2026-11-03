@@ -1,13 +1,15 @@
 "use client";
 import { BoldedText } from "../text";
 import Image from "next/image";
+import type { ReactNode } from "react";
+
 type discoverITItems = {
-  title?: string | JSX.Element;
+  title?: string | ReactNode;
   text?: string;
-  paragraph?: JSX.Element;
+  paragraph?: ReactNode;
   img?: string;
   subtext?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 };
 
 export const Bento = ({ children }: discoverITItems) => {

@@ -1,3 +1,5 @@
+import type { JSX } from "react";
+
 export const svgIcons: { [key: string]: JSX.Element } = {
   instagram: (
     <svg
