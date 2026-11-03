@@ -13,42 +13,6 @@
   }
 }
 
-/* Things for font sizing  */
-@font-face {
-  font-family: "Switzer";
-  src: url("/fonts/Switzer-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "Switzer";
-  src: url("/fonts/Switzer-Medium.otf") format("opentype");
-  font-weight: 500;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "Switzer";
-  src: url("/fonts/Switzer-Semibold.otf") format("opentype");
-  font-weight: 600;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "Switzer";
-  src: url("/fonts/Switzer-Bold.otf") format("opentype");
-  font-weight: 900;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "acid";
-  src: url("/fonts/FFF-AcidGrotesk-Bold-TRIAL.otf") format("opentype");
-  font-weight: 800;
-  font-style: normal;
-}
-
 .text-header1 {
   @apply font-bold text-4xl;
 }

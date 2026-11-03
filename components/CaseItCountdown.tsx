@@ -55,7 +55,7 @@ export const CaseItCountdown = ( {year, localDate, timeZone = "America/Vancouver
   ];
 
   return (
-    <fieldset className="border-redDark border-4 rounded-xl lg:rounded-[30px] px-16 py-2 md:py-4 font-acid font-bold">
+    <fieldset className="border-redDark border-4 rounded-xl lg:rounded-[30px] px-16 py-2 md:py-4 font-din font-bold">
       <legend className="uppercase text-redDark text-[1.5rem] px-2">
          CaseIT {year} 
       </legend>

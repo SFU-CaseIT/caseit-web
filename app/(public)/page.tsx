@@ -1,34 +1,19 @@
-"use client";
-import { useInView } from "react-intersection-observer";
 import * as home from "@/content/home_content";
 import { SquareButton } from "@/components/buttons";
 import { TextDot } from "@/components/text";
 import HeroSection from "@/components/HeroSection";
-import { useCountUp } from "@/hooks/useCountUp";
 import Image from "next/image";
-import StatCard from "@/components/stats";
+import StatsGrid from "@/components/StatsGrid";
 import { BoldedText } from "@/components/text";
 
 export default function Home() {
-  const { ref: sectionRef, inView } = useInView({
-    triggerOnce: true, // Trigger only once when it enters the viewport
-    threshold: 0.5, // Trigger when 10% of the section is visible
-  });
-  const competitors = useCountUp(64, 1500, inView);
-  const teams = useCountUp(16, 1000, inView);
-  const days = useCountUp(6, 500, inView);
-  const cases = useCountUp(2, 200, inView);
-  const competition = useCountUp(1, 100, inView);
-
   const stats = [
-    { label: "Competitors", count: competitors },
-    { label: "Teams", count: teams },
-    { label: "Days", count: days },
-    { label: "Cases", count: cases },
-    { label: "Competition", count: competition },
+    { label: "Competitors", count: 64 },
+    { label: "Teams", count: 16 },
+    { label: "Days", count: 6 },
+    { label: "Cases", count: 2 },
+    { label: "Competition", count: 1 },
   ];
-
-  console.log(inView);
 
   return (
     <main>
@@ -66,21 +51,7 @@ export default function Home() {
           />
         </div>
         {/* number scrolling */}
-        <div
-          ref={sectionRef}
-          className="grid grid-cols-2 mb-20 mt-12 md:mt-4 md:grid-cols-5 place-items-center p-8 gap-8 max-w-96 md:max-w-[1440px] mx-auto"
-        >
-          {stats.map((stat, index) => (
-            <StatCard
-              key={index}
-              number={stat.count}
-              label={stat.label}
-              className={
-                index === stats.length - 1 ? "col-span-2 md:col-span-1" : ""
-              }
-            />
-          ))}
-        </div>
+        <StatsGrid stats={stats} />
         {/* Vancouver card  */}
         <div className="  mt-12 flex flex-col  border-redDark border-2 rounded-2xl gap-12 p-4 md:p-6 xl:p-10 w-[90%] max-w-[25rem] md:max-w-[1200px] mx-auto drop-shadow-[0_0_15px_rgba(197,52,52,0.25)] bg-white text-center">
           <div className=" text-[1rem] lg:text-[1rem] flex flex-col justify-center">

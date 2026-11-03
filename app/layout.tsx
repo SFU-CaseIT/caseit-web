@@ -1,6 +1,20 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import Script from "next/script";
 import "@/styles/globals.css";
+
+const din = localFont({
+  src: [
+    { path: "../public/fonts/D-DIN.woff2", weight: "400", style: "normal" },
+    {
+      path: "../public/fonts/D-DIN-Bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-din",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "CaseIT 2027 is here!",
@@ -42,7 +56,7 @@ export default function RootLayout({
           });`}
         </Script>
       </head>
-      <body className="font-dinProRegular ">
+      <body className={`${din.variable} font-sans`}>
         {children}
       </body>
     </html>

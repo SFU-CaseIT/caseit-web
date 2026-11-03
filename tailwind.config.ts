@@ -13,8 +13,8 @@ const config: Config = {
       animation: { /* ... unchanged ... */ },
       keyframes: { /* ... unchanged ... */ },
       fontFamily: {
-        sans: ["Switzer", "sans-serif"],
-        acid: ["acid", "sans-serif"],
+        sans: ["var(--font-din)", "sans-serif"],
+        din: ["var(--font-din)", "sans-serif"],
       },
       fontSize: { /* ... unchanged ... */ },
 
