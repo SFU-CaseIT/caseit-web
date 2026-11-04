@@ -27,4 +27,4 @@ Open [http://localhost:3000](http://localhost:3000). The `/admin` area requires 
 
 ## Deployment
 
-Deploy as a Next.js application, setting the required environment variables in the hosting provider.
+Apply the SQL migrations in `supabase/migrations` to the Supabase project, then deploy as a Next.js application with the required environment variables configured in the hosting provider.

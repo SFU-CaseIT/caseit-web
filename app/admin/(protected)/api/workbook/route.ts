@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { gunzipSync } from "node:zlib";
 import { NextResponse, type NextRequest } from "next/server";
-import { isAdminWorkbookData, type SheetManifest, type SheetMetadata } from "@/lib/admin/adminDataService";
+import { isAdminWorkbookData, type AdminSheetData, type SheetManifest, type SheetMetadata } from "@/lib/admin/adminDataService";
 import { createSheetUploadGrant, verifySheetUploadGrant } from "@/lib/admin/sheetUploadGrant";
 import { notifyWorkbook, readWorkbookNotificationTargets, type DeletedNotificationTarget } from "@/lib/admin/webPushNotifications";
+import { collectSheetChangeNotifications, type SheetChangeNotification } from "@/lib/admin/workbookChangeNotifications";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -47,22 +48,17 @@ function isSheetMetadata(value: unknown): value is SheetMetadata {
     && typeof value.path === "string" && value.path.length <= 512;
 }
 
-function changedSheetNames(previous: SheetMetadata[], next: SheetMetadata[]): string[] {
-  const previousById = new Map(previous.map((sheet, index) => [sheet.id, { sheet, index }]));
-  const nextById = new Map(next.map((sheet, index) => [sheet.id, { sheet, index }]));
-  const names = new Set<string>();
-
-  previous.forEach((sheet, index) => {
-    const current = nextById.get(sheet.id);
-    if (!current) names.add(sheet.name);
-    else if (current.sheet.name !== sheet.name || current.sheet.path !== sheet.path || current.index !== index) {
-      names.add(current.sheet.name);
-    }
-  });
-  next.forEach((sheet) => {
-    if (!previousById.has(sheet.id)) names.add(sheet.name);
-  });
-  return [...names];
+function parseSheetData(bytes: Buffer, expectedId: string): AdminSheetData {
+  const content = bytes[0] === 0x1f && bytes[1] === 0x8b
+    ? gunzipSync(bytes, { maxOutputLength: MAX_SHEET_BYTES })
+    : bytes;
+  if (content.length > MAX_SHEET_BYTES) throw new Error("Sheet exceeds uncompressed limit.");
+  const parsed: unknown = JSON.parse(content.toString("utf8"));
+  const workbookData: unknown = { sheets: [parsed] };
+  if (!isAdminWorkbookData(workbookData) || workbookData.sheets[0].id !== expectedId) {
+    throw new Error("Invalid sheet data.");
+  }
+  return workbookData.sheets[0];
 }
 
 export async function GET(request: NextRequest) {
@@ -240,7 +236,9 @@ export async function PUT(request: NextRequest) {
     }
 
     const existing = new Map(manifest.sheets.map((sheet) => [sheet.id, sheet]));
-    const updatedSheetNames = changedSheetNames(manifest.sheets, sheets);
+    const sheetDataByPath = new Map<string, AdminSheetData>();
+    const sheetIdByPath = new Map<string, string>();
+    [...manifest.sheets, ...sheets].forEach((sheet) => sheetIdByPath.set(sheet.path, sheet.id));
     const storage = createAdminClient().storage.from(BUCKET);
     for (const sheet of sheets) {
       if (existing.get(sheet.id)?.path === sheet.path) continue;
@@ -260,18 +258,28 @@ export async function PUT(request: NextRequest) {
       }
       try {
         const bytes = Buffer.from(await file.arrayBuffer());
-        const data = bytes[0] === 0x1f && bytes[1] === 0x8b
-          ? gunzipSync(bytes, { maxOutputLength: MAX_SHEET_BYTES })
-          : bytes;
-        if (data.length > MAX_SHEET_BYTES) throw new Error("Sheet exceeds uncompressed limit.");
-        const parsed: unknown = JSON.parse(data.toString("utf8"));
-        if (!isAdminWorkbookData({ sheets: [parsed] }) || (parsed as { id: string }).id !== sheet.id) {
-          throw new Error("Invalid sheet data.");
-        }
+        sheetDataByPath.set(sheet.path, parseSheetData(bytes, sheet.id));
       } catch (error) {
         console.error("Could not validate an uploaded sheet.", error);
         return NextResponse.json({ error: "An uploaded sheet is invalid or too large." }, { status: 400 });
       }
+    }
+
+    let sheetChanges: SheetChangeNotification[] = [];
+    try {
+      sheetChanges = await collectSheetChangeNotifications(manifest.sheets, sheets, async (path) => {
+        const cached = sheetDataByPath.get(path);
+        if (cached) return cached;
+        const expectedId = sheetIdByPath.get(path);
+        if (!expectedId) throw new Error("Could not match sheet data to its manifest.");
+        const { data: file, error } = await storage.download(path);
+        if (error || !file) throw error ?? new Error("Could not load a workbook sheet.");
+        const sheet = parseSheetData(Buffer.from(await file.arrayBuffer()), expectedId);
+        sheetDataByPath.set(path, sheet);
+        return sheet;
+      });
+    } catch (error) {
+      console.error("The workbook was saved, but sheet changes could not be prepared for notifications.", error);
     }
 
     const { data: revision, error } = await createAdminClient().rpc("commit_sheet_workbook", {
@@ -289,7 +297,7 @@ export async function PUT(request: NextRequest) {
       const { data: workbook, error: nameError } = await createAdminClient().from("event_sheet_workbooks")
         .select("name").eq("event_id", body.workbookId).maybeSingle();
       if (nameError || !workbook) throw nameError ?? new Error("Workbook no longer exists.");
-      await notifyWorkbook(workbook.name, "updated", await readWorkbookNotificationTargets(body.workbookId), updatedSheetNames);
+      await notifyWorkbook(workbook.name, "updated", await readWorkbookNotificationTargets(body.workbookId), sheetChanges);
     } catch (error) {
       console.error("The workbook was saved, but push notifications could not be sent.", error);
     }

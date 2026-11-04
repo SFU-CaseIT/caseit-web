@@ -36,6 +36,7 @@ type EditorHandle = {
   exportFile: () => void;
   deleteSheet: () => void;
   revision: () => string | null;
+  getSheets: () => { id: string; name: string }[];
   getSheet: (id: string) => AdminSheetData | undefined;
   addSheet: (sheet: AdminSheetData) => string | null;
   removeSheet: (id: string) => void;
@@ -179,7 +180,9 @@ function uniqueSheetName(name: string, usedNames: Set<string>, fallback: string)
 }
 
 export default function AdminWorkbookEditor() {
-  const { setSavedWorkbooks, setWorkbookListError } = useWorkbookList();
+  const {
+    setSavedWorkbooks, setLiveWorkbooks, setWorkbookListError, setWorkbookSheetReader,
+  } = useWorkbookList();
   const [workbooks, setWorkbooks] = useState<WorkbookInfo[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [visitedIds, setVisitedIds] = useState<string[]>([]);
@@ -199,6 +202,7 @@ export default function AdminWorkbookEditor() {
   const [pendingMove, setPendingMove] = useState<{ source: string; destination: string; sheet: string } | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
   const editorRefs = useRef<Record<string, EditorHandle | null>>({});
+  const readWorkbookSheets = useCallback((id: string) => editorRefs.current[id]?.getSheets(), []);
   const listDirty = JSON.stringify(workbooks) !== JSON.stringify(baseline);
   const anyDirty = listDirty || deleted.length > 0 || Object.values(editorStates).some((state) => state.dirty);
   const selectedState = selectedId ? editorStates[selectedId] : undefined;
@@ -234,6 +238,15 @@ export default function AdminWorkbookEditor() {
       window.removeEventListener("caseit-admin-signout", cancelLoad);
     };
   }, [setSavedWorkbooks, setWorkbookListError]);
+
+  useEffect(() => {
+    if (!loadingList) setLiveWorkbooks(workbooks);
+  }, [workbooks, loadingList, setLiveWorkbooks]);
+
+  useEffect(() => {
+    setWorkbookSheetReader(readWorkbookSheets);
+    return () => setWorkbookSheetReader(null);
+  }, [readWorkbookSheets, setWorkbookSheetReader]);
 
   function selectWorkbook(id: string) {
     if (controlsDisabled) return;
@@ -485,6 +498,7 @@ const WorkbookEditor = forwardRef<EditorHandle, {
   onSheetDrop: (source: string, sheet: string, destination: string) => void;
   onSheetDrag: (destination: string | null) => void;
 }>(function WorkbookEditor({ workbookId, selected, onBusyChange, onStateChange, globalBusy, isNew, onSheetDrop, onSheetDrag }, ref) {
+  const { notifyWorkbookSheetsChanged } = useWorkbookList();
   const [workbookData, setWorkbookData] = useState<AdminWorkbookData>({ sheets: [] });
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
   const [status, setStatus] = useState("");
@@ -506,6 +520,10 @@ const WorkbookEditor = forwardRef<EditorHandle, {
   const initiallyNew = useRef(isNew);
 
   const activeSheet = workbookData.sheets[activeSheetIndex];
+
+  useEffect(() => {
+    if (!isLoading && !hasLoadError) notifyWorkbookSheetsChanged();
+  }, [workbookData, isLoading, hasLoadError, notifyWorkbookSheetsChanged]);
 
   useEffect(() => {
     let mounted = true;
@@ -829,6 +847,7 @@ const WorkbookEditor = forwardRef<EditorHandle, {
     exportFile: handleExport,
     deleteSheet: handleDeleteSheet,
     revision: () => savedSnapshotRef.current?.manifest.revision ?? null,
+    getSheets: () => workbookData.sheets.map(({ id, name }) => ({ id, name })),
     getSheet: (id) => workbookData.sheets.find((sheet) => sheet.id === id),
     addSheet,
     removeSheet,

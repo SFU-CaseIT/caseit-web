@@ -12,6 +12,21 @@ type PushSubscriptionInput = {
   };
 };
 
+type SheetPreferenceInput = {
+  workbookId: string;
+  sheetIds: string[];
+};
+
+function isSheetPreferenceInput(value: unknown): value is SheetPreferenceInput {
+  if (typeof value !== "object" || value === null || !("workbookId" in value) || !("sheetIds" in value)
+    || typeof value.workbookId !== "string" || !UUID.test(value.workbookId)
+    || !Array.isArray(value.sheetIds) || value.sheetIds.length > 100
+    || !value.sheetIds.every((id: unknown) => typeof id === "string" && UUID.test(id))) {
+    return false;
+  }
+  return new Set(value.sheetIds).size === value.sheetIds.length;
+}
+
 function isPushSubscriptionInput(value: unknown): value is PushSubscriptionInput {
   if (typeof value !== "object" || value === null || !("endpoint" in value) || !("keys" in value)) {
     return false;
@@ -38,6 +53,27 @@ function isPushSubscriptionInput(value: unknown): value is PushSubscriptionInput
   } catch {
     return false;
   }
+}
+
+function isSavePreferencesInput(value: unknown): value is {
+  action: "save";
+  subscription: PushSubscriptionInput;
+  workbooks: string[];
+  sheetPreferences: SheetPreferenceInput[];
+} {
+  if (typeof value !== "object" || value === null || !("action" in value) || value.action !== "save"
+    || !("subscription" in value) || !isPushSubscriptionInput(value.subscription)
+    || !("workbooks" in value) || !Array.isArray(value.workbooks)
+    || !("sheetPreferences" in value) || !Array.isArray(value.sheetPreferences)) return false;
+
+  const workbooks: unknown[] = value.workbooks;
+  const sheetPreferences: unknown[] = value.sheetPreferences;
+  if (workbooks.length > 500 || !workbooks.every((id) => typeof id === "string" && UUID.test(id))
+    || new Set(workbooks).size !== workbooks.length || sheetPreferences.length > 500
+    || !sheetPreferences.every(isSheetPreferenceInput)) return false;
+  const preferences = sheetPreferences as SheetPreferenceInput[];
+  return new Set(preferences.map((preference) => preference.workbookId)).size === preferences.length
+    && preferences.every((preference) => (workbooks as string[]).includes(preference.workbookId));
 }
 
 async function getAdminClient() {
@@ -113,6 +149,7 @@ export async function POST(request: NextRequest) {
       workbooks = data.map((w) => ({ id: w.event_id, name: w.name }));
     }
     let selected: string[] = [];
+    const sheetSelections: Record<string, string[]> = {};
     if (body.endpoint) {
       const { data: subscription, error: subscriptionError } = await admin.supabase.from("admin_push_subscriptions")
         .select("endpoint").eq("endpoint", body.endpoint).eq("user_id", admin.userId).maybeSingle();
@@ -128,25 +165,35 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: "Could not load notification preferences." }, { status: 500 });
         }
         selected = links.map((link) => link.workbook_id);
+        const { data: sheetLinks, error: sheetLinksError } = await client.from("admin_push_workbook_sheets")
+          .select("workbook_id, sheet_id").eq("endpoint", body.endpoint);
+        if (sheetLinksError) {
+          console.error("Could not read sheet notification preferences.", sheetLinksError);
+          return NextResponse.json({ error: "Could not load notification preferences." }, { status: 500 });
+        }
+        for (const link of sheetLinks) {
+          (sheetSelections[link.workbook_id] ??= []).push(link.sheet_id);
+        }
       }
     }
-    return NextResponse.json({ ...(workbooks && { workbooks }), selected },
+    return NextResponse.json({ ...(workbooks && { workbooks }), selected, sheetSelections },
       { headers: { "Cache-Control": "no-store" } });
   }
 
-  if (body.action !== "save" || !("subscription" in body) || !isPushSubscriptionInput(body.subscription)
-    || !("workbooks" in body) || !Array.isArray(body.workbooks) || body.workbooks.length > 500
-    || !body.workbooks.every((id: unknown) => typeof id === "string" && UUID.test(id))
-    || new Set(body.workbooks).size !== body.workbooks.length) {
+  if (!isSavePreferencesInput(body)) {
     return NextResponse.json({ error: "Invalid notification preferences." }, { status: 400 });
   }
 
-  const { error } = await createAdminClient().rpc("save_push_workbook_preferences", {
+  const { error } = await createAdminClient().rpc("save_push_workbook_sheet_preferences", {
     p_user_id: admin.userId,
     p_endpoint: body.subscription.endpoint,
     p_p256dh: body.subscription.keys.p256dh,
     p_auth: body.subscription.keys.auth,
     p_workbooks: body.workbooks,
+    p_sheet_preferences: body.sheetPreferences.map((preference) => ({
+      workbook_id: preference.workbookId,
+      sheet_ids: preference.sheetIds,
+    })),
   });
 
   if (error) {
@@ -179,6 +226,16 @@ export async function DELETE(request: NextRequest) {
     body.endpoint.length > 4096
   ) {
     return NextResponse.json({ error: "Invalid push subscription." }, { status: 400 });
+  }
+
+  const { error: sheetPreferencesError } = await createAdminClient().from("admin_push_workbook_sheets")
+    .delete().eq("endpoint", body.endpoint);
+  if (sheetPreferencesError) {
+    console.error("Could not remove sheet notification preferences.", sheetPreferencesError);
+    return NextResponse.json(
+      { error: "Could not disable notifications. Please try again." },
+      { status: 500 },
+    );
   }
 
   const { error } = await admin.supabase
