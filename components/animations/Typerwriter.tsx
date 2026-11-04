@@ -15,8 +15,6 @@ export default function Typerwriter({
   const [cursorVisible, setCursorVisible] = useState(true);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
     let cancelled = false;
     let timeoutId: ReturnType<typeof setTimeout>;
     const wait = (duration: number) =>
@@ -80,10 +78,6 @@ export default function Typerwriter({
           className="typewriter-cursor h-[1.15em] w-[0.052em] shrink-0 bg-current"
           style={{ opacity: cursorVisible ? 1 : 0 }}
         />
-      </span>
-      <span aria-hidden="true" className="typewriter-static">
-        {words[0]}
-        <span className="typewriter-cursor h-[1.15em] w-[0.052em] shrink-0 bg-current" />
       </span>
     </h1>
   );

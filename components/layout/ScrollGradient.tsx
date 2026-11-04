@@ -34,13 +34,6 @@ export default function ScrollGradient({
     const [headline, message, finalScene] = sceneRefs.current;
     if (!section || !background || !headline || !message || !finalScene) return;
 
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (reducedMotion) {
-      return;
-    }
-
     gsap.registerPlugin(ScrollTrigger);
 
     let finalSceneActive = false;

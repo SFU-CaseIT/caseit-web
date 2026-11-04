@@ -23,7 +23,7 @@ This is a website for a club at SFU called CaseIT under the Beedie department, f
 - Minimize client-side JavaScript; prefer native browser features and build-time rendering when interactivity is unnecessary.
 - Use a CDN and browser caching for public pages and static assets. Give fingerprinted assets long-lived immutable caching, and ensure deployments invalidate or revalidate cached pages so updates become visible.
 - Reserve layout space for images, embeds, and other asynchronously loaded content.
-- Preserve accessibility and user preferences, including keyboard navigation, visible focus, sufficient contrast, reduced motion, and usable touch targets.
+- Preserve accessibility and user preferences, including keyboard navigation, visible focus, sufficient contrast, and usable touch targets.
 - Validate key pages at mobile and desktop sizes and check performance and accessibility with project-appropriate tooling.
 
 ## Delivery Expectations

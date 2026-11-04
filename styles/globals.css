@@ -61,62 +61,9 @@ html {
   padding-inline: 1.5rem;
 }
 
-.typewriter-static {
-  display: none;
-}
-
-.typewriter-animated,
-.typewriter-static {
-  align-items: center;
-}
-
 .typewriter-animated {
+  align-items: center;
   display: inline-flex;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  .scroll-gradient-section {
-    height: auto !important;
-  }
-
-  .scroll-gradient-background {
-    position: relative;
-    display: block;
-    height: auto;
-    min-height: 100svh;
-    overflow: visible;
-    background-image: linear-gradient(180deg, #000000, #be3b35) !important;
-  }
-
-  .scroll-gradient-scenes {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  .scroll-gradient-scene {
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
-    transition: none;
-  }
-
-  .scroll-gradient-final {
-    background-color: white;
-  }
-
-  .typewriter-animated {
-    display: none;
-  }
-
-  .typewriter-static {
-    display: inline-flex;
-  }
-
 }
 
 .nav-dropdown {
@@ -168,12 +115,4 @@ html {
 
 .nav-dropdown-root.nav-dropdown-open > button .nav-dropdown-arrow {
   transform: rotate(180deg);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nav-dropdown,
-  .nav-dropdown li,
-  .nav-dropdown-arrow {
-    transition: none;
-  }
 }

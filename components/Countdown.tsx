@@ -14,14 +14,6 @@ export default function Countdown({ number, label }: CountdownProps) {
   const duration = 1200;
 
   useEffect(() => {
-    const motionPreference = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    );
-    if (motionPreference.matches) {
-      const frameId = requestAnimationFrame(() => setCount(number));
-      return () => cancelAnimationFrame(frameId);
-    }
-
     if (!isActive) return;
 
     let frameId = 0;
