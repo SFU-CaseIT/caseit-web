@@ -5,6 +5,24 @@ html {
   scroll-behavior: smooth;
 }
 
+:root {
+  --caseit-gradient: linear-gradient(
+    180deg,
+    #000000 0%,
+    #be3b35 37.5%,
+    #d8c7c7 77.5%,
+    #d8c7c700 100%
+  );
+}
+
+body {
+  background-color: white;
+  background-image: var(--caseit-gradient);
+  background-position: 50% 0%;
+  background-repeat: no-repeat;
+  background-size: 100% 300vh;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

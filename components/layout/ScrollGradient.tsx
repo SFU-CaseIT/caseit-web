@@ -84,10 +84,7 @@ export default function ScrollGradient({
         <div
           ref={backgroundRef}
           className="scroll-gradient-background sticky top-0 grid h-svh place-items-center overflow-hidden bg-[length:100%_300%] bg-[position:50%_0%] text-center text-white"
-          style={{
-            backgroundImage:
-              "linear-gradient(180deg, #000000 0%, #BE3B35 37.5%, #D8C7C7 77.5%, #D8C7C700 100%)",
-          }}
+          style={{ backgroundImage: "var(--caseit-gradient)" }}
         >
           <div className="scroll-gradient-scenes">
             {scenes.map((scene, index) => (
