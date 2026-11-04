@@ -3,7 +3,6 @@ import CaseitLogoWhite from "@/public/svgs/caseit/CaseitLogoWhite";
 import Dropdown from "@/components/layout/Dropdown";
 
 const competitionLinks = [
-  { label: "Home", href: "/" },
   { label: "CaseIT 2027", href: "/2026" },
   { label: "About CaseIT", href: "/about" },
 ];

@@ -55,13 +55,13 @@ export default function Dropdown({ label, links }: DropdownProps) {
         <ChevronIcon />
       </button>
       <ul
-        className="nav-dropdown absolute left-1/2 top-full z-10 flex min-w-max -translate-x-1/2 flex-col items-center gap-1 pt-2 text-center text-base"
+        className="nav-dropdown absolute left-1/2 top-full z-10 flex min-w-max -translate-x-1/2 flex-col items-center gap-0 pt-1 text-center text-base"
         id={menuId}
       >
         {links.map((link) => (
           <li key={link.href}>
             <Link
-              className="block px-3 py-2 transition-opacity hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+              className="block px-3 py-1.5 transition-opacity hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
               href={link.href}
             >
               {link.label}
