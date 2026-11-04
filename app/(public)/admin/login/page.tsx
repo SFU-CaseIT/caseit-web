@@ -1,9 +1,19 @@
 import { signIn } from "./actions";
+import type { Metadata } from "next";
 import { TextBox } from "@/components/TextBox";
 import { SignInSubmitButton } from "@/components/admin/SignInSubmitButton";
 import FadeIn from "@/components/animations/FadeIn";
 
 // LOGIN PAGE
+
+export const metadata: Metadata = {
+  title: "Admin Login",
+  description: "Sign in to the CaseIT executive workspace.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 type AdminLoginPageProps = {
   searchParams?: Promise<{ error?: string }>;

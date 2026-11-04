@@ -6,7 +6,8 @@ import { BgImgCenter } from "@/components/img";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Learn more about our company and team.",
+  description:
+    "Contact the CaseIT team with questions about the competition, participation, or sponsorship.",
 };
 
 export default function Contact() {

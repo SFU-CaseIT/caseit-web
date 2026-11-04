@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import ScrollGradient from "@/components/layout/ScrollGradient";
 import Countdown from "@/components/Countdown";
 import Typerwriter from "@/components/animations/Typerwriter";
 
 const words = ["Unparalleled", "Rigorous", "Engaged"] as const;
+
+export const metadata: Metadata = {
+  title: "Home",
+  description:
+    "Discover CaseIT, an international management information systems case competition bringing university teams to Vancouver.",
+};
 
 export default function Home() {
   const stats = [

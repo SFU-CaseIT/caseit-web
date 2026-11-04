@@ -9,7 +9,8 @@ import banner from "@/public/imgs/banners/2025_banner.png";
 import { ImgButton } from "@/components/ImgButton";
 export const metadata: Metadata = {
   title: "CaseIT 2027",
-  description: "Learn more about our company and team.",
+  description:
+    "Discover CaseIT 2027, taking place in Vancouver from February 14–19, and explore competition information and events.",
 };
 
 export default function CaseIt2027() {

@@ -4,8 +4,9 @@ import { TourBento } from "@/components/pages/discoverITItems";
 import { tourText } from "@/content/discoverIT_content";
 
 export const metadata: Metadata = {
-  title: "DiscoverIT - Tour",
-  description: "Learn more about our company and team.",
+  title: "DiscoverIT Tour",
+  description:
+    "Explore the tours featured in CaseIT’s DiscoverIT program for visiting university teams.",
 };
 
 export default function Tour() {

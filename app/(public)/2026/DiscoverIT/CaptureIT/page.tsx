@@ -11,8 +11,9 @@ import {
   CaptureITImgs,
 } from "@/content/discoverIT_content";
 export const metadata: Metadata = {
-  title: "DiscoverIT - CaptureIT",
-  description: "Learn more about our company and team.",
+  title: "CaptureIT",
+  description:
+    "See CaptureIT highlights and photo moments from CaseIT’s DiscoverIT program.",
 };
 
 export default function CaptureIT() {

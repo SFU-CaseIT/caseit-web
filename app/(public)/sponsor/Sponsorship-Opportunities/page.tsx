@@ -6,7 +6,8 @@ import { MobileButtons } from "@/components/pages/sponsorItems";
 
 export const metadata: Metadata = {
   title: "Sponsorship Opportunities",
-  description: "Learn more about our company and team.",
+  description:
+    "Explore sponsorship opportunities and ways to partner with CaseIT’s international university case competition.",
 };
 
 export default function SponsorOpps() {

@@ -7,8 +7,9 @@ import { OCText } from "@/components/text";
 import groupPic from "@/public/imgs/oc/2026/everyone.jpg";
 
 export const metadata: Metadata = {
-  title: "OC Team",
-  description: "Learn more about our company and team.",
+  title: "Organizing Committee",
+  description:
+    "Meet the CaseIT organizing committee responsible for bringing the annual competition to life.",
 };
 
 export default function OC() {

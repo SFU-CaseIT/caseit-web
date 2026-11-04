@@ -6,9 +6,9 @@ import * as chairs from "@/content/chair_content";
 import { RoundedButton } from "@/components/buttons";
 
 export const metadata: Metadata = {
-  title: "Chair's Welcome",
+  title: "Chair’s Welcome",
   description:
-    "With great excitement, we are embarking on another remarkable year of CaseIT",
+    "Read the CaseIT 2027 Chair’s welcome and learn about this year’s international case competition.",
 };
 
 export default function Chair() {

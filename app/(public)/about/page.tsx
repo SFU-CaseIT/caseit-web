@@ -7,8 +7,9 @@ import { ImgRibbonLeft } from "@/components/imgRibbons";
 import * as about from "@/content/about_content";
 
 export const metadata: Metadata = {
-  title: "About Us",
-  description: "Learn more about our company and team.",
+  title: "About",
+  description:
+    "Learn about CaseIT, its mission, and the international management information systems case competition it organizes.",
 };
 
 export default function About() {

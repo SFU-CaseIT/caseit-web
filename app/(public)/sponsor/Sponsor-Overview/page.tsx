@@ -11,7 +11,8 @@ import { RoundedButton, ArrowButton } from "@/components/buttons";
 
 export const metadata: Metadata = {
   title: "Sponsor Overview",
-  description: "Learn more about our company and team.",
+  description:
+    "Learn how CaseIT connects sponsors with university students through its international case competition.",
 };
 
 export default function SponsorOverview() {

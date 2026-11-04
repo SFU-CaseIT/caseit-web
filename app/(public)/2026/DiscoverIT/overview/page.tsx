@@ -10,8 +10,9 @@ import { RoundedButton } from "@/components/buttons";
 import { BoldedText } from "@/components/text";
 
 export const metadata: Metadata = {
-  title: "DiscoverIT - Overview",
-  description: "Learn more about our company and team.",
+  title: "DiscoverIT Overview",
+  description:
+    "Explore DiscoverIT, CaseIT’s program of activities and experiences for competition participants.",
 };
 
 export default function Overview() {
