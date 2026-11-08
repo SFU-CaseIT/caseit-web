@@ -166,7 +166,7 @@ export default function EditableTabs({ items, selectedId, label, disabled, maxLe
                     if (!drag.current || drag.current.pointer !== touch.identifier) return;
                     drag.current.active = true;
                     moveDrag(touch.clientX, touch.clientY);
-                  }, 600);
+                  }, 500);
                 }}
                 onTouchMove={(event) => {
                   const current = drag.current;

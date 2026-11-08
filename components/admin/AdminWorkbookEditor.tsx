@@ -922,7 +922,8 @@ const WorkbookEditor = forwardRef<EditorHandle, {
                 <div className="min-w-0 overflow-x-auto">
                   <DataGrid
                     columns={columns}
-                    className="rdg-light min-h-[420px]"
+                    className="rdg-light"
+                    style={{ height: "80dvh" }}
                     onCellClick={({ setActivePosition }) => setActivePosition(true)}
                     onCellDoubleClick={({ setActivePosition }) => setActivePosition(true)}
                     onRowsChange={handleRowsChange}
