@@ -8,7 +8,7 @@ import FadeIn from "@/components/animations/FadeIn";
 
 export const metadata: Metadata = {
   title: "Admin Login",
-  description: "Sign in to the CaseIT executive workspace.",
+  description: "Sign in to the CaseIT logistics.",
   robots: {
     index: false,
     follow: false,

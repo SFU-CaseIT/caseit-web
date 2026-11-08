@@ -219,7 +219,7 @@ export default function AdminPushNotifications() {
     setMessage("");
     try {
       if (!registration.current) throw new Error("Notifications are not ready. Reopen the menu and try again.");
-      if (!workbooks) throw new Error("The workbook list is not available. Re-fetch and try again.");
+      if (!workbooks) throw new Error("The workbook list is not available. Sync and try again.");
       const currentSelection = selected.filter((id) => workbooks.some((workbook) => workbook.id === id));
       const currentSheetSelections = Object.fromEntries(currentSelection.map((workbookId) => [
         workbookId, getSelectedSheetIds(workbookId),

@@ -54,14 +54,15 @@ export default async function AdminDashboard() {
           <header className="flex flex-wrap items-center justify-between gap-5 border-b border-black/10 px-2 pb-6 sm:px-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-redDark">CaseIT 2027</p>
-              <h1 className="mt-2 text-3xl font-bold tracking-tight text-black sm:text-4xl">Executive workspace</h1>
+              <h1 className="mt-2 text-3xl font-bold tracking-tight text-black sm:text-4xl">Logistics</h1>
             </div>
             <div className="flex flex-wrap items-center gap-4">
+              <div id="workbook-sync-action" />
               <AdminPushNotifications />
-              <InstallAppButton />
               <form action={signOut}>
                 <SignOutSubmitButton />
               </form>
+              <InstallAppButton />
             </div>
           </header>
           <AdminWorkbookEditorLoader />

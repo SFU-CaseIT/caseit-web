@@ -17,6 +17,7 @@ declare global {
 export default function InstallAppButton() {
   const [prompt, setPrompt] = useState<InstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
+  const [mobile, setMobile] = useState(false);
   const [working, setWorking] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -25,6 +26,8 @@ export default function InstallAppButton() {
     function update() {
       setPrompt(window.caseitInstallPrompt ?? null);
       setInstalled(Boolean(window.caseitAppInstalled) || standalone.matches || ("standalone" in navigator && navigator.standalone === true));
+      setMobile(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+        || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
     }
     update();
     window.addEventListener("caseit-install-change", update);
@@ -61,15 +64,17 @@ export default function InstallAppButton() {
     }
   }
 
+  if (!mobile || installed) return null;
+
   return (
     <div className="flex flex-col items-start gap-2 sm:items-end">
       <button
         className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:opacity-50"
-        disabled={installed || working}
+        disabled={working}
         onClick={() => void install()}
         type="button"
       >
-        {installed ? "App installed" : working ? "Installing..." : "Add app"}
+        {working ? "Installing..." : "Add app"}
       </button>
       {message && <p aria-live="polite" className="max-w-64 text-sm text-black/60" role="status">{message}</p>}
     </div>

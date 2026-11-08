@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { Cell, DataGrid, renderTextEditor, type Column, type Renderers } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 import type * as XLSX from "xlsx";
@@ -192,6 +193,11 @@ export default function AdminWorkbookEditor() {
   const [busy, setBusy] = useState(false);
   const [savingAll, setSavingAll] = useState(false);
   const [refetchingList, setRefetchingList] = useState(false);
+  const [syncTarget] = useState(() => {
+    const target = document.getElementById("workbook-sync-action");
+    if (!target) throw new Error("Workbook sync action target is missing.");
+    return target;
+  });
   const [editingList, setEditingList] = useState(false);
   const [undoingAll, startUndoAll] = useTransition();
   const [editorStates, setEditorStates] = useState<Record<string, EditorState>>({});
@@ -227,7 +233,7 @@ export default function AdminWorkbookEditor() {
         if (controller.signal.aborted) return;
         console.error("Could not load workbooks.", error);
         setListError(error instanceof Error ? error.message : "Could not load workbooks.");
-        setWorkbookListError("Could not load workbooks. Use Re-fetch to try again.");
+        setWorkbookListError("Could not load workbooks. Use Sync to try again.");
       } finally {
         if (!controller.signal.aborted) setLoadingList(false);
       }
@@ -277,7 +283,7 @@ export default function AdminWorkbookEditor() {
     const revision = saved ? editorRefs.current[id]?.revision() : null;
     if (saved) {
       if (!revision || revision === "pending") {
-        setListError("Could not delete the workbook without a loaded revision. Re-fetch and try again.");
+        setListError("Could not delete the workbook without a loaded revision. Sync and try again.");
         return;
       }
     }
@@ -364,7 +370,7 @@ export default function AdminWorkbookEditor() {
     } catch (error) {
       if (controller.signal.aborted) return;
       console.error("Could not re-fetch workbooks.", error);
-      setListError(error instanceof Error ? error.message : "Could not re-fetch workbooks.");
+      setListError(error instanceof Error ? error.message : "Could not sync workbooks.");
     } finally {
       window.removeEventListener("caseit-admin-signout", cancel);
       if (!controller.signal.aborted) setRefetchingList(false);
@@ -417,14 +423,13 @@ export default function AdminWorkbookEditor() {
 
   return (
     <section className="mt-8 overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm" aria-label="CaseIT workbook editor">
+      {createPortal(
+        <button className="inline-flex min-h-11 items-center justify-center rounded-md border border-redDark bg-redDark px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-redDark disabled:opacity-50" disabled={controlsDisabled || anyDirty || loadingList} onClick={() => void refetchAll()} type="button">{refetchingList ? <LoadingSpinner label="Syncing..." light /> : "Sync"}</button>,
+        syncTarget,
+      )}
       <div className="flex flex-col gap-5 border-b border-black/10 bg-[#FAFAFA] p-5 sm:p-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-black md:text-3xl">Schedule &amp; logs</h2>
-          <p className="mt-2 text-sm text-black/60">Import or edit workbooks. Save changes when ready.</p>
-        </div>
         <div className="flex flex-wrap gap-2">
           <button className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || !selectedState?.ready} onClick={() => selectedId && editorRefs.current[selectedId]?.importFile()} type="button">Import</button>
-          <button className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || anyDirty || loadingList} onClick={() => void refetchAll()} type="button">{refetchingList ? <LoadingSpinner label="Re-fetching..." /> : "Re-fetch"}</button>
           <button className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || !anyDirty} onClick={undoAll} type="button">{undoingAll ? <LoadingSpinner label="Undoing changes..." /> : "Undo changes"}</button>
           <button className="min-h-11 rounded-md border border-redDark bg-redDark px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" disabled={controlsDisabled || !anyDirty} onClick={() => void saveAll()} type="button">{savingAll ? <LoadingSpinner label="Saving..." light /> : "Save changes"}</button>
           <button className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || !selectedState?.ready || !selectedState.hasSheet} onClick={() => selectedId && editorRefs.current[selectedId]?.exportFile()} type="button">Export .xlsx</button>
@@ -644,7 +649,8 @@ const WorkbookEditor = forwardRef<EditorHandle, {
         },
         renderEditCell: renderTextEditor,
         resizable: true,
-        width: 160,
+        minWidth: 160,
+        width: "minmax(160px, 1fr)",
         editable: !isSaving && !isLoading && !isRefetching && !isUndoing && !isImporting && !isExporting && !globalBusy,
       })) ?? [],
     [activeSheet, isLoading, isRefetching, isSaving, isUndoing, isImporting, isExporting, globalBusy],
@@ -775,7 +781,7 @@ const WorkbookEditor = forwardRef<EditorHandle, {
       if (!savedSnapshotRef.current) throw new Error("Could not save without a loaded workbook.");
       if (savedSnapshotRef.current.manifest.revision === "pending") {
         const manifest = await fetchManifest(workbookId);
-        if (manifest.sheets.length) throw new Error("The workbook changed. Export your draft, then undo changes and re-fetch.");
+        if (manifest.sheets.length) throw new Error("The workbook changed. Export your draft, then undo changes and sync.");
         savedSnapshotRef.current = { manifest, workbook: { sheets: [] } };
       }
       const snapshot = await saveSnapshot(workbookId, workbookData, savedSnapshotRef.current, dirtySheetIdsRef.current);
@@ -813,7 +819,7 @@ const WorkbookEditor = forwardRef<EditorHandle, {
       setActiveSheetIndex(0);
       setHasRemoteUpdate(false);
       setHasLoadError(false);
-      setStatus("Workbook re-fetched");
+      setStatus("Workbook synced");
       await cacheSnapshot(workbookId, snapshot);
     } catch (error) {
       if (signal?.aborted) return;
@@ -870,8 +876,8 @@ const WorkbookEditor = forwardRef<EditorHandle, {
             <p className="text-sm font-semibold text-blue-950">A newer workbook is available.</p>
             <p className="mt-1 text-sm text-blue-900/75">
               {hasUnsavedChanges
-                ? "Save or discard your local edits before re-fetching."
-                : "Re-fetch to load the latest version from Supabase."}
+                ? "Save or discard your local edits before syncing."
+                : "Sync to load the latest version from Supabase."}
             </p>
           </div>
         </div>

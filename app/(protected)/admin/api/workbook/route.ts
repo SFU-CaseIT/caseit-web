@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
       if (!data || typeof data.success !== "boolean" || !Array.isArray(data.deleted_notifications) && data.success) {
         throw new Error("Invalid workbook list save response.");
       }
-      if (!data.success) return NextResponse.json({ error: "The workbook list or a deleted workbook changed. Export any sheet drafts you need, then undo changes and re-fetch." }, { status: 409 });
+      if (!data.success) return NextResponse.json({ error: "The workbook list or a deleted workbook changed. Export any sheet drafts you need, then undo changes and sync." }, { status: 409 });
       const deletedTargets: DeletedNotificationTarget[] = data.deleted_notifications;
       const deletedNames = new Map(deletedTargets.map((target) => [target.id, target.name]));
       for (const [id, name] of deletedNames) {
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
       && typeof body.revision === "string" && Array.isArray(body.ids)
       && body.ids.length <= MAX_SHEETS && body.ids.every((id: unknown) => typeof id === "string" && UUID.test(id))) {
       if (manifest.revision !== body.revision) {
-        return NextResponse.json({ error: "The workbook changed. Please re-fetch." }, { status: 409 });
+        return NextResponse.json({ error: "The workbook changed. Please sync." }, { status: 409 });
       }
       const wanted = new Set<string>(body.ids);
       const sheets = manifest.sheets.filter((sheet) => wanted.has(sheet.id));
@@ -226,7 +226,7 @@ export async function PUT(request: NextRequest) {
     const manifest = await readManifest(body.workbookId);
     if (!manifest) return NextResponse.json({ error: "Workbook not found." }, { status: 404 });
     if (manifest.revision !== body.revision) {
-      return NextResponse.json({ error: "The workbook changed on another device. Your draft is preserved; export it before undoing and re-fetching." }, { status: 409 });
+      return NextResponse.json({ error: "The workbook changed on another device. Your draft is preserved; export it before undoing and syncing." }, { status: 409 });
     }
     if (sheets.length === manifest.sheets.length && sheets.every((sheet, index) => {
       const current = manifest.sheets[index];
@@ -290,7 +290,7 @@ export async function PUT(request: NextRequest) {
     });
     if (error) throw error;
     if (!revision) {
-      return NextResponse.json({ error: "The workbook changed on another device. Your draft is preserved; export it before undoing and re-fetching." }, { status: 409 });
+      return NextResponse.json({ error: "The workbook changed on another device. Your draft is preserved; export it before undoing and syncing." }, { status: 409 });
     }
 
     try {

@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
   if (error) {
     console.error("Could not save an admin push subscription.", error);
     return NextResponse.json(
-      { error: error.code === "22023" ? "The workbook list changed. Close notifications, re-fetch workbooks, and try again." : "Could not save notification preferences. Please try again." },
+      { error: error.code === "22023" ? "The workbook list changed. Close notifications, sync workbooks, and try again." : "Could not save notification preferences. Please try again." },
       { status: error.code === "22023" ? 400 : 500 },
     );
   }

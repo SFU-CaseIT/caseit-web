@@ -90,8 +90,8 @@ body {
   opacity: 0;
   transform: translateY(-0.5rem);
   transition:
-    opacity 180ms ease,
-    transform 180ms ease,
+    opacity 180ms ease-out,
+    transform 180ms ease-out,
     visibility 180ms;
 }
 
@@ -106,8 +106,8 @@ body {
   opacity: 0;
   transform: translateY(-0.35rem);
   transition:
-    opacity 180ms ease,
-    transform 180ms ease;
+    opacity 180ms ease-out,
+    transform 180ms ease-out;
 }
 
 .nav-dropdown-root.nav-dropdown-open > .nav-dropdown li {
