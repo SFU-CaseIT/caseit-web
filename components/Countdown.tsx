@@ -1,20 +1,19 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import { ScrollGradientContext } from "@/components/layout/ScrollGradient";
+import { useEffect, useState } from "react";
 
 type CountdownProps = {
   number: number;
   label: string;
+  active: boolean;
 };
 
-export default function Countdown({ number, label }: CountdownProps) {
+export default function Countdown({ number, label, active }: CountdownProps) {
   const [count, setCount] = useState(0);
-  const isActive = useContext(ScrollGradientContext);
   const duration = 1200;
 
   useEffect(() => {
-    if (!isActive) return;
+    if (!active) return;
 
     let frameId = 0;
     const startTime = performance.now();
@@ -30,11 +29,13 @@ export default function Countdown({ number, label }: CountdownProps) {
     };
     frameId = requestAnimationFrame(updateCount);
     return () => cancelAnimationFrame(frameId);
-  }, [duration, isActive, number]);
+  }, [duration, active, number]);
   return (
     <div className="flex min-w-0 flex-col items-center text-center text-black">
       <span className="font-din text-[clamp(4rem,8vw,6rem)] font-medium leading-none tracking-[0em]">
-        {String(count).padStart(2, "0")}
+        <span className="sr-only">{String(number).padStart(2, "0")}</span>
+        <span aria-hidden="true" className="motion-reduce:hidden">{String(count).padStart(2, "0")}</span>
+        <span aria-hidden="true" className="hidden motion-reduce:inline">{String(number).padStart(2, "0")}</span>
       </span>
       <span className="mt-4 font-dinText text-[1rem] font-normal leading-none tracking-[0em]">
         {label}

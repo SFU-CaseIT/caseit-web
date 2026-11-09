@@ -1,5 +1,5 @@
 import Link from "next/link";
-import CaseitLogoWhite from "@/public/svgs/caseit/CaseitLogoWhite";
+import CaseIT_Logo from "@/public/svgs/caseit/CaseIT_Logo";
 
 const footerGroups = [
   {
@@ -58,7 +58,7 @@ export default function Footer() {
       <div className="site-container">
         <div className="mb-10 flex items-end gap-4 md:mb-12">
           <Link aria-label="CaseIT home" className="block w-36 md:w-44" href="/">
-            <CaseitLogoWhite className="h-auto w-full" />
+            <CaseIT_Logo className="h-auto w-full text-white" />
           </Link>
           <span className="pb-1 text-xs">© 2027</span>
         </div>

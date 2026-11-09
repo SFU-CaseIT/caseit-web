@@ -47,7 +47,7 @@ export default function Dropdown({ label, links }: DropdownProps) {
       <button
         aria-controls={menuId}
         aria-expanded={isOpen}
-        className="flex cursor-pointer items-center gap-2 py-2 text-xl font-normal leading-none tracking-[0em] transition-opacity hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+        className="flex cursor-pointer items-center gap-2 py-2 text-xl font-normal leading-none tracking-[0em] transition-opacity hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current"
         onClick={() => setIsOpen(true)}
         type="button"
       >
@@ -61,7 +61,7 @@ export default function Dropdown({ label, links }: DropdownProps) {
         {links.map((link) => (
           <li key={link.href}>
             <Link
-              className="block px-3 py-1.5 transition-opacity hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+              className="block px-3 py-2 transition-opacity hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"
               href={link.href}
             >
               {link.label}

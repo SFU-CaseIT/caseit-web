@@ -63,25 +63,6 @@ body {
   @apply scale-95 opacity-30 overflow-y-hidden;
 }
 
-.scroll-gradient-scenes {
-  display: grid;
-  width: 100%;
-}
-
-.scroll-gradient-final {
-  background-color: transparent;
-}
-
-.scroll-gradient-scene {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  grid-area: 1 / 1;
-  width: 100%;
-  padding-inline: 1.5rem;
-}
-
 .typewriter-animated {
   align-items: center;
   display: inline-flex;
