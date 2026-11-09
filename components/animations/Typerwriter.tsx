@@ -38,7 +38,7 @@ export default function Typerwriter({
         await wait(600);
         if (cancelled) return;
 
-        for (let blink = 0; blink < 4; blink += 1) {
+        for (let blink = 0; blink < 2; blink += 1) {
           setCursorVisible(blink % 2 === 1);
           await wait(530);
           if (cancelled) return;

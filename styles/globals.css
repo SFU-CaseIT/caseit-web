@@ -17,10 +17,13 @@ html {
 
 body {
   background-color: white;
-  background-image: var(--caseit-gradient);
-  background-position: 50% 0%;
+  background-image:
+    linear-gradient(to bottom, #d8c7c700 0%, #be3b3500 10%, #be3b35 50%, #000000 100%),
+    var(--caseit-gradient);
+  background-position: center bottom, center top;
   background-repeat: no-repeat;
-  background-size: 100% 300vh;
+  background-size: 100% clamp(48rem, 120vh, 80rem), 100% 300vh;
+  min-height: 100vh;
 }
 
 @layer utilities {

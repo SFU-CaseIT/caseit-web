@@ -55,7 +55,7 @@ export default function Dropdown({ label, links }: DropdownProps) {
         <ChevronIcon />
       </button>
       <ul
-        className="nav-dropdown absolute left-1/2 top-full z-10 flex min-w-max -translate-x-1/2 flex-col items-center gap-0 pt-1 text-center text-base"
+        className="nav-dropdown absolute left-1/2 top-full z-10 flex min-w-max -translate-x-1/2 flex-col items-center gap-0 pt-1 text-center text-xl font-normal leading-none tracking-[0em]"
         id={menuId}
       >
         {links.map((link) => (

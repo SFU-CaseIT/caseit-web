@@ -54,7 +54,7 @@ const footerGroups = [
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-b from-[#8b2825] via-[#451714] to-[#170807] py-10 text-white md:py-12">
+    <footer className="bg-transparent py-10 text-white md:py-12">
       <div className="site-container">
         <div className="mb-10 flex items-end gap-4 md:mb-12">
           <Link aria-label="CaseIT home" className="block w-36 md:w-44" href="/">
