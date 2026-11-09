@@ -422,24 +422,24 @@ export default function AdminWorkbookEditor() {
   }, [pendingMove, editorStates]);
 
   return (
-    <section className="mt-8 overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm" aria-label="CaseIT workbook editor">
+    <section className="mt-8 overflow-hidden rounded-2xl border border-white/20 bg-black/20" aria-label="CaseIT workbook editor">
       {createPortal(
-        <button className="inline-flex min-h-11 items-center justify-center rounded-md border border-redDark bg-redDark px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-redDark disabled:opacity-50" disabled={controlsDisabled || anyDirty || loadingList} onClick={() => void refetchAll()} type="button">{refetchingList ? <LoadingSpinner label="Syncing..." light /> : "Sync"}</button>,
+        <button className="admin-button admin-button-primary inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2 text-sm font-semibold" disabled={controlsDisabled || anyDirty || loadingList} onClick={() => void refetchAll()} type="button">{refetchingList ? <LoadingSpinner label="Syncing..." /> : "Sync"}</button>,
         syncTarget,
       )}
-      <div className="flex flex-col gap-5 border-b border-black/10 bg-[#FAFAFA] p-5 sm:p-6">
+      <div className="flex flex-col gap-5 border-b border-white/20 p-5 sm:p-6">
         <div className="flex flex-wrap gap-2">
-          <button className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || !selectedState?.ready} onClick={() => selectedId && editorRefs.current[selectedId]?.importFile()} type="button">Import</button>
-          <button className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || !anyDirty} onClick={undoAll} type="button">{undoingAll ? <LoadingSpinner label="Undoing changes..." /> : "Undo changes"}</button>
-          <button className="min-h-11 rounded-md border border-redDark bg-redDark px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" disabled={controlsDisabled || !anyDirty} onClick={() => void saveAll()} type="button">{savingAll ? <LoadingSpinner label="Saving..." light /> : "Save changes"}</button>
-          <button className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || !selectedState?.ready || !selectedState.hasSheet} onClick={() => selectedId && editorRefs.current[selectedId]?.exportFile()} type="button">Export .xlsx</button>
+          <button className="admin-button min-h-11 rounded-md px-4 py-2 text-sm font-semibold" disabled={controlsDisabled || !selectedState?.ready} onClick={() => selectedId && editorRefs.current[selectedId]?.importFile()} type="button">Import</button>
+          <button className="admin-button min-h-11 rounded-md px-4 py-2 text-sm font-semibold" disabled={controlsDisabled || !anyDirty} onClick={undoAll} type="button">{undoingAll ? <LoadingSpinner label="Undoing changes..." light /> : "Undo changes"}</button>
+          <button className="admin-button admin-button-primary min-h-11 rounded-md px-4 py-2 text-sm font-semibold" disabled={controlsDisabled || !anyDirty} onClick={() => void saveAll()} type="button">{savingAll ? <LoadingSpinner label="Saving..." /> : "Save changes"}</button>
+          <button className="admin-button min-h-11 rounded-md px-4 py-2 text-sm font-semibold" disabled={controlsDisabled || !selectedState?.ready || !selectedState.hasSheet} onClick={() => selectedId && editorRefs.current[selectedId]?.exportFile()} type="button">Export .xlsx</button>
           <div className="relative" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setDeleteOpen(false); }} onKeyDown={(event) => { if (event.key === "Escape") setDeleteOpen(false); }}>
-            <button aria-expanded={deleteOpen} aria-controls="delete-options" className="min-h-11 rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={controlsDisabled || !selectedId || !selectedState?.ready} onClick={() => setDeleteOpen((open) => !open)} type="button">Delete</button>
+            <button aria-expanded={deleteOpen} aria-controls="delete-options" className="admin-button min-h-11 rounded-md px-4 py-2 text-sm font-semibold" disabled={controlsDisabled || !selectedId || !selectedState?.ready} onClick={() => setDeleteOpen((open) => !open)} type="button">Delete</button>
             {deleteOpen && (
               <FadeIn className="absolute right-0 z-20 mt-1 min-w-40">
-              <div id="delete-options" className="rounded-md border border-black/10 bg-white p-1 shadow-lg">
-                <button className="block min-h-11 w-full rounded px-3 text-left text-sm hover:bg-black/5 disabled:opacity-50" disabled={controlsDisabled || !selectedState?.hasSheet} onClick={() => { if (selectedId) editorRefs.current[selectedId]?.deleteSheet(); setDeleteOpen(false); }} type="button">Delete sheet</button>
-                <button className="block min-h-11 w-full rounded px-3 text-left text-sm hover:bg-black/5 disabled:opacity-50" disabled={controlsDisabled || !selectedId || !selectedState?.ready} onClick={() => { deleteWorkbook(); setDeleteOpen(false); }} type="button">Delete workbook</button>
+              <div id="delete-options" className="rounded-md border border-white/20 bg-neutral-900 p-1 text-white shadow-lg">
+                <button className="block min-h-11 w-full rounded px-3 text-left text-sm hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white disabled:opacity-50" disabled={controlsDisabled || !selectedState?.hasSheet} onClick={() => { if (selectedId) editorRefs.current[selectedId]?.deleteSheet(); setDeleteOpen(false); }} type="button">Delete sheet</button>
+                <button className="block min-h-11 w-full rounded px-3 text-left text-sm hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white disabled:opacity-50" disabled={controlsDisabled || !selectedId || !selectedState?.ready} onClick={() => { deleteWorkbook(); setDeleteOpen(false); }} type="button">Delete workbook</button>
               </div>
               </FadeIn>
             )}
@@ -447,21 +447,21 @@ export default function AdminWorkbookEditor() {
         </div>
       </div>
       {statusMessage && (
-        <div className="flex min-h-14 items-center border-b border-black/10 px-5 py-3 sm:px-6">
-          <p aria-live="polite" className={`text-sm ${statusIsError ? "font-medium text-redDark" : "text-black/60"}`} role={statusIsError ? "alert" : "status"}>
+        <div className="flex min-h-14 items-center border-b border-white/20 px-5 py-3 sm:px-6">
+          <p aria-live="polite" className={`text-sm ${statusIsError ? "font-medium text-red-200" : "text-white/80"}`} role={statusIsError ? "alert" : "status"}>
             {statusMessage}
           </p>
         </div>
       )}
       {loadingList ? (
-        <div className="p-6"><LoadingSpinner label="Loading workbooks..." /></div>
+        <div className="p-6"><LoadingSpinner label="Loading workbooks..." light /></div>
       ) : (
         <>
-          <div className="min-w-0 border-b border-black/10 bg-[#FAFAFA] px-4 pt-3">
+          <div className="min-w-0 border-b border-white/20 px-4 pt-3">
             <EditableTabs items={workbooks} label="Workbooks" selectedId={selectedId} disabled={controlsDisabled}
               workbookDropTargets highlightedDropTarget={dropTarget}
               maxLength={120} onSelect={selectWorkbook} onEditingChange={setEditingList}
-              trailingAction={<button aria-label="Add workbook" className="min-h-11 shrink-0 rounded-md px-3 text-xl font-semibold text-redDark focus-visible:outline focus-visible:outline-2 focus-visible:outline-redDark disabled:opacity-50" disabled={controlsDisabled || workbooks.length >= 500} onClick={addWorkbook} title="Add workbook" type="button">+</button>}
+              trailingAction={<button aria-label="Add workbook" className="min-h-11 shrink-0 rounded-md px-3 text-xl font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white disabled:opacity-50" disabled={controlsDisabled || workbooks.length >= 500} onClick={addWorkbook} title="Add workbook" type="button">+</button>}
               onRename={(id, name) => {
                 if (!name) return "Workbook names cannot be empty.";
                 setWorkbooks((current) => current.map((item) => item.id === id ? { ...item, name } : item));
@@ -469,7 +469,7 @@ export default function AdminWorkbookEditor() {
               }}
               onMove={(id, to) => setWorkbooks((current) => moveItem(current, current.findIndex((item) => item.id === id), to))} />
           </div>
-          {!selectedId && <p className="p-6 text-sm text-black/60">{workbooks.length ? "Select a workbook to view its sheets." : "Add a workbook to get started."}</p>}
+          {!selectedId && <p className="p-6 text-sm text-white/80">{workbooks.length ? "Select a workbook to view its sheets." : "Add a workbook to get started."}</p>}
           {[...workbooks, ...deleted].map((workbook) => (
             <div
               aria-labelledby={`workbook-tab-${workbook.id}`}
@@ -871,10 +871,10 @@ const WorkbookEditor = forwardRef<EditorHandle, {
           />
 
       {hasRemoteUpdate && !isLoading && (
-        <div className="flex flex-col gap-3 border-b border-blue-100 bg-blue-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="flex flex-col gap-3 border-b border-white/20 bg-black/30 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div>
-            <p className="text-sm font-semibold text-blue-950">A newer workbook is available.</p>
-            <p className="mt-1 text-sm text-blue-900/75">
+            <p className="text-sm font-semibold text-white">A newer workbook is available.</p>
+            <p className="mt-1 text-sm text-white/80">
               {hasUnsavedChanges
                 ? "Save or discard your local edits before syncing."
                 : "Sync to load the latest version from Supabase."}
@@ -904,10 +904,10 @@ const WorkbookEditor = forwardRef<EditorHandle, {
           }} />
       )}
 
-      <div className={`mx-4 mb-4 max-w-full overflow-hidden rounded-lg border border-black/10 bg-white ${workbookData.sheets.length > 0 && !isLoading ? "" : "mx-5 mb-5 sm:mx-6 sm:mb-6"}`}>
+      <div className={`mx-4 mb-4 max-w-full overflow-hidden rounded-lg ${workbookData.sheets.length > 0 && !isLoading ? "border border-black/10 bg-white text-black" : "mx-5 mb-5 border border-white/20 bg-black/20 text-white sm:mx-6 sm:mb-6"}`}>
         {isLoading ? (
           <div className="flex min-h-[420px] items-center justify-center p-8">
-            <LoadingSpinner label="Preparing workbook..." />
+            <LoadingSpinner label="Preparing workbook..." light />
           </div>
         ) : workbookData.sheets.length ? (
           workbookData.sheets.map((sheet, index) => (
@@ -938,10 +938,10 @@ const WorkbookEditor = forwardRef<EditorHandle, {
           ))
         ) : (
           <div className="flex min-h-64 flex-col items-center justify-center p-8 text-center">
-            <p className="text-base font-semibold text-black">
+            <p className="text-base font-semibold text-white">
               {hasLoadError ? "Workbook unavailable" : "No event workbook yet"}
             </p>
-            <p className="mt-2 max-w-md text-sm leading-6 text-black/60">
+            <p className="mt-2 max-w-md text-sm leading-6 text-white/80">
             {hasLoadError ? status : "Import a workbook to begin editing."}
             </p>
           </div>

@@ -5,6 +5,54 @@ html {
   scroll-behavior: smooth;
 }
 
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: #2b2424;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #a89c9c;
+    border: 0.1875rem solid #2b2424;
+    border-radius: 1rem;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #d8c7c7;
+  }
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #a89c9c #2b2424;
+  }
+}
+
+@media (forced-colors: active) {
+  * {
+    scrollbar-color: auto;
+    scrollbar-width: auto;
+  }
+
+  ::-webkit-scrollbar {
+    width: auto;
+    height: auto;
+  }
+
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner,
+  ::-webkit-scrollbar-thumb {
+    background: revert;
+    border: revert;
+  }
+}
+
 :root {
   --caseit-gradient: linear-gradient(
     180deg,
@@ -24,6 +72,37 @@ body {
   background-repeat: no-repeat;
   background-size: 100% clamp(48rem, 120vh, 80rem), 100% 300vh;
   min-height: 100vh;
+}
+
+.admin-button {
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.2);
+  color: white;
+  transition: background-color 150ms, color 150ms, border-color 150ms;
+}
+
+.admin-button:enabled:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-button-primary {
+  border-color: white;
+  background: white;
+  color: black;
+}
+
+.admin-button-primary:enabled:hover {
+  border-color: #d2d2d2;
+  background: #d2d2d2;
+}
+
+.admin-button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.admin-button:disabled {
+  opacity: 0.5;
 }
 
 @layer utilities {

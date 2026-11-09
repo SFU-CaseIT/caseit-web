@@ -69,14 +69,14 @@ export default function InstallAppButton() {
   return (
     <div className="flex flex-col items-start gap-2 sm:items-end">
       <button
-        className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:opacity-50"
+        className="admin-button inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2 text-sm font-semibold"
         disabled={working}
         onClick={() => void install()}
         type="button"
       >
         {working ? "Installing..." : "Add app"}
       </button>
-      {message && <p aria-live="polite" className="max-w-64 text-sm text-black/60" role="status">{message}</p>}
+      {message && <p aria-live="polite" className="max-w-64 text-sm text-white/80" role="status">{message}</p>}
     </div>
   );
 }

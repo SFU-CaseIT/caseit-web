@@ -270,7 +270,7 @@ export default function AdminPushNotifications() {
     <div className="relative" onKeyDown={(event) => { if (event.key === "Escape" && !busy) closePreferences(); }}>
       <button
         aria-expanded={open} aria-controls="notification-preferences"
-        className="inline-flex min-h-11 items-center justify-center rounded-md border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-black/40 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+        className="admin-button inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2 text-sm font-semibold"
         onClick={() => { if (open) closePreferences(); else void openPreferences(); }}
         disabled={busy}
         type="button"
@@ -278,24 +278,24 @@ export default function AdminPushNotifications() {
       {open && (
         <div className="absolute left-0 z-30 mt-2 sm:left-auto sm:right-0">
           <FadeIn className="w-56 max-w-[calc(100vw-2rem)]">
-          <div ref={workbookDropdown} id="notification-preferences" className="relative w-full rounded-xl border border-black/10 bg-white p-3 text-center shadow-lg">
-            <p className="text-sm font-semibold text-black">Notify this device about</p>
-            {(loading || busy || (!workbooks && !workbookError)) && <p className="mt-3 text-sm text-black/60" role="status">{busy ? "Saving..." : "Loading..."}</p>}
-            {message && <p className="mt-3 text-sm text-redDark" role="alert">{message}</p>}
-            {workbookError && <p className="mt-3 text-sm text-redDark" role="alert">{workbookError}</p>}
+          <div ref={workbookDropdown} id="notification-preferences" className="relative w-full rounded-xl border border-white/20 bg-neutral-900 p-3 text-center text-white shadow-lg">
+            <p className="text-sm font-semibold">Notify this device about</p>
+            {(loading || busy || (!workbooks && !workbookError)) && <p className="mt-3 text-sm text-white/80" role="status">{busy ? "Saving..." : "Loading..."}</p>}
+            {message && <p className="mt-3 text-sm text-red-200" role="alert">{message}</p>}
+            {workbookError && <p className="mt-3 text-sm text-red-200" role="alert">{workbookError}</p>}
             {loaded && workbooks && !workbookError && (
               <>
                 <div className="mt-1 flex max-h-60 flex-col overflow-y-auto">
-                  {workbooks.length === 0 && <p className="py-2 text-sm text-black/60">No workbooks available.</p>}
+                  {workbooks.length === 0 && <p className="py-2 text-sm text-white/80">No workbooks available.</p>}
                   {workbooks.map((workbook) => (
-                    <label key={workbook.id} className={`flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border px-2 py-1 text-sm transition-colors ${selected.includes(workbook.id) ? "border-redDark/20 bg-redDark/10 text-redDark" : "border-transparent text-black/70 hover:border-black/10 hover:bg-black/[0.05]"}`}>
-                      <input className="size-5 shrink-0 accent-redDark" type="checkbox" checked={selected.includes(workbook.id)} disabled={busy}
+                    <label key={workbook.id} className={`flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border px-2 py-1 text-sm transition-colors ${selected.includes(workbook.id) ? "border-white/60 bg-white/15 text-white" : "border-transparent text-white/80 hover:border-white/20 hover:bg-white/10"}`}>
+                      <input className="size-5 shrink-0 accent-white" type="checkbox" checked={selected.includes(workbook.id)} disabled={busy}
                         onChange={(event) => toggleWorkbook(workbook.id, event.target.checked)} />
                       <span className="break-words">{workbook.name}</span>
                     </label>
                   ))}
                 </div>
-                <button className="mt-2 min-h-11 w-full rounded-md bg-redDark px-3 py-1 text-sm font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-redDark disabled:opacity-50"
+                <button className="admin-button admin-button-primary mt-2 min-h-11 w-full rounded-md px-3 py-1 text-sm font-semibold"
                   disabled={busy || (activeWorkbookId !== null && selected.includes(activeWorkbookId)
                     && (sheetLoading || Boolean(sheetError)))}
                   onClick={() => void confirm()} type="button">Confirm</button>
@@ -303,20 +303,20 @@ export default function AdminPushNotifications() {
             )}
             {activeWorkbookId && selected.includes(activeWorkbookId) && (
               <FadeIn key={activeWorkbookId} className={`absolute z-30 w-56 max-w-[calc(100vw-2rem)] ${sheetPlacement === "right" ? "left-full top-0 ml-2" : "right-0 top-full mt-2"}`}>
-                <div className="rounded-xl border border-black/10 bg-white p-3 shadow-lg">
-                <p className="mb-1 text-sm font-semibold text-black">
+                <div className="rounded-xl border border-white/20 bg-neutral-900 p-3 text-white shadow-lg">
+                <p className="mb-1 text-sm font-semibold">
                   {workbooks?.find((workbook) => workbook.id === activeWorkbookId)?.name ?? "Workbook"} sheets
                 </p>
-                {sheetLoading && <p className="py-2 text-sm text-black/60" role="status">Loading sheets...</p>}
+                {sheetLoading && <p className="py-2 text-sm text-white/80" role="status">Loading sheets...</p>}
                 {sheetError && (
-                  <div className="py-2 text-sm text-redDark" role="alert">
+                  <div className="py-2 text-sm text-red-200" role="alert">
                     <p>{sheetError}</p>
                     <button className="mt-1 underline" disabled={busy} onClick={() => void loadSheetOptions(activeWorkbookId)} type="button">Retry</button>
                   </div>
                 )}
                 {!sheetLoading && !sheetError && activeSheetOptions && (
                   <>
-                    <button className="mb-1 min-h-8 rounded px-2 text-xs font-semibold text-redDark transition-colors hover:bg-redDark/10 disabled:opacity-50"
+                    <button className="mb-1 min-h-8 rounded px-2 text-xs font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white disabled:opacity-50"
                       disabled={busy || activeSheetOptions.length === 0}
                       onClick={() => {
                         const sheetIds = activeSheetOptions.map((sheet) => sheet.id);
@@ -333,10 +333,10 @@ export default function AdminPushNotifications() {
                         ? "Clear all sheets" : "Choose all sheets"}
                     </button>
                     <div className="flex max-h-60 flex-col overflow-y-auto">
-                      {activeSheetOptions.length === 0 && <p className="py-2 text-sm text-black/60">No sheets available.</p>}
+                      {activeSheetOptions.length === 0 && <p className="py-2 text-sm text-white/80">No sheets available.</p>}
                       {activeSheetOptions.map((sheet) => (
-                        <label key={sheet.id} className="flex min-h-9 cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm text-black/70 transition-colors hover:bg-redDark/5">
-                          <input className="size-4 shrink-0 accent-redDark" type="checkbox" checked={getSelectedSheetIds(activeWorkbookId).includes(sheet.id)} disabled={busy}
+                        <label key={sheet.id} className="flex min-h-9 cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm text-white/80 transition-colors hover:bg-white/10">
+                          <input className="size-4 shrink-0 accent-white" type="checkbox" checked={getSelectedSheetIds(activeWorkbookId).includes(sheet.id)} disabled={busy}
                             onChange={(event) => toggleSheet(activeWorkbookId, sheet.id, event.target.checked)} />
                           <span className="break-words">{sheet.name}</span>
                         </label>

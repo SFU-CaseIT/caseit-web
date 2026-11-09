@@ -106,12 +106,12 @@ export default function EditableTabs({ items, selectedId, label, disabled, maxLe
     <div>
       <div ref={tabListRef} className="flex w-full min-w-0 max-w-full gap-1 overflow-x-auto px-4" role="tablist" aria-label={label}>
         {items.map((item, index) => (
-          <div className={`flex shrink-0 items-center border-b-2 border-transparent ${dragPreview?.id === item.id ? "opacity-30" : ""} ${highlightedDropTarget === item.id ? "rounded-t-md bg-redDark/10" : ""}`} data-tab-id={item.id} data-workbook-drop-id={workbookDropTargets ? item.id : undefined} key={item.id}>
+          <div className={`flex shrink-0 items-center border-b-2 border-transparent ${dragPreview?.id === item.id ? "opacity-30" : ""} ${highlightedDropTarget === item.id ? "rounded-t-md bg-white/20" : ""}`} data-tab-id={item.id} data-workbook-drop-id={workbookDropTargets ? item.id : undefined} key={item.id}>
             {editing === item.id ? (
               <input
                 aria-label={`Rename ${label}`}
                 autoFocus
-                className="my-1 w-40 rounded border border-black/30 px-2 py-2 text-sm"
+                className="my-1 w-40 rounded border border-white/60 bg-neutral-900 px-2 py-2 text-sm text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
                 maxLength={maxLength}
                 onBlur={finish}
                 onChange={(event) => { setValue(event.target.value); setError(""); }}
@@ -125,7 +125,7 @@ export default function EditableTabs({ items, selectedId, label, disabled, maxLe
               <button
                 aria-controls={`${label === "Workbooks" ? "workbook-panel" : "sheet-panel"}-${item.id}`}
                 aria-selected={selectedId === item.id}
-                className={`min-h-11 cursor-grab select-none border-b-2 px-3 py-2 text-sm font-semibold active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-redDark ${selectedId === item.id ? "border-redDark text-redDark" : "border-transparent text-black/55"}`}
+                className={`min-h-11 cursor-grab select-none border-b-2 px-3 py-2 text-sm font-semibold transition-colors hover:bg-white/10 active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-white ${selectedId === item.id ? "border-white text-white" : "border-transparent text-white/80"}`}
                 disabled={disabled || editing !== null}
                 id={`${label === "Workbooks" ? "workbook-tab" : "sheet-tab"}-${item.id}`}
                 onClick={() => {
@@ -205,14 +205,14 @@ export default function EditableTabs({ items, selectedId, label, disabled, maxLe
         ))}
         {trailingAction}
       </div>
-      {error && <p className="px-4 pb-2 text-sm text-redDark" role="alert">{error}</p>}
+      {error && <p className="px-4 pb-2 text-sm text-red-200" role="alert">{error}</p>}
       {dragPreview && createPortal(
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed z-[100] flex items-center rounded-md border border-black/10 bg-white text-sm font-semibold shadow-lg"
+          className="pointer-events-none fixed z-[100] flex items-center rounded-md border border-white/20 bg-neutral-900 text-sm font-semibold shadow-lg"
           style={{ left: dragPreview.x, top: dragPreview.y, width: dragPreview.width }}
         >
-          <span className="min-h-11 border-b-2 border-redDark px-3 py-2 text-redDark">
+          <span className="min-h-11 border-b-2 border-white px-3 py-2 text-white">
             {items.find((item) => item.id === dragPreview.id)?.name}
           </span>
         </div>,

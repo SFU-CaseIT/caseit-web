@@ -8,7 +8,7 @@ const AdminWorkbookEditor = dynamic(() => import("./AdminWorkbookEditor"), {
   ssr: false,
   loading: () => (
     <div className="p-6">
-      <LoadingSpinner label="Preparing workbook editor..." />
+      <LoadingSpinner label="Preparing workbook editor..." light />
     </div>
   ),
 });
@@ -25,10 +25,10 @@ export default function AdminWorkbookEditorLoader() {
     return (
       <section
         aria-label="CaseIT workbook editor"
-        className="mt-8 overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm"
+        className="mt-8 overflow-hidden rounded-2xl border border-white/20 bg-black/20"
       >
         <div className="p-6">
-          <LoadingSpinner label="Preparing workbook editor..." />
+          <LoadingSpinner label="Preparing workbook editor..." light />
         </div>
       </section>
     );
